@@ -1,20 +1,72 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# QQQ 200-Day Moving Average Deviation Dashboard
 
-# Run and deploy your AI Studio app
+Real-time monitoring of QQQ's deviation from its 200-day moving average — a key technical indicator for market timing.
 
-This contains everything you need to run your app locally.
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
 
-View your app in AI Studio: https://ai.studio/apps/drive/1_lNJ1V5D5tZzDfRdJtvcEH3vB4PaxT6N
+## Why This Matters
 
-## Run Locally
+The 200-day moving average (200 DMA) is one of the most watched technical indicators:
 
-**Prerequisites:**  Node.js
+- **When QQQ is significantly ABOVE the 200 DMA** (index > 80): Market may be overextended, historically signals potential pullback
+- **When QQQ is significantly BELOW the 200 DMA** (index < 20): Market may be oversold, historically signals potential bounce
 
+> *"Historically, when the deviation index surpasses 80, it signals a high-probability market pullback."*
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Features
+
+- **Real-time Deviation Index**: Normalized 0-100 scale for easy interpretation
+- **Interactive Chart**: Historical deviation with trend visualization
+- **Risk Level Indicator**: Low / Moderate / High / Danger zones
+- **Stats Dashboard**: Current price, SMA, 24h change
+- **Auto-refresh**: Simulated real-time updates every 10 seconds
+
+## Tech Stack
+
+- React + TypeScript
+- Vite
+- Recharts for data visualization
+
+## Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Run development server
+npm run dev
+```
+
+## Data Structure
+
+```typescript
+interface DataPoint {
+  date: string;
+  price: number;      // Current QQQ price
+  sma200: number;     // 200-day simple moving average
+  deviation: number;  // Raw deviation percentage
+  index: number;      // Normalized 0-100 index
+}
+
+interface MarketSummary {
+  currentPrice: number;
+  currentSMA: number;
+  currentIndex: number;
+  change24h: number;
+  riskLevel: 'Low' | 'Moderate' | 'High' | 'Danger';
+}
+```
+
+## Interpretation Guide
+
+| Index Range | Risk Level | Market Condition | Historical Action |
+|-------------|------------|------------------|-------------------|
+| 0 - 20 | Low | Oversold | Potential buying opportunity |
+| 20 - 50 | Moderate | Normal range | Hold / monitor |
+| 50 - 80 | High | Extended | Reduce exposure |
+| 80 - 100 | Danger | Overextended | High pullback probability |
+
+## License
+
+MIT
