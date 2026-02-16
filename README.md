@@ -2,6 +2,8 @@
 
 Real-time monitoring of QQQ's deviation from its 200-day moving average — a key technical indicator for market timing.
 
+Part of a broader [quantitative finance toolkit](https://github.com/YichengYang-Ethan) built around [clawdfolio](https://github.com/YichengYang-Ethan/clawdfolio), which provides the underlying technical analysis framework (RSI, SMA/EMA, Bollinger Bands, deviation analytics).
+
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
 
@@ -66,6 +68,14 @@ interface MarketSummary {
 | 20 - 50 | Moderate | Normal range | Hold / monitor |
 | 50 - 80 | High | Extended | Reduce exposure |
 | 80 - 100 | Danger | Overextended | High pullback probability |
+
+## Related Projects
+
+| Project | Role |
+|---------|------|
+| [clawdfolio](https://github.com/YichengYang-Ethan/clawdfolio) | Core engine — the SMA/deviation analytics powering this dashboard's methodology |
+| [investment-dashboard](https://github.com/YichengYang-Ethan/investment-dashboard) | Full portfolio visualization frontend |
+| [crypto-return-prediction](https://github.com/YichengYang-Ethan/crypto-return-prediction-kaggle) | ML alpha research using similar momentum/trend indicators |
 
 ## License
 
