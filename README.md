@@ -69,13 +69,18 @@ interface MarketSummary {
 | 50 - 80 | High | Extended | Reduce exposure |
 | 80 - 100 | Danger | Overextended | High pullback probability |
 
+## Methodology Origin
+
+The 200-day SMA deviation calculation and risk-level classification used in this dashboard follow the same methodology implemented in [clawdfolio](https://github.com/YichengYang-Ethan/clawdfolio)'s `analysis/` module (SMA, EMA, RSI, Bollinger Bands). This dashboard is a standalone React implementation focused on a single strategy, while clawdfolio provides the full-spectrum Python analytics engine.
+
 ## Related Projects
 
 | Project | Role |
 |---------|------|
-| [clawdfolio](https://github.com/YichengYang-Ethan/clawdfolio) | Core engine — the SMA/deviation analytics powering this dashboard's methodology |
-| [investment-dashboard](https://github.com/YichengYang-Ethan/investment-dashboard) | Full portfolio visualization frontend |
-| [crypto-return-prediction](https://github.com/YichengYang-Ethan/crypto-return-prediction-kaggle) | ML alpha research using similar momentum/trend indicators |
+| [clawdfolio](https://github.com/YichengYang-Ethan/clawdfolio) | **Methodology source** — SMA/deviation analytics engine that this dashboard's strategy is derived from |
+| [investment-dashboard](https://github.com/YichengYang-Ethan/investment-dashboard) | Sibling dashboard — full portfolio visualization (multi-asset, multi-metric) |
+| [crypto-return-prediction](https://github.com/YichengYang-Ethan/crypto-return-prediction-kaggle) | ML research — momentum/trend prediction using similar technical indicators |
+| [ESG-Driven-Stock-Value-Prediction](https://github.com/YichengYang-Ethan/ESG-Driven-Stock-Value-Prediction) | ML research — fundamental factor analysis |
 
 ## License
 
