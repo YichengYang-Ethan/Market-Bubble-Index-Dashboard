@@ -1,11 +1,18 @@
 # QQQ 200-Day Moving Average Deviation Dashboard
 
-Real-time monitoring of QQQ's deviation from its 200-day moving average — a key technical indicator for market timing.
+**[Live Demo](https://yichengyang-ethan.github.io/QQQ-200D-Deviation-Dashboard/)** | Real-time monitoring of QQQ's deviation from its 200-day moving average
 
 Part of a broader [quantitative finance toolkit](https://github.com/YichengYang-Ethan) built around [clawdfolio](https://github.com/YichengYang-Ethan/clawdfolio), which provides the underlying technical analysis framework (RSI, SMA/EMA, Bollinger Bands, deviation analytics).
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
+[![Deploy](https://github.com/YichengYang-Ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/deploy.yml/badge.svg)](https://github.com/YichengYang-Ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/deploy.yml)
+
+## Preview
+
+<p align="center">
+  <img src="docs/screenshot.png" width="800" alt="QQQ 200D Deviation Dashboard">
+</p>
 
 ## Why This Matters
 
@@ -26,17 +33,15 @@ The 200-day moving average (200 DMA) is one of the most watched technical indica
 
 ## Tech Stack
 
-- React + TypeScript
+- React + TypeScript (strict mode)
 - Vite
 - Recharts for data visualization
+- Deployed on GitHub Pages
 
 ## Quick Start
 
 ```bash
-# Install dependencies
 npm install
-
-# Run development server
 npm run dev
 ```
 
@@ -49,14 +54,6 @@ interface DataPoint {
   sma200: number;     // 200-day simple moving average
   deviation: number;  // Raw deviation percentage
   index: number;      // Normalized 0-100 index
-}
-
-interface MarketSummary {
-  currentPrice: number;
-  currentSMA: number;
-  currentIndex: number;
-  change24h: number;
-  riskLevel: 'Low' | 'Moderate' | 'High' | 'Danger';
 }
 ```
 
