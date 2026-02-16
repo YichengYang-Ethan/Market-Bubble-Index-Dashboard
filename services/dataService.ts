@@ -1,5 +1,6 @@
 
 import { DataPoint, MarketSummary } from '../types';
+import { DEVIATION_CONFIG, getRiskLevel } from '../constants';
 
 /**
  * The 200-day deviation index is calculated as:
@@ -53,16 +54,11 @@ export const getMarketSummary = (data: DataPoint[]): MarketSummary => {
   
   const change = ((latest.price - previous.price) / previous.price) * 100;
   
-  let riskLevel: MarketSummary['riskLevel'] = 'Low';
-  if (latest.index >= 80) riskLevel = 'Danger';
-  else if (latest.index >= 65) riskLevel = 'High';
-  else if (latest.index >= 40) riskLevel = 'Moderate';
-
   return {
     currentPrice: latest.price,
     currentSMA: latest.sma200,
     currentIndex: latest.index,
     change24h: change,
-    riskLevel
+    riskLevel: getRiskLevel(latest.index)
   };
 };

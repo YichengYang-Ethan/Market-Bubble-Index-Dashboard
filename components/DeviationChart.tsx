@@ -12,6 +12,9 @@ import {
   ReferenceArea
 } from 'recharts';
 import { DataPoint } from '../types';
+import { DEVIATION_CONFIG } from '../constants';
+
+const { RISK_LEVELS } = DEVIATION_CONFIG;
 
 interface Props {
   data: DataPoint[];
@@ -78,14 +81,14 @@ const DeviationChart: React.FC<Props> = ({ data }) => {
           />
           <Tooltip content={<CustomTooltip />} />
 
-          {/* Colored reference zones */}
-          <ReferenceArea y1={0} y2={40} fill="#22c55e" fillOpacity={0.05} />
-          <ReferenceArea y1={40} y2={65} fill="#eab308" fillOpacity={0.05} />
-          <ReferenceArea y1={65} y2={80} fill="#f97316" fillOpacity={0.05} />
-          <ReferenceArea y1={80} y2={100} fill="#ef4444" fillOpacity={0.1} />
+          {/* Colored reference zones aligned with DEVIATION_CONFIG.RISK_LEVELS */}
+          <ReferenceArea y1={0} y2={RISK_LEVELS.LOW} fill="#22c55e" fillOpacity={0.05} />
+          <ReferenceArea y1={RISK_LEVELS.LOW} y2={RISK_LEVELS.MODERATE} fill="#eab308" fillOpacity={0.05} />
+          <ReferenceArea y1={RISK_LEVELS.MODERATE} y2={RISK_LEVELS.HIGH} fill="#f97316" fillOpacity={0.05} />
+          <ReferenceArea y1={RISK_LEVELS.HIGH} y2={100} fill="#ef4444" fillOpacity={0.1} />
 
           {/* Signal Lines */}
-          <ReferenceLine y={80} stroke="#22c55e" strokeWidth={2} label={{ position: 'right', value: '80', fill: '#22c55e', fontSize: 12, fontWeight: 'bold' }} />
+          <ReferenceLine y={RISK_LEVELS.HIGH} stroke="#22c55e" strokeWidth={2} label={{ position: 'right', value: String(RISK_LEVELS.HIGH), fill: '#22c55e', fontSize: 12, fontWeight: 'bold' }} />
           <ReferenceLine y={95} stroke="#ef4444" strokeDasharray="5 5" strokeWidth={1} label={{ position: 'right', value: 'Critical', fill: '#ef4444', fontSize: 10 }} />
 
           <Line

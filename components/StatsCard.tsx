@@ -1,13 +1,14 @@
 
 import React from 'react';
 import { MarketSummary } from '../types';
+import { DEVIATION_CONFIG } from '../constants';
 
 interface Props {
   summary: MarketSummary;
 }
 
 const StatsCard: React.FC<Props> = ({ summary }) => {
-  const isDanger = summary.currentIndex >= 80;
+  const isDanger = summary.currentIndex >= DEVIATION_CONFIG.RISK_LEVELS.HIGH;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
