@@ -4,6 +4,7 @@ import DeviationChart from './components/DeviationChart';
 import StatsCard from './components/StatsCard';
 import { generateHistoricalData, getMarketSummary } from './services/dataService';
 import { DataPoint, MarketSummary } from './types';
+import { DEVIATION_CONFIG } from './constants';
 
 const App: React.FC = () => {
   const [data, setData] = useState<DataPoint[]>([]);
@@ -12,8 +13,6 @@ const App: React.FC = () => {
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   const fetchData = useCallback(() => {
-    // In a real app, this would be an API call to a finance backend.
-    // Here we generate realistic historical data and start a tick for "real-time" simulation.
     const historical = generateHistoricalData(10);
     setData(historical);
     setSummary(getMarketSummary(historical));
@@ -22,14 +21,14 @@ const App: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-    
-    // Simulate real-time updates every 10 seconds
+
     const interval = setInterval(() => {
       setData(prevData => {
         if (prevData.length === 0) return prevData;
         const last = prevData[prevData.length - 1];
-        const nextPrice = last.price * (1 + (Math.random() - 0.49) * 0.002);
-        const nextSMA = last.sma200 * 0.9995 + nextPrice * 0.0005;
+        const { SIMULATION } = DEVIATION_CONFIG;
+        const nextPrice = last.price * (1 + (Math.random() - 0.49) * SIMULATION.VOLATILITY);
+        const nextSMA = last.sma200 * (1 - SIMULATION.MEAN_REVERSION) + nextPrice * SIMULATION.MEAN_REVERSION;
         const rawDev = (nextPrice - nextSMA) / nextSMA;
         let nextIndex = ((rawDev + 0.15) / 0.40) * 100;
         nextIndex = Math.max(0, Math.min(100, nextIndex));
@@ -41,13 +40,13 @@ const App: React.FC = () => {
           deviation: rawDev,
           index: nextIndex
         };
-        
+
         const newData = [...prevData.slice(1), nextPoint];
         setSummary(getMarketSummary(newData));
         setLastUpdate(new Date());
         return newData;
       });
-    }, 10000);
+    }, DEVIATION_CONFIG.REFRESH_INTERVAL_MS);
 
     return () => clearInterval(interval);
   }, [fetchData]);
@@ -62,6 +61,8 @@ const App: React.FC = () => {
       </div>
     );
   }
+
+  const { RISK_LEVELS } = DEVIATION_CONFIG;
 
   return (
     <div className="min-h-screen pb-20 bg-slate-50">
@@ -91,8 +92,8 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-black text-slate-900 mb-2">QQQ 200D Deviation Dashboard</h1>
           <p className="text-lg text-slate-500 max-w-2xl">
-            Monitoring the <span className="font-bold text-slate-800 italic">200-day moving average deviation</span>. 
-            Historically, when the index surpasses <span className="text-green-600 font-bold">80</span>, it signals a high-probability market pullback.
+            Monitoring the <span className="font-bold text-slate-800 italic">{DEVIATION_CONFIG.SMA_PERIOD}-day moving average deviation</span>.
+            Historically, when the index surpasses <span className="text-green-600 font-bold">{RISK_LEVELS.HIGH}</span>, it signals a high-probability market pullback.
           </p>
         </div>
       </header>
@@ -100,12 +101,12 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <StatsCard summary={summary} />
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3">
             <DeviationChart data={data} />
           </div>
-          
+
           <div className="space-y-6">
             <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-xl overflow-hidden relative">
               <i className="fa-solid fa-lightbulb text-6xl absolute -bottom-4 -right-4 opacity-10"></i>
@@ -115,19 +116,19 @@ const App: React.FC = () => {
               </h3>
               <ul className="space-y-4 text-sm text-slate-300">
                 <li className="flex gap-2">
-                  <span className="text-green-400 font-bold">0-40:</span>
+                  <span className="text-green-400 font-bold">0-{RISK_LEVELS.LOW}:</span>
                   <span>Oversold / Accumulation Zone. Prime entry point for long-term holders.</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-yellow-400 font-bold">40-70:</span>
+                  <span className="text-yellow-400 font-bold">{RISK_LEVELS.LOW}-{RISK_LEVELS.MODERATE}:</span>
                   <span>Healthy Growth Zone. Market is trending within normal bounds.</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-orange-400 font-bold">70-80:</span>
+                  <span className="text-orange-400 font-bold">{RISK_LEVELS.MODERATE}-{RISK_LEVELS.HIGH}:</span>
                   <span>Caution Zone. Approaching resistance, consider trailing stops.</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-red-400 font-bold">80+:</span>
+                  <span className="text-red-400 font-bold">{RISK_LEVELS.HIGH}+:</span>
                   <span><span className="underline decoration-red-500">Danger Zone.</span> Probability of a sharp correction exceeds 85%.</span>
                 </li>
               </ul>
@@ -153,20 +154,20 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Informational Text Section (Matching User Image Theme) */}
+        {/* Informational Text Section */}
         <section className="mt-12 bg-white p-8 rounded-2xl border border-slate-100 shadow-sm">
           <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="flex-1">
               <h2 className="text-2xl font-bold text-slate-900 mb-4">
-                当指标超过 <span className="text-green-600">80</span>，就是相对危险的信号
+                当指标超过 <span className="text-green-600">{RISK_LEVELS.HIGH}</span>，就是相对危险的信号
               </h2>
               <p className="text-slate-600 leading-relaxed text-lg">
-                该指标通过追踪纳斯达克100指数 (QQQ) 与其200日均线的偏离程度来衡量市场的“过热”状况。
-                在过去十年的回测中，每当偏离度指数触及 80 关口，通常意味着买盘动能已接近极限，
+                该指标通过追踪纳斯达克100指数 (QQQ) 与其{DEVIATION_CONFIG.SMA_PERIOD}日均线的偏离程度来衡量市场的"过热"状况。
+                在过去十年的回测中，每当偏离度指数触及 {RISK_LEVELS.HIGH} 关口，通常意味着买盘动能已接近极限，
                 不久后指标就会回落，意味着 <span className="text-red-600 font-bold">股价回调</span>。
               </p>
               <div className="mt-6 flex gap-4">
-                <button 
+                <button
                   onClick={() => window.location.reload()}
                   className="bg-slate-900 text-white px-6 py-2 rounded-lg font-semibold hover:bg-slate-800 transition-colors"
                 >
@@ -185,14 +186,13 @@ const App: React.FC = () => {
                      <p className="text-[10px] text-slate-400 font-bold uppercase">Index Score</p>
                    </div>
                 </div>
-                {/* Visual meter simulation */}
                 <svg className="absolute top-0 left-0 w-40 h-40 transform -rotate-90">
                   <circle
                     cx="80"
                     cy="80"
                     r="64"
                     fill="transparent"
-                    stroke={summary.currentIndex > 80 ? "#ef4444" : "#3b82f6"}
+                    stroke={summary.currentIndex > RISK_LEVELS.HIGH ? "#ef4444" : "#3b82f6"}
                     strokeWidth="8"
                     strokeDasharray={`${(summary.currentIndex / 100) * 402} 402`}
                     className="transition-all duration-1000"
@@ -205,7 +205,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className="mt-20 border-t border-slate-200 py-10 text-center text-slate-400 text-xs">
-        <p>© 2024 MeiTou Alpha Financial Tools. Data simulated based on real historical QQQ parameters.</p>
+        <p>&copy; 2024 MeiTou Alpha Financial Tools. Data simulated based on real historical QQQ parameters.</p>
         <p className="mt-2">Not financial advice. Automated axis adjustment and risk signaling active.</p>
       </footer>
     </div>
