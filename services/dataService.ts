@@ -2,37 +2,51 @@
 import { DataPoint, MarketSummary } from '../types';
 import { DEVIATION_CONFIG, getRiskLevel } from '../constants';
 
-/**
- * The 200-day deviation index is calculated as:
- * 1. Calculate the percentage difference between the price and its 200-day SMA.
- * 2. Normalize this percentage to a 0-100 scale using historical volatility bounds.
- */
+interface QQQDataFile {
+  generated_at: string;
+  ticker: string;
+  data: DataPoint[];
+}
 
+/**
+ * Fetch real QQQ data from the pre-generated static JSON file.
+ * Falls back to simulated data if the fetch fails.
+ */
+export const fetchRealData = async (): Promise<{ data: DataPoint[]; isDemo: boolean; generatedAt?: string }> => {
+  try {
+    const base = import.meta.env.BASE_URL || '/';
+    const res = await fetch(`${base}data/qqq.json`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json: QQQDataFile = await res.json();
+    if (!json.data || json.data.length === 0) throw new Error('Empty data');
+    return { data: json.data, isDemo: false, generatedAt: json.generated_at };
+  } catch {
+    // Fallback to simulated data
+    return { data: generateHistoricalData(2), isDemo: true };
+  }
+};
+
+/**
+ * Simulated data generator (Brownian motion). Used as fallback only.
+ */
 export const generateHistoricalData = (years: number = 10): DataPoint[] => {
   const data: DataPoint[] = [];
-  const totalDays = years * 252; // Roughly 252 trading days per year
+  const totalDays = years * 252;
   const today = new Date();
-  
-  let currentPrice = 450; // Starting point roughly near current QQQ
+
+  let currentPrice = 450;
   let currentSMA = 400;
-  const volatility = 0.012; // Typical daily volatility
+  const volatility = 0.012;
 
   for (let i = totalDays; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(today.getDate() - i);
-    
-    // Simulate Brownian motion with some trend
-    const change = (Math.random() - 0.48) * volatility; 
-    currentPrice = currentPrice * (1 + change);
-    
-    // Simple mock for SMA that lags the price
-    currentSMA = currentSMA * 0.999 + currentPrice * 0.001;
 
-    // Deviation calculation: (Price - SMA) / SMA
+    const change = (Math.random() - 0.48) * volatility;
+    currentPrice = currentPrice * (1 + change);
+    currentSMA = currentSMA * 0.999 + currentPrice * 0.001;
     const rawDeviation = (currentPrice - currentSMA) / currentSMA;
-    
-    // Normalize to 0-100 index based on typical QQQ deviation bounds (-15% to +25%)
-    // These bounds map to the 0-100 scale shown in the image
+
     let indexValue = ((rawDeviation + 0.15) / 0.40) * 100;
     indexValue = Math.max(0, Math.min(100, indexValue));
 
@@ -51,9 +65,9 @@ export const generateHistoricalData = (years: number = 10): DataPoint[] => {
 export const getMarketSummary = (data: DataPoint[]): MarketSummary => {
   const latest = data[data.length - 1];
   const previous = data[data.length - 2];
-  
+
   const change = ((latest.price - previous.price) / previous.price) * 100;
-  
+
   return {
     currentPrice: latest.price,
     currentSMA: latest.sma200,

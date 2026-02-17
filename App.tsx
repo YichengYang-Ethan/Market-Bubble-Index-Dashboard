@@ -2,57 +2,53 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import DeviationChart from './components/DeviationChart';
 import StatsCard from './components/StatsCard';
-import { generateHistoricalData, getMarketSummary } from './services/dataService';
+import { fetchRealData, getMarketSummary } from './services/dataService';
 import { DataPoint, MarketSummary } from './types';
 import { DEVIATION_CONFIG } from './constants';
 
-type TimeRange = 1 | 3 | 5 | 10;
+type TimeRange = '1Y' | '2Y' | 'ALL';
+
+const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
 const App: React.FC = () => {
+  const [allData, setAllData] = useState<DataPoint[]>([]);
   const [data, setData] = useState<DataPoint[]>([]);
   const [summary, setSummary] = useState<MarketSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDemo, setIsDemo] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
-  const [timeRange, setTimeRange] = useState<TimeRange>(10);
+  const [timeRange, setTimeRange] = useState<TimeRange>('ALL');
 
-  const fetchData = useCallback(() => {
-    const historical = generateHistoricalData(timeRange);
-    setData(historical);
-    setSummary(getMarketSummary(historical));
+  const loadData = useCallback(async () => {
+    const result = await fetchRealData();
+    setAllData(result.data);
+    setIsDemo(result.isDemo);
+    setLastUpdate(new Date());
     setIsLoading(false);
-  }, [timeRange]);
+  }, []);
+
+  // Apply time range filter
+  useEffect(() => {
+    if (allData.length === 0) return;
+    let filtered = allData;
+    if (timeRange !== 'ALL') {
+      const years = timeRange === '1Y' ? 1 : 2;
+      const cutoff = new Date();
+      cutoff.setFullYear(cutoff.getFullYear() - years);
+      const cutoffStr = cutoff.toISOString().split('T')[0];
+      filtered = allData.filter(d => d.date >= cutoffStr);
+    }
+    setData(filtered);
+    if (filtered.length >= 2) {
+      setSummary(getMarketSummary(filtered));
+    }
+  }, [allData, timeRange]);
 
   useEffect(() => {
-    fetchData();
-
-    const interval = setInterval(() => {
-      setData(prevData => {
-        if (prevData.length === 0) return prevData;
-        const last = prevData[prevData.length - 1];
-        const { SIMULATION } = DEVIATION_CONFIG;
-        const nextPrice = last.price * (1 + (Math.random() - 0.49) * SIMULATION.VOLATILITY);
-        const nextSMA = last.sma200 * (1 - SIMULATION.MEAN_REVERSION) + nextPrice * SIMULATION.MEAN_REVERSION;
-        const rawDev = (nextPrice - nextSMA) / nextSMA;
-        let nextIndex = ((rawDev + 0.15) / 0.40) * 100;
-        nextIndex = Math.max(0, Math.min(100, nextIndex));
-
-        const nextPoint: DataPoint = {
-          date: new Date().toLocaleTimeString(),
-          price: nextPrice,
-          sma200: nextSMA,
-          deviation: rawDev,
-          index: nextIndex
-        };
-
-        const newData = [...prevData.slice(1), nextPoint];
-        setSummary(getMarketSummary(newData));
-        setLastUpdate(new Date());
-        return newData;
-      });
-    }, DEVIATION_CONFIG.REFRESH_INTERVAL_MS);
-
+    loadData();
+    const interval = setInterval(loadData, REFRESH_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [fetchData]);
+  }, [loadData]);
 
   const handleExportCSV = () => {
     const headers = ['Date', 'Price', 'SMA200', 'Deviation%', 'Index'];
@@ -85,7 +81,7 @@ const App: React.FC = () => {
   }
 
   const { RISK_LEVELS } = DEVIATION_CONFIG;
-  const timeRanges: TimeRange[] = [1, 3, 5, 10];
+  const timeRanges: TimeRange[] = ['1Y', '2Y', 'ALL'];
 
   return (
     <div className="min-h-screen pb-20 bg-slate-950 text-slate-100">
@@ -102,7 +98,11 @@ const App: React.FC = () => {
               <span className="text-xl font-bold text-white tracking-tight">QQQ Deviation Tracker</span>
             </div>
             <div className="flex items-center gap-4 text-sm text-slate-400">
-              <span className="hidden md:inline bg-slate-800 px-3 py-1 rounded-full text-xs font-medium text-slate-300">Simulated Data</span>
+              {isDemo ? (
+                <span className="hidden md:inline bg-amber-600/20 text-amber-400 px-3 py-1 rounded-full text-xs font-medium">Demo Mode</span>
+              ) : (
+                <span className="hidden md:inline bg-emerald-600/20 text-emerald-400 px-3 py-1 rounded-full text-xs font-medium">Live Data</span>
+              )}
               <span className="hidden md:inline">Last Updated: {lastUpdate.toLocaleTimeString()}</span>
             </div>
           </div>
@@ -126,17 +126,17 @@ const App: React.FC = () => {
 
         {/* Time Range Selector */}
         <div className="flex gap-2 mb-6">
-          {timeRanges.map(yr => (
+          {timeRanges.map(range => (
             <button
-              key={yr}
-              onClick={() => setTimeRange(yr)}
+              key={range}
+              onClick={() => setTimeRange(range)}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                timeRange === yr
+                timeRange === range
                   ? 'bg-blue-600 text-white'
                   : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
               }`}
             >
-              {yr}Y
+              {range}
             </button>
           ))}
         </div>
@@ -211,7 +211,7 @@ const App: React.FC = () => {
               </p>
               <div className="mt-6 flex gap-4">
                 <button
-                  onClick={() => window.location.reload()}
+                  onClick={() => loadData()}
                   className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-500 transition-colors"
                 >
                   Refresh Data
@@ -252,7 +252,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className="mt-20 border-t border-slate-800 py-10 text-center text-slate-500 text-xs">
-        <p>&copy; 2025 QQQ Deviation Tracker. Data simulated based on real historical QQQ parameters.</p>
+        <p>&copy; 2025 QQQ Deviation Tracker. Daily QQQ data via Yahoo Finance, updated by GitHub Actions.</p>
         <p className="mt-2">Not financial advice. Automated axis adjustment and risk signaling active.</p>
       </footer>
     </div>
