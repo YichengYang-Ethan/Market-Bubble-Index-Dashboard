@@ -2,8 +2,6 @@
 
 **[Live Demo](https://yichengyang-ethan.github.io/QQQ-200D-Deviation-Dashboard/)** | Daily QQQ deviation monitoring via Yahoo Finance data
 
-Part of a broader [quantitative finance toolkit](https://github.com/YichengYang-Ethan) built around [clawdfolio](https://github.com/YichengYang-Ethan/clawdfolio), which provides the underlying technical analysis framework (RSI, SMA/EMA, Bollinger Bands, deviation analytics).
-
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
 ![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
 [![Deploy](https://github.com/YichengYang-Ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/deploy.yml/badge.svg)](https://github.com/YichengYang-Ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/deploy.yml)
@@ -82,19 +80,6 @@ interface DataPoint {
 | 20 - 50 | Moderate | Normal range | Hold / monitor |
 | 50 - 80 | High | Extended | Reduce exposure |
 | 80 - 100 | Danger | Overextended | High pullback probability |
-
-## Methodology Origin
-
-The 200-day SMA deviation calculation and risk-level classification used in this dashboard follow the same methodology implemented in [clawdfolio](https://github.com/YichengYang-Ethan/clawdfolio)'s `analysis/` module (SMA, EMA, RSI, Bollinger Bands). This dashboard is a standalone React implementation focused on a single strategy, while clawdfolio provides the full-spectrum Python analytics engine.
-
-## Related Projects
-
-| Project | Role |
-|---------|------|
-| [clawdfolio](https://github.com/YichengYang-Ethan/clawdfolio) | **Methodology source** -- SMA/deviation analytics engine that this dashboard's strategy is derived from |
-| [investment-dashboard](https://github.com/YichengYang-Ethan/investment-dashboard) | Sibling dashboard -- full portfolio visualization (multi-asset, multi-metric) |
-| [crypto-return-prediction](https://github.com/YichengYang-Ethan/crypto-return-prediction-kaggle) | ML research -- momentum/trend prediction using similar technical indicators |
-| [ESG-Driven-Stock-Value-Prediction](https://github.com/YichengYang-Ethan/ESG-Driven-Stock-Value-Prediction) | ML research -- fundamental factor analysis |
 
 ## License
 
