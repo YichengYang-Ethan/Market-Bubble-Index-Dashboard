@@ -5,15 +5,16 @@ import { DEVIATION_CONFIG } from '../constants';
 
 interface Props {
   summary: MarketSummary;
+  ticker: string;
 }
 
-const StatsCard: React.FC<Props> = ({ summary }) => {
+const StatsCard: React.FC<Props> = ({ summary, ticker }) => {
   const isDanger = summary.currentIndex >= DEVIATION_CONFIG.RISK_LEVELS.HIGH;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
       <div className="bg-slate-900 p-5 rounded-xl border border-slate-800 shadow-sm">
-        <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Current QQQ Price</p>
+        <p className="text-slate-500 text-xs font-semibold uppercase tracking-wider mb-1">Current {ticker} Price</p>
         <div className="flex items-baseline gap-2">
           <span className="text-2xl font-bold text-white">${summary.currentPrice.toFixed(2)}</span>
           <span className={`text-sm font-medium ${summary.change24h >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>

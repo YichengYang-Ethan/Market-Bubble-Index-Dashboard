@@ -1,23 +1,23 @@
 
-import { DataPoint, MarketSummary } from '../types';
+import { DataPoint, MarketSummary, BacktestResult, BacktestSignal, HistoricalSignal } from '../types';
 import { DEVIATION_CONFIG, getRiskLevel } from '../constants';
 
-interface QQQDataFile {
+interface TickerDataFile {
   generated_at: string;
   ticker: string;
   data: DataPoint[];
 }
 
 /**
- * Fetch real QQQ data from the pre-generated static JSON file.
+ * Fetch data for a specific ticker from the pre-generated static JSON file.
  * Falls back to simulated data if the fetch fails.
  */
-export const fetchRealData = async (): Promise<{ data: DataPoint[]; isDemo: boolean; generatedAt?: string }> => {
+export const fetchRealData = async (ticker: string = 'QQQ'): Promise<{ data: DataPoint[]; isDemo: boolean; generatedAt?: string }> => {
   try {
     const base = '/QQQ-200D-Deviation-Dashboard/';
-    const res = await fetch(`${base}data/qqq.json`);
+    const res = await fetch(`${base}data/${ticker.toLowerCase()}.json`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json: QQQDataFile = await res.json();
+    const json: TickerDataFile = await res.json();
     if (!json.data || json.data.length === 0) throw new Error('Empty data');
     return { data: json.data, isDemo: false, generatedAt: json.generated_at };
   } catch {
@@ -76,3 +76,112 @@ export const getMarketSummary = (data: DataPoint[]): MarketSummary => {
     riskLevel: getRiskLevel(latest.index)
   };
 };
+
+/**
+ * Run a simple threshold-based backtest on the data.
+ * Buy when index < buyThreshold, sell when index > sellThreshold.
+ */
+export const runBacktest = (
+  data: DataPoint[],
+  buyThreshold: number,
+  sellThreshold: number,
+  initialInvestment: number
+): BacktestResult => {
+  const signals: BacktestSignal[] = [];
+  let cash = initialInvestment;
+  let shares = 0;
+  let inPosition = false;
+  let peakValue = initialInvestment;
+  let maxDrawdown = 0;
+
+  for (const point of data) {
+    const portfolioValue = inPosition ? shares * point.price : cash;
+
+    if (portfolioValue > peakValue) peakValue = portfolioValue;
+    const drawdown = (peakValue - portfolioValue) / peakValue;
+    if (drawdown > maxDrawdown) maxDrawdown = drawdown;
+
+    if (!inPosition && point.index <= buyThreshold) {
+      shares = cash / point.price;
+      cash = 0;
+      inPosition = true;
+      signals.push({ date: point.date, type: 'buy', price: point.price, index: point.index });
+    } else if (inPosition && point.index >= sellThreshold) {
+      cash = shares * point.price;
+      shares = 0;
+      inPosition = false;
+      signals.push({ date: point.date, type: 'sell', price: point.price, index: point.index });
+    }
+  }
+
+  // Final value
+  const lastPrice = data[data.length - 1].price;
+  const finalValue = inPosition ? shares * lastPrice : cash;
+  const strategyReturn = (finalValue - initialInvestment) / initialInvestment;
+
+  // Buy-and-hold comparison
+  const firstPrice = data[0].price;
+  const buyHoldReturn = (lastPrice - firstPrice) / firstPrice;
+
+  // Annualize
+  const firstDate = new Date(data[0].date);
+  const lastDate = new Date(data[data.length - 1].date);
+  const years = (lastDate.getTime() - firstDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+  const annualize = (r: number) => years > 0 ? Math.pow(1 + r, 1 / years) - 1 : 0;
+
+  return {
+    numTrades: signals.length,
+    strategyReturn,
+    strategyAnnualizedReturn: annualize(strategyReturn),
+    buyHoldReturn,
+    buyHoldAnnualizedReturn: annualize(buyHoldReturn),
+    maxDrawdown,
+    signals,
+  };
+};
+
+/**
+ * Auto-detect historical signals from peaks and troughs in the deviation index.
+ */
+export const detectHistoricalSignals = (data: DataPoint[], highThreshold: number = 80, lowThreshold: number = 20): HistoricalSignal[] => {
+  const signals: HistoricalSignal[] = [];
+  const windowSize = 20; // look-around window for local extremes
+
+  for (let i = windowSize; i < data.length - windowSize; i++) {
+    const point = data[i];
+
+    if (point.index >= highThreshold) {
+      // Check if this is a local maximum
+      let isMax = true;
+      for (let j = i - windowSize; j <= i + windowSize; j++) {
+        if (j !== i && data[j].index > point.index) { isMax = false; break; }
+      }
+      if (isMax) {
+        // Skip if too close to the last signal of the same type
+        const lastSell = signals.filter(s => s.type === 'sell').pop();
+        if (!lastSell || daysBetween(lastSell.date, point.date) > 30) {
+          signals.push({ date: point.date, type: 'sell', index: point.index, price: point.price });
+        }
+      }
+    }
+
+    if (point.index <= lowThreshold) {
+      let isMin = true;
+      for (let j = i - windowSize; j <= i + windowSize; j++) {
+        if (j !== i && data[j].index < point.index) { isMin = false; break; }
+      }
+      if (isMin) {
+        const lastBuy = signals.filter(s => s.type === 'buy').pop();
+        if (!lastBuy || daysBetween(lastBuy.date, point.date) > 30) {
+          signals.push({ date: point.date, type: 'buy', index: point.index, price: point.price });
+        }
+      }
+    }
+  }
+
+  return signals.sort((a, b) => b.date.localeCompare(a.date)); // newest first
+};
+
+function daysBetween(d1: string, d2: string): number {
+  return Math.abs(new Date(d2).getTime() - new Date(d1).getTime()) / (24 * 60 * 60 * 1000);
+}

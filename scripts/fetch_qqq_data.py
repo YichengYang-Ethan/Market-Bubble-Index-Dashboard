@@ -1,4 +1,4 @@
-"""Fetch real QQQ data via yfinance and generate a static JSON file for the dashboard."""
+"""Fetch market data via yfinance and generate static JSON files for the dashboard."""
 
 import json
 import sys
@@ -11,25 +11,37 @@ except ImportError:
     print("yfinance not installed. Run: pip install yfinance", file=sys.stderr)
     sys.exit(1)
 
+# Deviation normalization ranges per ticker.
+# Maps [-lower%, +upper%] -> [0, 100].
+# TQQQ is 3x leveraged so its deviation range is much wider.
+TICKER_CONFIG = {
+    "QQQ":  {"lower": 0.15, "upper": 0.25},
+    "SPY":  {"lower": 0.12, "upper": 0.20},
+    "TQQQ": {"lower": 0.40, "upper": 0.65},
+    "IWM":  {"lower": 0.15, "upper": 0.25},
+}
 
-def main():
-    # Fetch ~3 years of daily QQQ data (need 200+ extra days for SMA warm-up)
-    ticker = yf.Ticker("QQQ")
+DEFAULT_TICKERS = list(TICKER_CONFIG.keys())
+
+
+def fetch_ticker(symbol: str) -> list[dict]:
+    cfg = TICKER_CONFIG.get(symbol, {"lower": 0.15, "upper": 0.25})
+    norm_range = cfg["lower"] + cfg["upper"]
+
+    ticker = yf.Ticker(symbol)
     hist = ticker.history(period="3y", interval="1d")
 
     if hist.empty:
-        print("ERROR: No data returned from yfinance", file=sys.stderr)
-        sys.exit(1)
+        print(f"WARNING: No data returned for {symbol}", file=sys.stderr)
+        return []
 
     closes = hist["Close"].dropna()
     if len(closes) < 200:
-        print(f"ERROR: Only {len(closes)} data points, need at least 200", file=sys.stderr)
-        sys.exit(1)
+        print(f"WARNING: Only {len(closes)} data points for {symbol}, need 200", file=sys.stderr)
+        return []
 
-    # Calculate 200-day SMA
     sma200 = closes.rolling(window=200).mean()
 
-    # Build data points (skip first 200 days where SMA is NaN)
     data_points = []
     for i in range(len(closes)):
         if sma200.iloc[i] != sma200.iloc[i]:  # NaN check
@@ -38,8 +50,7 @@ def main():
         sma = float(sma200.iloc[i])
         raw_deviation = (price - sma) / sma
 
-        # Normalize to 0-100 index: maps [-15%, +25%] -> [0, 100]
-        index_value = ((raw_deviation + 0.15) / 0.40) * 100
+        index_value = ((raw_deviation + cfg["lower"]) / norm_range) * 100
         index_value = max(0.0, min(100.0, index_value))
 
         date_str = closes.index[i].strftime("%Y-%m-%d")
@@ -51,26 +62,41 @@ def main():
             "index": round(index_value, 2),
         })
 
-    if not data_points:
-        print("ERROR: No valid data points generated", file=sys.stderr)
-        sys.exit(1)
+    return data_points
 
-    output = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "ticker": "QQQ",
-        "data": data_points,
-    }
 
-    # Write to public/data directory so it gets included in the build
+def main():
+    tickers = sys.argv[1:] if len(sys.argv) > 1 else DEFAULT_TICKERS
     out_dir = Path(__file__).resolve().parent.parent / "public" / "data"
     out_dir.mkdir(parents=True, exist_ok=True)
-    out_path = out_dir / "qqq.json"
-    out_path.write_text(json.dumps(output, separators=(",", ":")))
 
-    print(f"OK: Wrote {len(data_points)} data points to {out_path}")
-    print(f"    Date range: {data_points[0]['date']} to {data_points[-1]['date']}")
-    print(f"    Latest price: ${data_points[-1]['price']}")
-    print(f"    Latest index: {data_points[-1]['index']}")
+    failed = []
+    for symbol in tickers:
+        symbol = symbol.upper()
+        print(f"Fetching {symbol}...")
+        data_points = fetch_ticker(symbol)
+
+        if not data_points:
+            failed.append(symbol)
+            continue
+
+        output = {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "ticker": symbol,
+            "data": data_points,
+        }
+
+        out_path = out_dir / f"{symbol.lower()}.json"
+        out_path.write_text(json.dumps(output, separators=(",", ":")))
+
+        print(f"  OK: {len(data_points)} points -> {out_path}")
+        print(f"      Range: {data_points[0]['date']} to {data_points[-1]['date']}")
+        print(f"      Latest: ${data_points[-1]['price']} (index {data_points[-1]['index']})")
+
+    if failed:
+        print(f"\nWARNING: Failed tickers: {', '.join(failed)}", file=sys.stderr)
+        if len(failed) == len(tickers):
+            sys.exit(1)
 
 
 if __name__ == "__main__":

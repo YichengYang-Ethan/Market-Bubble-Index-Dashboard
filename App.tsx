@@ -2,15 +2,27 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import DeviationChart from './components/DeviationChart';
 import StatsCard from './components/StatsCard';
-import { fetchRealData, getMarketSummary } from './services/dataService';
-import { DataPoint, MarketSummary } from './types';
-import { DEVIATION_CONFIG } from './constants';
+import BacktestPanel from './components/BacktestPanel';
+import { fetchRealData, getMarketSummary, detectHistoricalSignals } from './services/dataService';
+import { DataPoint, MarketSummary, BacktestSignal, HistoricalSignal } from './types';
+import { DEVIATION_CONFIG, SUPPORTED_TICKERS, TICKER_LABELS, TickerSymbol } from './constants';
 
 type TimeRange = '1Y' | '2Y' | 'ALL';
 
 const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
 
+function getInitialTicker(): TickerSymbol {
+  try {
+    const hash = window.location.hash.slice(1).toUpperCase();
+    if ((SUPPORTED_TICKERS as readonly string[]).includes(hash)) return hash as TickerSymbol;
+    const stored = localStorage.getItem('selectedTicker');
+    if (stored && (SUPPORTED_TICKERS as readonly string[]).includes(stored)) return stored as TickerSymbol;
+  } catch { /* ignore */ }
+  return 'QQQ';
+}
+
 const App: React.FC = () => {
+  const [selectedTicker, setSelectedTicker] = useState<TickerSymbol>(getInitialTicker);
   const [allData, setAllData] = useState<DataPoint[]>([]);
   const [data, setData] = useState<DataPoint[]>([]);
   const [summary, setSummary] = useState<MarketSummary | null>(null);
@@ -18,14 +30,26 @@ const App: React.FC = () => {
   const [isDemo, setIsDemo] = useState(false);
   const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
   const [timeRange, setTimeRange] = useState<TimeRange>('ALL');
+  const [backtestSignals, setBacktestSignals] = useState<BacktestSignal[]>([]);
+  const [historicalSignals, setHistoricalSignals] = useState<HistoricalSignal[]>([]);
 
-  const loadData = useCallback(async () => {
-    const result = await fetchRealData();
+  const loadData = useCallback(async (ticker: TickerSymbol) => {
+    setIsLoading(true);
+    const result = await fetchRealData(ticker);
     setAllData(result.data);
     setIsDemo(result.isDemo);
     setLastUpdate(new Date());
+    setBacktestSignals([]);
+    setHistoricalSignals(detectHistoricalSignals(result.data));
     setIsLoading(false);
   }, []);
+
+  const handleTickerChange = useCallback((ticker: TickerSymbol) => {
+    setSelectedTicker(ticker);
+    window.location.hash = ticker;
+    try { localStorage.setItem('selectedTicker', ticker); } catch { /* ignore */ }
+    loadData(ticker);
+  }, [loadData]);
 
   // Apply time range filter
   useEffect(() => {
@@ -45,10 +69,10 @@ const App: React.FC = () => {
   }, [allData, timeRange]);
 
   useEffect(() => {
-    loadData();
-    const interval = setInterval(loadData, REFRESH_INTERVAL_MS);
+    loadData(selectedTicker);
+    const interval = setInterval(() => loadData(selectedTicker), REFRESH_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [loadData]);
+  }, [selectedTicker, loadData]);
 
   const handleExportCSV = () => {
     const headers = ['Date', 'Price', 'SMA200', 'Deviation%', 'Index'];
@@ -64,7 +88,7 @@ const App: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `qqq-deviation-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `${selectedTicker.toLowerCase()}-deviation-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -74,7 +98,7 @@ const App: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400 font-medium">Fetching Market Data...</p>
+          <p className="text-slate-400 font-medium">Fetching {selectedTicker} Data...</p>
         </div>
       </div>
     );
@@ -95,8 +119,26 @@ const App: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
-              <span className="text-xl font-bold text-white tracking-tight">QQQ Deviation Tracker</span>
+              <span className="text-xl font-bold text-white tracking-tight">Deviation Tracker</span>
             </div>
+
+            {/* Ticker Selector */}
+            <div className="flex items-center gap-1 bg-slate-800 rounded-lg p-1">
+              {SUPPORTED_TICKERS.map(ticker => (
+                <button
+                  key={ticker}
+                  onClick={() => handleTickerChange(ticker)}
+                  className={`px-3 py-1.5 rounded-md text-sm font-semibold transition-colors ${
+                    selectedTicker === ticker
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                  }`}
+                >
+                  {ticker}
+                </button>
+              ))}
+            </div>
+
             <div className="flex items-center gap-4 text-sm text-slate-400">
               {isDemo ? (
                 <span className="hidden md:inline bg-amber-600/20 text-amber-400 px-3 py-1 rounded-full text-xs font-medium">Demo Mode</span>
@@ -112,17 +154,17 @@ const App: React.FC = () => {
       {/* Hero Header */}
       <header className="bg-slate-900/50 border-b border-slate-800 mb-8 py-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-black text-white mb-2">QQQ 200D Deviation Dashboard</h1>
+          <h1 className="text-3xl font-black text-white mb-2">{selectedTicker} 200D Deviation Dashboard</h1>
           <p className="text-lg text-slate-400 max-w-2xl">
-            Monitoring the <span className="font-bold text-slate-200 italic">{DEVIATION_CONFIG.SMA_PERIOD}-day moving average deviation</span>.
-            Historically, when the index surpasses <span className="text-emerald-400 font-bold">{RISK_LEVELS.HIGH}</span>, it signals a high-probability market pullback.
+            Monitoring <span className="text-white font-semibold">{TICKER_LABELS[selectedTicker]}</span> ({selectedTicker}) <span className="font-bold text-slate-200 italic">{DEVIATION_CONFIG.SMA_PERIOD}-day moving average deviation</span>.
+            When the index surpasses <span className="text-emerald-400 font-bold">{RISK_LEVELS.HIGH}</span>, it signals a high-probability pullback.
           </p>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <StatsCard summary={summary} />
+        <StatsCard summary={summary} ticker={selectedTicker} />
 
         {/* Time Range Selector */}
         <div className="flex gap-2 mb-6">
@@ -143,7 +185,7 @@ const App: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <div className="lg:col-span-3">
-            <DeviationChart data={data} />
+            <DeviationChart data={data} ticker={selectedTicker} signals={backtestSignals} />
           </div>
 
           <div className="space-y-6">
@@ -177,25 +219,40 @@ const App: React.FC = () => {
               </ul>
             </div>
 
+            {/* Dynamic Historical Signals */}
             <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm">
               <h3 className="font-bold text-white mb-4">Historical Signals</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between py-2 border-b border-slate-800">
-                  <span className="text-sm text-slate-400">Late 2021 Peak</span>
-                  <span className="bg-red-500/20 text-red-400 text-xs font-bold px-2 py-1 rounded">Index: 94</span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-slate-800">
-                  <span className="text-sm text-slate-400">Early 2024 High</span>
-                  <span className="bg-red-500/20 text-red-400 text-xs font-bold px-2 py-1 rounded">Index: 82</span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-slate-800">
-                  <span className="text-sm text-slate-400">Oct 2022 Bottom</span>
-                  <span className="bg-emerald-500/20 text-emerald-400 text-xs font-bold px-2 py-1 rounded">Index: 5</span>
-                </div>
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {historicalSignals.length === 0 ? (
+                  <p className="text-sm text-slate-500">No signals detected in this dataset.</p>
+                ) : (
+                  historicalSignals.map((signal, i) => (
+                    <div key={i} className="flex items-center justify-between py-2 border-b border-slate-800">
+                      <div>
+                        <span className="text-sm text-slate-400">{signal.date}</span>
+                        <span className={`ml-2 text-xs font-semibold ${signal.type === 'buy' ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {signal.type === 'buy' ? 'BUY' : 'SELL'}
+                        </span>
+                      </div>
+                      <span className={`text-xs font-bold px-2 py-1 rounded ${
+                        signal.type === 'buy'
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : 'bg-red-500/20 text-red-400'
+                      }`}>
+                        Index: {signal.index.toFixed(0)}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
         </div>
+
+        {/* Backtest Panel */}
+        <section className="mt-8">
+          <BacktestPanel data={data} ticker={selectedTicker} onSignalsChange={setBacktestSignals} />
+        </section>
 
         {/* Info Section */}
         <section className="mt-12 bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-sm">
@@ -205,13 +262,13 @@ const App: React.FC = () => {
                 When the index exceeds <span className="text-emerald-400">{RISK_LEVELS.HIGH}</span>, it signals danger
               </h2>
               <p className="text-slate-400 leading-relaxed text-lg">
-                This indicator tracks the deviation between the Nasdaq 100 Index (QQQ) and its {DEVIATION_CONFIG.SMA_PERIOD}-day moving average to gauge market "overheating."
-                In backtesting over the past decade, whenever the deviation index reached the {RISK_LEVELS.HIGH} threshold, it typically signaled that buying momentum was nearing its limit,
-                and the index would soon pull back, indicating a <span className="text-red-400 font-bold">price correction</span>.
+                This indicator tracks the deviation between {TICKER_LABELS[selectedTicker]} ({selectedTicker}) and its {DEVIATION_CONFIG.SMA_PERIOD}-day moving average to gauge market &quot;overheating.&quot;
+                Whenever the deviation index reaches the {RISK_LEVELS.HIGH} threshold, it typically signals that buying momentum is nearing its limit,
+                and the index will soon pull back, indicating a <span className="text-red-400 font-bold">price correction</span>.
               </p>
               <div className="mt-6 flex gap-4">
                 <button
-                  onClick={() => loadData()}
+                  onClick={() => loadData(selectedTicker)}
                   className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-500 transition-colors"
                 >
                   Refresh Data
@@ -252,7 +309,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className="mt-20 border-t border-slate-800 py-10 text-center text-slate-500 text-xs">
-        <p>&copy; 2025 QQQ Deviation Tracker. Daily QQQ data via Yahoo Finance, updated by GitHub Actions.</p>
+        <p>&copy; 2025 Deviation Tracker. Daily market data via Yahoo Finance, updated by GitHub Actions.</p>
         <p className="mt-2">Not financial advice. Automated axis adjustment and risk signaling active.</p>
       </footer>
     </div>

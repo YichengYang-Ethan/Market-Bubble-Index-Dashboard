@@ -9,15 +9,18 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
-  ReferenceArea
+  ReferenceArea,
+  ReferenceDot
 } from 'recharts';
-import { DataPoint } from '../types';
+import { DataPoint, BacktestSignal } from '../types';
 import { DEVIATION_CONFIG } from '../constants';
 
 const { RISK_LEVELS } = DEVIATION_CONFIG;
 
 interface Props {
   data: DataPoint[];
+  ticker: string;
+  signals?: BacktestSignal[];
 }
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -33,25 +36,45 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
-const DeviationChart: React.FC<Props> = ({ data }) => {
+const DeviationChart: React.FC<Props> = ({ data, ticker, signals }) => {
   const sampledData = data.filter((_, idx) => idx % 5 === 0);
+
+  // Build a set of signal dates for O(1) lookup in sampled data
+  const signalsByDate = new Map<string, BacktestSignal>();
+  if (signals) {
+    for (const s of signals) {
+      signalsByDate.set(s.date, s);
+    }
+  }
 
   return (
     <div className="w-full h-[500px] bg-slate-900 p-6 rounded-2xl shadow-sm border border-slate-800">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-xl font-bold text-white">QQQ 200-Day Deviation Index</h2>
+          <h2 className="text-xl font-bold text-white">{ticker} 200-Day Deviation Index</h2>
           <p className="text-sm text-slate-500">Historical trend analysis and risk signaling</p>
         </div>
         <div className="flex gap-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
-            <span className="text-xs font-medium text-slate-400">Threshold (80)</span>
+            <span className="text-xs font-medium text-slate-400">Threshold ({RISK_LEVELS.HIGH})</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-red-500 rounded-full"></div>
             <span className="text-xs font-medium text-slate-400">Overheated Zone</span>
           </div>
+          {signals && signals.length > 0 && (
+            <>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-400 rounded-full border border-green-300"></div>
+                <span className="text-xs font-medium text-slate-400">Buy</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-400 rounded-full border border-red-300"></div>
+                <span className="text-xs font-medium text-slate-400">Sell</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -81,7 +104,7 @@ const DeviationChart: React.FC<Props> = ({ data }) => {
           />
           <Tooltip content={<CustomTooltip />} />
 
-          {/* Colored reference zones aligned with DEVIATION_CONFIG.RISK_LEVELS */}
+          {/* Colored reference zones */}
           <ReferenceArea y1={0} y2={RISK_LEVELS.LOW} fill="#22c55e" fillOpacity={0.05} />
           <ReferenceArea y1={RISK_LEVELS.LOW} y2={RISK_LEVELS.MODERATE} fill="#eab308" fillOpacity={0.05} />
           <ReferenceArea y1={RISK_LEVELS.MODERATE} y2={RISK_LEVELS.HIGH} fill="#f97316" fillOpacity={0.05} />
@@ -100,6 +123,24 @@ const DeviationChart: React.FC<Props> = ({ data }) => {
             activeDot={{ r: 8, strokeWidth: 2, stroke: '#3b82f6', fill: '#1e40af', filter: 'drop-shadow(0 0 6px #3b82f6)' }}
             animationDuration={1500}
           />
+
+          {/* Backtest signal markers */}
+          {signals && signals.map((s, i) => {
+            // Only render if this date exists in the sampled data
+            const exists = sampledData.some(d => d.date === s.date);
+            if (!exists) return null;
+            return (
+              <ReferenceDot
+                key={`signal-${i}`}
+                x={s.date}
+                y={s.index}
+                r={5}
+                fill={s.type === 'buy' ? '#4ade80' : '#f87171'}
+                stroke={s.type === 'buy' ? '#22c55e' : '#ef4444'}
+                strokeWidth={2}
+              />
+            );
+          })}
         </LineChart>
       </ResponsiveContainer>
     </div>
