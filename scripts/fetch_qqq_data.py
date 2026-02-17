@@ -5,6 +5,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import pandas as pd
+
 try:
     import yfinance as yf
 except ImportError:
@@ -44,7 +46,7 @@ def fetch_ticker(symbol: str) -> list[dict]:
 
     data_points = []
     for i in range(len(closes)):
-        if sma200.iloc[i] != sma200.iloc[i]:  # NaN check
+        if pd.isna(sma200.iloc[i]):
             continue
         price = float(closes.iloc[i])
         sma = float(sma200.iloc[i])

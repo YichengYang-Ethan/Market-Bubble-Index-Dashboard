@@ -35,8 +35,9 @@ export const generateHistoricalData = (years: number = 10): DataPoint[] => {
   const today = new Date();
 
   let currentPrice = 450;
-  let currentSMA = 400;
   const volatility = 0.012;
+  const priceBuffer: number[] = [];
+  const smaWindow = 200;
 
   for (let i = totalDays; i >= 0; i--) {
     const date = new Date(today);
@@ -44,7 +45,9 @@ export const generateHistoricalData = (years: number = 10): DataPoint[] => {
 
     const change = (Math.random() - 0.48) * volatility;
     currentPrice = currentPrice * (1 + change);
-    currentSMA = currentSMA * 0.999 + currentPrice * 0.001;
+    priceBuffer.push(currentPrice);
+    if (priceBuffer.length > smaWindow) priceBuffer.shift();
+    const currentSMA = priceBuffer.reduce((sum, p) => sum + p, 0) / priceBuffer.length;
     const rawDeviation = (currentPrice - currentSMA) / currentSMA;
 
     let indexValue = ((rawDeviation + 0.15) / 0.40) * 100;
