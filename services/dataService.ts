@@ -14,7 +14,7 @@ interface QQQDataFile {
  */
 export const fetchRealData = async (): Promise<{ data: DataPoint[]; isDemo: boolean; generatedAt?: string }> => {
   try {
-    const base = import.meta.env.BASE_URL || '/';
+    const base = '/QQQ-200D-Deviation-Dashboard/';
     const res = await fetch(`${base}data/qqq.json`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json: QQQDataFile = await res.json();
