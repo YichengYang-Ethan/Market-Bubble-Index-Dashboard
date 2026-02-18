@@ -279,8 +279,8 @@ const App: React.FC = () => {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-black text-white mb-3">Market Bubble Index</h1>
             <p className="text-lg text-slate-400 max-w-3xl mx-auto">
-              A composite measure of market euphoria across <span className="text-white font-semibold">7 indicators</span> including
-              QQQ deviation, VIX, sector breadth, credit spreads, put/call ratio, yield curve, and CAPE valuation.
+              A composite measure of market euphoria across <span className="text-white font-semibold">8 indicators</span> including
+              QQQ deviation, VIX, sector breadth, credit spreads, put/call ratio, yield curve, CAPE valuation, and leverage sentiment.
             </p>
           </div>
 
@@ -363,14 +363,14 @@ const App: React.FC = () => {
                   {(() => {
                     const score = bubbleData.composite_score;
                     const mapping = score < 30
-                      ? { label: '\u52A0\u4ED3 +30%', bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', text: 'text-emerald-400' }
+                      ? { label: 'Overweight +30%', bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', text: 'text-emerald-400' }
                       : score < 50
-                      ? { label: '\u7EF4\u6301\u57FA\u51C6', bg: 'bg-slate-700/30', border: 'border-slate-600', text: 'text-slate-300' }
+                      ? { label: 'Hold Benchmark', bg: 'bg-slate-700/30', border: 'border-slate-600', text: 'text-slate-300' }
                       : score < 70
-                      ? { label: '\u51CF\u4ED3 -20%', bg: 'bg-yellow-500/20', border: 'border-yellow-500/30', text: 'text-yellow-400' }
+                      ? { label: 'Underweight -20%', bg: 'bg-yellow-500/20', border: 'border-yellow-500/30', text: 'text-yellow-400' }
                       : score < 85
-                      ? { label: '\u51CF\u4ED3 -50%', bg: 'bg-orange-500/20', border: 'border-orange-500/30', text: 'text-orange-400' }
-                      : { label: '\u4EC5\u4FDD\u7559 20%', bg: 'bg-red-500/20', border: 'border-red-500/30', text: 'text-red-400' };
+                      ? { label: 'Underweight -50%', bg: 'bg-orange-500/20', border: 'border-orange-500/30', text: 'text-orange-400' }
+                      : { label: 'Retain 20% Only', bg: 'bg-red-500/20', border: 'border-red-500/30', text: 'text-red-400' };
                     return (
                       <div className={`${mapping.bg} border ${mapping.border} rounded-xl p-6 text-center`}>
                         <p className={`text-3xl font-black ${mapping.text}`}>{mapping.label}</p>
@@ -726,7 +726,7 @@ const App: React.FC = () => {
           <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl mb-8">
             <h3 className="text-lg font-bold text-white mb-4">How the Bubble Index Works</h3>
             <p className="text-slate-400 leading-relaxed mb-4">
-              The Market Bubble Index is a composite score (0-100) that aggregates <span className="text-white font-semibold">7 independent market indicators</span> across
+              The Market Bubble Index is a composite score (0-100) that aggregates <span className="text-white font-semibold">8 independent market indicators</span> across
               three categories&mdash;sentiment, liquidity, and valuation&mdash;to measure the degree of speculative excess.
               Each indicator is converted to a percentile rank within a rolling lookback window (50-252 trading days depending on the indicator),
               then combined via weighted average into the composite score. If any indicator is unavailable, its weight is automatically redistributed among the remaining indicators.
@@ -770,13 +770,14 @@ const App: React.FC = () => {
                 <h4 className="text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">Indicator Weights</h4>
                 <div className="space-y-2">
                   {[
-                    { label: 'QQQ Deviation', weight: 17, cat: 'Sentiment' },
-                    { label: 'CAPE Valuation', weight: 15, cat: 'Valuation' },
-                    { label: 'VIX Level', weight: 15, cat: 'Sentiment' },
-                    { label: 'Tail Risk (SKEW)', weight: 14, cat: 'Sentiment' },
-                    { label: 'Sector Breadth', weight: 13, cat: 'Liquidity' },
-                    { label: 'Credit Spread', weight: 13, cat: 'Liquidity' },
-                    { label: 'Yield Curve', weight: 13, cat: 'Liquidity' },
+                    { label: 'QQQ Deviation', weight: 15, cat: 'Sentiment' },
+                    { label: 'CAPE Valuation', weight: 13, cat: 'Valuation' },
+                    { label: 'VIX Level', weight: 13, cat: 'Sentiment' },
+                    { label: 'Leverage Sentiment', weight: 12, cat: 'Sentiment' },
+                    { label: 'Tail Risk (SKEW)', weight: 12, cat: 'Sentiment' },
+                    { label: 'Sector Breadth', weight: 12, cat: 'Liquidity' },
+                    { label: 'Credit Spread', weight: 12, cat: 'Liquidity' },
+                    { label: 'Yield Curve', weight: 11, cat: 'Liquidity' },
                   ].map(item => (
                     <div key={item.label} className="flex items-center gap-3 text-sm">
                       <span className="text-slate-400 w-36 truncate">{item.label}</span>
@@ -824,7 +825,7 @@ const App: React.FC = () => {
       {/* ========== FOOTER ========== */}
       <footer className="border-t border-slate-800 py-10 text-center text-slate-500 text-xs">
         <p>&copy; 2025-2026 Market Bubble Index Dashboard. Daily market data via Yahoo Finance &amp; FRED, updated by GitHub Actions.</p>
-        <p className="mt-2">Not financial advice. 7 indicators across sentiment, liquidity, and valuation dimensions. 10-year rolling data window.</p>
+        <p className="mt-2">Not financial advice. 8 indicators across sentiment, liquidity, and valuation dimensions. 10-year rolling data window.</p>
       </footer>
     </div>
   );
