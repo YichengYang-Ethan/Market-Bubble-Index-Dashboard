@@ -38,3 +38,32 @@ export interface HistoricalSignal {
   index: number;
   price: number;
 }
+
+export interface BubbleIndicator {
+  score: number;
+  raw_value: number;
+  weight: number;
+  label: string;
+}
+
+export interface BubbleIndexData {
+  generated_at: string;
+  composite_score: number;
+  sentiment_score: number | null;
+  liquidity_score: number | null;
+  regime: string;
+  indicators: Record<string, BubbleIndicator>;
+}
+
+export interface BubbleHistoryPoint {
+  date: string;
+  composite_score: number;
+  sentiment_score: number | null;
+  liquidity_score: number | null;
+  regime: string;
+}
+
+export interface BubbleHistoryData {
+  generated_at: string;
+  history: BubbleHistoryPoint[];
+}
