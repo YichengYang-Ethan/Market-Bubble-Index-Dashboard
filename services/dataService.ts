@@ -148,16 +148,16 @@ export const runBacktest = (
  */
 export const detectHistoricalSignals = (data: DataPoint[], highThreshold: number = 80, lowThreshold: number = 20): HistoricalSignal[] => {
   const signals: HistoricalSignal[] = [];
-  const windowSize = 20; // look-around window for local extremes
+  const windowSize = 20; // backward window for local extremes (no look-ahead)
 
-  for (let i = windowSize; i < data.length - windowSize; i++) {
+  for (let i = windowSize; i < data.length; i++) {
     const point = data[i];
 
     if (point.index >= highThreshold) {
-      // Check if this is a local maximum
+      // Check if this is a local maximum (backward only, no look-ahead bias)
       let isMax = true;
-      for (let j = i - windowSize; j <= i + windowSize; j++) {
-        if (j !== i && data[j].index > point.index) { isMax = false; break; }
+      for (let j = i - windowSize; j < i; j++) {
+        if (data[j].index > point.index) { isMax = false; break; }
       }
       if (isMax) {
         // Skip if too close to the last signal of the same type
@@ -169,9 +169,10 @@ export const detectHistoricalSignals = (data: DataPoint[], highThreshold: number
     }
 
     if (point.index <= lowThreshold) {
+      // Check if this is a local minimum (backward only, no look-ahead bias)
       let isMin = true;
-      for (let j = i - windowSize; j <= i + windowSize; j++) {
-        if (j !== i && data[j].index < point.index) { isMin = false; break; }
+      for (let j = i - windowSize; j < i; j++) {
+        if (data[j].index < point.index) { isMin = false; break; }
       }
       if (isMin) {
         const lastBuy = signals.filter(s => s.type === 'buy').pop();

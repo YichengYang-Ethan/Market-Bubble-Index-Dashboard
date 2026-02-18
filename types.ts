@@ -56,6 +56,7 @@ export interface BubbleIndexData {
   composite_score: number;
   sentiment_score: number | null;
   liquidity_score: number | null;
+  valuation_score?: number | null;
   regime: string;
   indicators: Record<string, BubbleIndicator>;
   previous_day?: PreviousDay;
@@ -66,6 +67,7 @@ export interface BubbleHistoryPoint {
   composite_score: number;
   sentiment_score: number | null;
   liquidity_score: number | null;
+  valuation_score?: number | null;
   regime: string;
   indicators?: Record<string, number | null>;
 }
@@ -80,5 +82,5 @@ export interface IndicatorMeta {
   label: string;
   color: string;
   description: string;
-  category: 'sentiment' | 'liquidity';
+  category: 'sentiment' | 'liquidity' | 'valuation';
 }

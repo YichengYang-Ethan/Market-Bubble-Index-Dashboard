@@ -33,37 +33,49 @@ import os
 INDICATOR_CONFIG = {
     "qqq_deviation": {
         "label": "QQQ Deviation",
-        "weight": 0.20,
+        "weight": 0.17,
         "lookback": 200,
+        "category": "sentiment",
     },
     "vix_level": {
         "label": "VIX Level",
-        "weight": 0.18,
+        "weight": 0.15,
         "lookback": 252,
+        "category": "sentiment",
     },
     "sector_breadth": {
         "label": "Sector Breadth",
-        "weight": 0.15,
+        "weight": 0.13,
         "lookback": 50,
+        "category": "liquidity",
     },
     "credit_spread": {
         "label": "Credit Spread",
-        "weight": 0.15,
+        "weight": 0.13,
         "lookback": 252,
+        "category": "liquidity",
     },
     "put_call_ratio": {
         "label": "Put/Call Ratio (SKEW)",
-        "weight": 0.17,
+        "weight": 0.14,
         "lookback": 252,
         "source": "yfinance",
         "ticker": "^SKEW",
+        "category": "sentiment",
     },
     "yield_curve": {
         "label": "Yield Curve",
-        "weight": 0.15,
+        "weight": 0.13,
         "lookback": 252,
         "source": "fred",
         "series_id": "T10Y2Y",
+        "category": "liquidity",
+    },
+    "cape_ratio": {
+        "label": "CAPE Valuation",
+        "weight": 0.15,
+        "lookback": 252,
+        "category": "valuation",
     },
 }
 
@@ -110,7 +122,7 @@ def percentile_rank(series: pd.Series, lookback: int) -> pd.Series:
 
 def compute_qqq_deviation(lookback: int = 200) -> pd.Series:
     """QQQ deviation from 200-day SMA, percentile-ranked."""
-    data = yf.download("QQQ", period="3y", progress=False)
+    data = yf.download("QQQ", period="10y", progress=False)
     closes = data["Close"].squeeze().dropna()
     sma = closes.rolling(window=lookback).mean()
     deviation = (closes - sma) / sma
@@ -120,7 +132,7 @@ def compute_qqq_deviation(lookback: int = 200) -> pd.Series:
 def compute_vix_level(lookback: int = 252) -> pd.Series:
     """VIX level inverted (high VIX = high bubble risk when inverted means complacency).
     Actually: low VIX = complacency = higher bubble risk. So we invert."""
-    data = yf.download("^VIX", period="3y", progress=False)
+    data = yf.download("^VIX", period="10y", progress=False)
     vix = data["Close"].squeeze().dropna()
     # Invert: low VIX -> high score (complacency / bubble-like)
     inverted = -vix
@@ -130,7 +142,7 @@ def compute_vix_level(lookback: int = 252) -> pd.Series:
 def compute_sector_breadth(lookback: int = 50) -> pd.Series:
     """Fraction of sector ETFs above their 50-day SMA, percentile-ranked."""
     tickers = SECTOR_ETFS
-    data = yf.download(tickers, period="2y", progress=False)
+    data = yf.download(tickers, period="10y", progress=False)
     closes = data["Close"]
 
     # Count how many sectors are above their own SMA
@@ -146,7 +158,7 @@ def compute_sector_breadth(lookback: int = 50) -> pd.Series:
 
 def compute_credit_spread(lookback: int = 252) -> pd.Series:
     """HYG/IEF ratio as credit spread proxy. Tight spreads (high ratio) = risk-on = higher bubble score."""
-    data = yf.download(["HYG", "IEF"], period="3y", progress=False)
+    data = yf.download(["HYG", "IEF"], period="10y", progress=False)
     closes = data["Close"]
     ratio = (closes["HYG"] / closes["IEF"]).dropna()
     return percentile_rank(ratio, lookback)
@@ -156,7 +168,7 @@ def compute_put_call_ratio(lookback: int = 252) -> pd.Series | None:
     """CBOE SKEW index as sentiment proxy (replaces discontinued FRED PCCE).
     High SKEW = heavy tail-risk hedging = complacency/bubble signal."""
     try:
-        data = yf.download("^SKEW", period="3y", progress=False)
+        data = yf.download("^SKEW", period="10y", progress=False)
         skew = data["Close"].squeeze().dropna()
         if skew.empty:
             return None
@@ -172,13 +184,32 @@ def compute_yield_curve(fred: "Fred | None", lookback: int = 252) -> pd.Series |
     if fred is None:
         return None
     try:
-        spread = fred.get_series("T10Y2Y", observation_start="2023-01-01")
+        spread = fred.get_series("T10Y2Y", observation_start="2015-01-01")
         spread = spread.dropna()
         if spread.empty:
             return None
         return percentile_rank(spread, lookback)
     except Exception as e:
         print(f"  FRED T10Y2Y error: {e}", file=sys.stderr)
+        return None
+
+
+def compute_cape_ratio(lookback: int = 252) -> pd.Series | None:
+    """Approximate CAPE using S&P 500 price relative to 10-year moving average.
+    Higher values = more expensive = more bubble-like."""
+    try:
+        spy = yf.download("^GSPC", period="10y", progress=False)["Close"].squeeze().dropna()
+        if spy.empty:
+            return None
+        # Use 10-year (2520 trading day) moving average as long-term earnings proxy
+        sma_long = spy.rolling(window=min(2520, len(spy) - 1), min_periods=252).mean()
+        cape_proxy = spy / sma_long  # Price relative to long-term average
+        cape_proxy = cape_proxy.dropna()
+        if cape_proxy.empty:
+            return None
+        return percentile_rank(cape_proxy, lookback)
+    except Exception as e:
+        print(f"  CAPE ratio error: {e}", file=sys.stderr)
         return None
 
 
@@ -193,6 +224,7 @@ COMPUTE_FNS = {
     "credit_spread": lambda fred: compute_credit_spread(INDICATOR_CONFIG["credit_spread"]["lookback"]),
     "put_call_ratio": lambda fred: compute_put_call_ratio(INDICATOR_CONFIG["put_call_ratio"]["lookback"]),
     "yield_curve": lambda fred: compute_yield_curve(fred, INDICATOR_CONFIG["yield_curve"]["lookback"]),
+    "cape_ratio": lambda fred: compute_cape_ratio(INDICATOR_CONFIG["cape_ratio"]["lookback"]),
 }
 
 
@@ -245,9 +277,10 @@ def build_bubble_index():
     for col in available:
         composite += combined[col].fillna(50.0) * weights[col]
 
-    # Categorize into sentiment vs liquidity sub-scores
-    sentiment_keys = {"qqq_deviation", "vix_level", "put_call_ratio"}
-    liquidity_keys = {"sector_breadth", "credit_spread", "yield_curve"}
+    # Categorize into sub-scores by category
+    sentiment_keys = {k for k in available if INDICATOR_CONFIG[k].get("category") == "sentiment"}
+    liquidity_keys = {k for k in available if INDICATOR_CONFIG[k].get("category") == "liquidity"}
+    valuation_keys = {k for k in available if INDICATOR_CONFIG[k].get("category") == "valuation"}
 
     def sub_score(keys):
         cols = [k for k in keys if k in combined.columns]
@@ -262,6 +295,7 @@ def build_bubble_index():
 
     sentiment = sub_score(sentiment_keys)
     liquidity = sub_score(liquidity_keys)
+    valuation = sub_score(valuation_keys)
 
     # Build snapshot (latest values)
     latest_idx = combined.index[-1]
@@ -281,6 +315,7 @@ def build_bubble_index():
         "composite_score": round(float(composite.iloc[-1]), 1),
         "sentiment_score": round(float(sentiment.iloc[-1]), 1) if not np.isnan(sentiment.iloc[-1]) else None,
         "liquidity_score": round(float(liquidity.iloc[-1]), 1) if not np.isnan(liquidity.iloc[-1]) else None,
+        "valuation_score": round(float(valuation.iloc[-1]), 1) if not np.isnan(valuation.iloc[-1]) else None,
         "regime": get_regime(float(composite.iloc[-1])),
         "indicators": snapshot_indicators,
     }
@@ -296,14 +331,15 @@ def build_bubble_index():
             "indicators": prev_indicators,
         }
 
-    # Build history (last 365 trading days)
+    # Build history (all available trading days)
     history_points = []
-    for i in range(max(0, len(composite) - 365), len(composite)):
+    for i in range(len(composite)):
         idx = composite.index[i]
         date_str = idx.strftime("%Y-%m-%d") if hasattr(idx, "strftime") else str(idx)[:10]
         c_val = float(composite.iloc[i])
         s_val = float(sentiment.iloc[i]) if not np.isnan(sentiment.iloc[i]) else None
         l_val = float(liquidity.iloc[i]) if not np.isnan(liquidity.iloc[i]) else None
+        v_val = float(valuation.iloc[i]) if not np.isnan(valuation.iloc[i]) else None
 
         # Per-indicator scores for this day
         day_indicators = {}
@@ -316,6 +352,7 @@ def build_bubble_index():
             "composite_score": round(c_val, 1),
             "sentiment_score": round(s_val, 1) if s_val is not None else None,
             "liquidity_score": round(l_val, 1) if l_val is not None else None,
+            "valuation_score": round(v_val, 1) if v_val is not None else None,
             "regime": get_regime(c_val),
             "indicators": day_indicators,
         })

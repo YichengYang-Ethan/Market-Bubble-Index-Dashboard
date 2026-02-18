@@ -5,6 +5,7 @@ interface BubbleGaugeProps {
   regime: string;
   sentimentScore: number | null;
   liquidityScore: number | null;
+  valuationScore?: number | null;
   generatedAt?: string;
 }
 
@@ -44,7 +45,7 @@ function formatGeneratedAt(isoString: string): string {
   return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, sentimentScore, liquidityScore, generatedAt }) => {
+const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, sentimentScore, liquidityScore, valuationScore, generatedAt }) => {
   const color = getScoreColor(compositeScore);
   const radius = 112;
   const circumference = 2 * Math.PI * radius;
@@ -93,7 +94,7 @@ const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, senti
         </span>
 
         {/* Sub-scores */}
-        <div className="grid grid-cols-2 gap-4 mt-6 w-full">
+        <div className="grid grid-cols-3 gap-4 mt-6 w-full">
           <div className="bg-slate-800/50 rounded-lg p-3 text-center">
             <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Sentiment</p>
             <p className="text-xl font-bold" style={{ color: sentimentScore != null ? getScoreColor(sentimentScore) : '#64748b' }}>
@@ -104,6 +105,12 @@ const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, senti
             <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Liquidity</p>
             <p className="text-xl font-bold" style={{ color: liquidityScore != null ? getScoreColor(liquidityScore) : '#64748b' }}>
               {liquidityScore != null ? liquidityScore.toFixed(0) : '--'}
+            </p>
+          </div>
+          <div className="bg-slate-800/50 rounded-lg p-3 text-center">
+            <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Valuation</p>
+            <p className="text-xl font-bold" style={{ color: valuationScore != null ? getScoreColor(valuationScore) : '#64748b' }}>
+              {valuationScore != null ? valuationScore.toFixed(0) : '--'}
             </p>
           </div>
         </div>

@@ -265,8 +265,8 @@ const App: React.FC = () => {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-black text-white mb-3">Market Bubble Index</h1>
             <p className="text-lg text-slate-400 max-w-3xl mx-auto">
-              A composite measure of market euphoria across <span className="text-white font-semibold">6 indicators</span> including
-              QQQ deviation, VIX, sector breadth, credit spreads, put/call ratio, and yield curve.
+              A composite measure of market euphoria across <span className="text-white font-semibold">7 indicators</span> including
+              QQQ deviation, VIX, sector breadth, credit spreads, put/call ratio, yield curve, and CAPE valuation.
             </p>
           </div>
 
@@ -288,6 +288,7 @@ const App: React.FC = () => {
                 regime={bubbleData.regime}
                 sentimentScore={bubbleData.sentiment_score}
                 liquidityScore={bubbleData.liquidity_score}
+                valuationScore={bubbleData.valuation_score}
                 generatedAt={bubbleData.generated_at}
               />
             </div>
@@ -564,12 +565,13 @@ const App: React.FC = () => {
           </div>
 
           {/* Methodology Explanation */}
-          <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl">
+          <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl mb-8">
             <h3 className="text-lg font-bold text-white mb-4">How the Bubble Index Works</h3>
             <p className="text-slate-400 leading-relaxed mb-4">
-              The Market Bubble Index is a composite score (0-100) that aggregates 6 independent market indicators
-              to measure the degree of speculative excess in the market. Each indicator is normalized to a 0-100 scale
-              and combined using a weighted average.
+              The Market Bubble Index is a composite score (0-100) that aggregates <span className="text-white font-semibold">7 independent market indicators</span> across
+              three categories&mdash;sentiment, liquidity, and valuation&mdash;to measure the degree of speculative excess.
+              Each indicator is converted to a percentile rank within a rolling lookback window (50-252 trading days depending on the indicator),
+              then combined via weighted average into the composite score. If any indicator is unavailable, its weight is automatically redistributed among the remaining indicators.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {INDICATOR_META.map(meta => (
@@ -584,13 +586,87 @@ const App: React.FC = () => {
               ))}
             </div>
           </div>
+
+          {/* Data Sources & Weights */}
+          <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl mb-8">
+            <h3 className="text-lg font-bold text-white mb-4">Data Sources & Indicator Weights</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <h4 className="text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">Data Sources</h4>
+                <ul className="space-y-2 text-sm text-slate-400">
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-400 mt-0.5">&#x2022;</span>
+                    <span><span className="text-white font-medium">Yahoo Finance</span> (yfinance) &mdash; QQQ, SPY, VIX, SKEW, 11 sector ETFs, HYG, IEF, S&amp;P 500 price data. 10-year history.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-400 mt-0.5">&#x2022;</span>
+                    <span><span className="text-white font-medium">FRED</span> (Federal Reserve) &mdash; 10Y-2Y Treasury yield spread (T10Y2Y) from 2015.</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-blue-400 mt-0.5">&#x2022;</span>
+                    <span><span className="text-white font-medium">Update Schedule</span> &mdash; Automated via GitHub Actions, weekdays at 9:30 PM UTC (after US market close).</span>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">Indicator Weights</h4>
+                <div className="space-y-2">
+                  {[
+                    { label: 'QQQ Deviation', weight: 17, cat: 'Sentiment' },
+                    { label: 'CAPE Valuation', weight: 15, cat: 'Valuation' },
+                    { label: 'VIX Level', weight: 15, cat: 'Sentiment' },
+                    { label: 'Tail Risk (SKEW)', weight: 14, cat: 'Sentiment' },
+                    { label: 'Sector Breadth', weight: 13, cat: 'Liquidity' },
+                    { label: 'Credit Spread', weight: 13, cat: 'Liquidity' },
+                    { label: 'Yield Curve', weight: 13, cat: 'Liquidity' },
+                  ].map(item => (
+                    <div key={item.label} className="flex items-center gap-3 text-sm">
+                      <span className="text-slate-400 w-36 truncate">{item.label}</span>
+                      <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="h-full bg-blue-500/60 rounded-full" style={{ width: `${item.weight * 5}%` }} />
+                      </div>
+                      <span className="text-white font-semibold w-10 text-right">{item.weight}%</span>
+                      <span className="text-xs text-slate-500 w-20">{item.cat}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Normalization & Backtest Methodology */}
+          <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl">
+            <h3 className="text-lg font-bold text-white mb-4">Normalization & Backtest</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-sm text-slate-400">
+              <div>
+                <h4 className="text-sm font-semibold text-slate-300 mb-2 uppercase tracking-wide">Percentile Ranking</h4>
+                <p className="leading-relaxed">
+                  Each raw indicator value is ranked against its own trailing history using an empirical percentile function:
+                  for each value, we count how many preceding values in the lookback window are lower, divide by window size,
+                  and scale to 0-100. This makes indicators comparable across different units and magnitudes. The lookback
+                  window is 200 days for QQQ deviation, 50 days for sector breadth, and 252 days (one trading year) for all other indicators.
+                </p>
+              </div>
+              <div>
+                <h4 className="text-sm font-semibold text-slate-300 mb-2 uppercase tracking-wide">Deviation Tracker Backtest</h4>
+                <p className="leading-relaxed">
+                  The Deviation Tracker section includes an interactive backtest engine. It uses a simple threshold strategy:
+                  buy when the deviation index drops below the buy threshold (default 20), sell when it rises above the
+                  sell threshold (default 80). The engine tracks cash, shares, and peak portfolio value to compute strategy
+                  return, annualized CAGR, and maximum drawdown. Results are compared against buy-and-hold over the same period.
+                  Historical signals use a backward-only 20-day window to avoid look-ahead bias.
+                  Note: the backtest assumes full position sizing (all-in / all-out) with no transaction costs, slippage, or taxes.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* ========== FOOTER ========== */}
       <footer className="border-t border-slate-800 py-10 text-center text-slate-500 text-xs">
-        <p>&copy; 2025 Market Bubble Index Dashboard. Daily market data via Yahoo Finance, updated by GitHub Actions.</p>
-        <p className="mt-2">Not financial advice. Automated axis adjustment and risk signaling active.</p>
+        <p>&copy; 2025-2026 Market Bubble Index Dashboard. Daily market data via Yahoo Finance &amp; FRED, updated by GitHub Actions.</p>
+        <p className="mt-2">Not financial advice. 7 indicators across sentiment, liquidity, and valuation dimensions. 10-year rolling data window.</p>
       </footer>
     </div>
   );

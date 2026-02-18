@@ -78,6 +78,13 @@ export const INDICATOR_META: IndicatorMeta[] = [
     description: '10Y-2Y Treasury spread. A steepening curve signals risk-on conditions.',
     category: 'liquidity',
   },
+  {
+    key: 'cape_ratio',
+    label: 'CAPE Valuation',
+    color: '#f43f5e',
+    description: 'S&P 500 price relative to 10-year moving average, percentile-ranked. Higher values indicate expensive valuations typical of bubble conditions.',
+    category: 'valuation',
+  },
 ];
 
 export const BUBBLE_REGIME_CONFIG = [

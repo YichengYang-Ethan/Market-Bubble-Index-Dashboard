@@ -26,8 +26,8 @@ describe("DEVIATION_CONFIG", () => {
 });
 
 describe("INDICATOR_META", () => {
-  it("should have 6 entries", () => {
-    expect(INDICATOR_META).toHaveLength(6);
+  it("should have 7 entries", () => {
+    expect(INDICATOR_META).toHaveLength(7);
   });
 
   it("each entry should have key, label, color, description, and category", () => {
@@ -40,9 +40,9 @@ describe("INDICATOR_META", () => {
     }
   });
 
-  it("categories should be 'sentiment' or 'liquidity'", () => {
+  it("categories should be 'sentiment', 'liquidity', or 'valuation'", () => {
     for (const indicator of INDICATOR_META) {
-      expect(["sentiment", "liquidity"]).toContain(indicator.category);
+      expect(["sentiment", "liquidity", "valuation"]).toContain(indicator.category);
     }
   });
 

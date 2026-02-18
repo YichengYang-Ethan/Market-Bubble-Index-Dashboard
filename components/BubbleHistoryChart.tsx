@@ -46,6 +46,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history }) => {
       composite_score: 'Composite',
       sentiment_score: 'Sentiment',
       liquidity_score: 'Liquidity',
+      valuation_score: 'Valuation',
     };
     INDICATOR_META.forEach((ind) => {
       labels[ind.key] = ind.label;
@@ -138,6 +139,16 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history }) => {
               dot={false}
               activeDot={{ r: 3, fill: '#34d399' }}
             />
+            <Line
+              type="monotone"
+              dataKey="valuation_score"
+              stroke="#f43f5e"
+              strokeWidth={1.5}
+              strokeDasharray="4 2"
+              dot={false}
+              activeDot={{ r: 3, fill: '#f43f5e' }}
+              connectNulls
+            />
             {/* Per-indicator lines (toggled) */}
             {INDICATOR_META.map((ind) =>
               enabledIndicators[ind.key] ? (
@@ -171,6 +182,10 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history }) => {
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-0.5 bg-emerald-400 rounded" style={{ borderTop: '2px dashed #34d399' }} />
           <span>Liquidity</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-4 h-0.5 rounded" style={{ borderTop: '2px dashed #f43f5e' }} />
+          <span>Valuation</span>
         </div>
       </div>
 
