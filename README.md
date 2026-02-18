@@ -1,9 +1,9 @@
 # Market Bubble Index Dashboard
 
-[![Deploy](https://github.com/yichengyang-ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/deploy.yml/badge.svg)](https://github.com/yichengyang-ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/deploy.yml)
-[![Update Data](https://github.com/yichengyang-ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/update-data.yml/badge.svg)](https://github.com/yichengyang-ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/update-data.yml)
+[![Deploy](https://github.com/yichengyang-ethan/Market-Bubble-Index-Dashboard/actions/workflows/deploy.yml/badge.svg)](https://github.com/yichengyang-ethan/Market-Bubble-Index-Dashboard/actions/workflows/deploy.yml)
+[![Update Data](https://github.com/yichengyang-ethan/Market-Bubble-Index-Dashboard/actions/workflows/update-data.yml/badge.svg)](https://github.com/yichengyang-ethan/Market-Bubble-Index-Dashboard/actions/workflows/update-data.yml)
 
-**Live:** [yichengyang-ethan.github.io/QQQ-200D-Deviation-Dashboard](https://yichengyang-ethan.github.io/QQQ-200D-Deviation-Dashboard/)
+**Live:** [yichengyang-ethan.github.io/Market-Bubble-Index-Dashboard](https://yichengyang-ethan.github.io/Market-Bubble-Index-Dashboard/)
 
 A single-page financial dashboard that tracks market bubble risk through a composite index of **6 weighted indicators**. Designed as a portfolio showcase piece with professional data visualization.
 

@@ -1,6 +1,6 @@
 import { BubbleIndexData, BubbleHistoryData } from '../types';
 
-const BASE = '/QQQ-200D-Deviation-Dashboard/';
+const BASE = '/Market-Bubble-Index-Dashboard/';
 
 export const fetchBubbleIndex = async (): Promise<BubbleIndexData> => {
   const res = await fetch(`${BASE}data/bubble_index.json`);

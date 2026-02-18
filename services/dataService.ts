@@ -14,7 +14,7 @@ interface TickerDataFile {
  */
 export const fetchRealData = async (ticker: string = 'QQQ'): Promise<{ data: DataPoint[]; isDemo: boolean; generatedAt?: string }> => {
   try {
-    const base = '/QQQ-200D-Deviation-Dashboard/';
+    const base = '/Market-Bubble-Index-Dashboard/';
     const res = await fetch(`${base}data/${ticker.toLowerCase()}.json`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json: TickerDataFile = await res.json();
