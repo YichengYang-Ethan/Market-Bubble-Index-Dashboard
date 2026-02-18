@@ -43,7 +43,7 @@ const REGIME_BANDS = [
 const MAX_POINTS = 500;
 
 const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceData }) => {
-  const [timeRange, setTimeRange] = useState<TimeRange>('3Y');
+  const [timeRange, setTimeRange] = useState<TimeRange>('ALL');
   const [showSubScores, setShowSubScores] = useState<Record<string, boolean>>({
     sentiment_score: false,
     liquidity_score: false,

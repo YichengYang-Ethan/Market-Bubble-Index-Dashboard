@@ -141,7 +141,7 @@ def percentile_rank(series: pd.Series, lookback: int) -> pd.Series:
 
 def compute_qqq_deviation(lookback: int = 200) -> pd.Series:
     """QQQ deviation from 200-day SMA, percentile-ranked."""
-    data = yf.download("QQQ", period="10y", progress=False)
+    data = yf.download("QQQ", start="2014-01-01", progress=False)
     closes = data["Close"].squeeze().dropna()
     sma = closes.rolling(window=lookback).mean()
     deviation = (closes - sma) / sma
@@ -151,7 +151,7 @@ def compute_qqq_deviation(lookback: int = 200) -> pd.Series:
 def compute_vix_level(lookback: int = 252) -> pd.Series:
     """VIX level inverted (high VIX = high bubble risk when inverted means complacency).
     Actually: low VIX = complacency = higher bubble risk. So we invert."""
-    data = yf.download("^VIX", period="10y", progress=False)
+    data = yf.download("^VIX", start="2014-01-01", progress=False)
     vix = data["Close"].squeeze().dropna()
     # Invert: low VIX -> high score (complacency / bubble-like)
     inverted = -vix
@@ -161,7 +161,7 @@ def compute_vix_level(lookback: int = 252) -> pd.Series:
 def compute_sector_breadth(lookback: int = 50) -> pd.Series:
     """Fraction of sector ETFs above their 50-day SMA, percentile-ranked."""
     tickers = SECTOR_ETFS
-    data = yf.download(tickers, period="10y", progress=False)
+    data = yf.download(tickers, start="2014-01-01", progress=False)
     closes = data["Close"]
 
     # Count how many sectors are above their own SMA
@@ -177,7 +177,7 @@ def compute_sector_breadth(lookback: int = 50) -> pd.Series:
 
 def compute_credit_spread(lookback: int = 252) -> pd.Series:
     """HYG/IEF ratio as credit spread proxy. Tight spreads (high ratio) = risk-on = higher bubble score."""
-    data = yf.download(["HYG", "IEF"], period="10y", progress=False)
+    data = yf.download(["HYG", "IEF"], start="2014-01-01", progress=False)
     closes = data["Close"]
     ratio = (closes["HYG"] / closes["IEF"]).dropna()
     return percentile_rank(ratio, lookback)
@@ -187,7 +187,7 @@ def compute_put_call_ratio(lookback: int = 252) -> pd.Series | None:
     """CBOE SKEW index as sentiment proxy (replaces discontinued FRED PCCE).
     High SKEW = heavy tail-risk hedging = complacency/bubble signal."""
     try:
-        data = yf.download("^SKEW", period="10y", progress=False)
+        data = yf.download("^SKEW", start="2014-01-01", progress=False)
         skew = data["Close"].squeeze().dropna()
         if skew.empty:
             return None
@@ -203,7 +203,7 @@ def compute_yield_curve(fred: "Fred | None", lookback: int = 252) -> pd.Series |
     if fred is None:
         return None
     try:
-        spread = fred.get_series("T10Y2Y", observation_start="2015-01-01")
+        spread = fred.get_series("T10Y2Y", observation_start="2014-01-01")
         spread = spread.dropna()
         if spread.empty:
             return None
@@ -217,7 +217,7 @@ def compute_cape_ratio(lookback: int = 252) -> pd.Series | None:
     """Approximate CAPE using S&P 500 price relative to 10-year moving average.
     Higher values = more expensive = more bubble-like."""
     try:
-        spy = yf.download("^GSPC", period="10y", progress=False)["Close"].squeeze().dropna()
+        spy = yf.download("^GSPC", start="2014-01-01", progress=False)["Close"].squeeze().dropna()
         if spy.empty:
             return None
         # Use 10-year (2520 trading day) moving average as long-term earnings proxy
@@ -404,6 +404,13 @@ def build_bubble_index():
             "regime": get_regime(c_val),
             "indicators": day_indicators,
         })
+
+    # Trim early points with poor indicator coverage (< 3/7 is noise)
+    MIN_INDICATORS = 3
+    history_points = [
+        pt for pt in history_points
+        if sum(1 for v in pt["indicators"].values() if v is not None) >= MIN_INDICATORS
+    ]
 
     history = {
         "generated_at": datetime.now(timezone.utc).isoformat(),

@@ -43,7 +43,7 @@ def fetch_ticker(symbol: str) -> list[dict]:
     norm_range = cfg["lower"] + cfg["upper"]
 
     ticker = yf.Ticker(symbol)
-    hist = ticker.history(period="10y", interval="1d")
+    hist = ticker.history(start="2013-01-01", interval="1d")
 
     if hist.empty:
         print(f"WARNING: No data returned for {symbol}", file=sys.stderr)
