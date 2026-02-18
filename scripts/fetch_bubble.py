@@ -25,6 +25,25 @@ except ImportError:
     FRED_AVAILABLE = False
 
 import os
+import math
+
+
+def _sanitize(obj):
+    """Recursively replace float NaN/Inf with None so json.dumps never emits
+    invalid tokens like NaN or Infinity."""
+    if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+        return None
+    if isinstance(obj, dict):
+        return {k: _sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_sanitize(v) for v in obj]
+    return obj
+
+
+def _dump_json(obj) -> str:
+    """Serialize to compact JSON, guaranteed free of NaN/Infinity."""
+    return json.dumps(_sanitize(obj), separators=(",", ":"), allow_nan=False)
+
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -396,12 +415,12 @@ def build_bubble_index():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     snapshot_path = out_dir / "bubble_index.json"
-    snapshot_path.write_text(json.dumps(snapshot, separators=(",", ":")))
+    snapshot_path.write_text(_dump_json(snapshot))
     print(f"\nSnapshot written to {snapshot_path}")
     print(f"  Composite: {snapshot['composite_score']} | Regime: {snapshot['regime']}")
 
     history_path = out_dir / "bubble_history.json"
-    history_path.write_text(json.dumps(history, separators=(",", ":")))
+    history_path.write_text(_dump_json(history))
     print(f"History written to {history_path} ({len(history_points)} points)")
 
 

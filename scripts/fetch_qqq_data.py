@@ -1,11 +1,23 @@
 """Fetch market data via yfinance and generate static JSON files for the dashboard."""
 
 import json
+import math
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+
+
+def _sanitize(obj):
+    """Recursively replace float NaN/Inf with None for valid JSON."""
+    if isinstance(obj, float) and (math.isnan(obj) or math.isinf(obj)):
+        return None
+    if isinstance(obj, dict):
+        return {k: _sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_sanitize(v) for v in obj]
+    return obj
 
 try:
     import yfinance as yf
@@ -89,7 +101,7 @@ def main():
         }
 
         out_path = out_dir / f"{symbol.lower()}.json"
-        out_path.write_text(json.dumps(output, separators=(",", ":")))
+        out_path.write_text(json.dumps(_sanitize(output), separators=(",", ":"), allow_nan=False))
 
         print(f"  OK: {len(data_points)} points -> {out_path}")
         print(f"      Range: {data_points[0]['date']} to {data_points[-1]['date']}")
