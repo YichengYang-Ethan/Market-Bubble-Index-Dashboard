@@ -93,8 +93,8 @@ function runBubbleBacktest(
 }
 
 const BubbleBacktestPanel: React.FC<Props> = ({ history, priceData, ticker }) => {
-  const [buyThreshold, setBuyThreshold] = useState(30);
-  const [sellThreshold, setSellThreshold] = useState(70);
+  const [buyThreshold, setBuyThreshold] = useState(25);
+  const [sellThreshold, setSellThreshold] = useState(85);
   const [initialInvestment, setInitialInvestment] = useState(10000);
 
   const result = useMemo(() => {
