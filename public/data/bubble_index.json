@@ -1,15 +1,1 @@
-{
-  "generated_at": "2026-02-17T00:00:00+00:00",
-  "composite_score": 52.3,
-  "sentiment_score": 55.8,
-  "liquidity_score": 48.1,
-  "regime": "MODERATE",
-  "indicators": {
-    "qqq_deviation": {"score": 58.0, "raw_value": 0.04, "weight": 0.20, "label": "QQQ Deviation"},
-    "vix_level": {"score": 42.0, "raw_value": 18.5, "weight": 0.18, "label": "VIX Level"},
-    "sector_breadth": {"score": 55.0, "raw_value": 0.62, "weight": 0.15, "label": "Sector Breadth"},
-    "credit_spread": {"score": 48.0, "raw_value": 0.012, "weight": 0.15, "label": "Credit Spread"},
-    "put_call_ratio": {"score": 60.0, "raw_value": 0.85, "weight": 0.17, "label": "Put/Call Ratio"},
-    "yield_curve": {"score": 50.0, "raw_value": 0.25, "weight": 0.15, "label": "Yield Curve"}
-  }
-}
+{"generated_at":"2026-02-18T03:36:51.505513+00:00","composite_score":30.6,"sentiment_score":14.2,"liquidity_score":44.5,"regime":"MODERATE","indicators":{"qqq_deviation":{"score":4.0,"raw_value":0.0402,"weight":0.241,"label":"QQQ Deviation"},"vix_level":{"score":25.5,"raw_value":0.255,"weight":0.2169,"label":"VIX Level"},"sector_breadth":{"score":4.1,"raw_value":0.0408,"weight":0.1807,"label":"Sector Breadth"},"credit_spread":{"score":49.0,"raw_value":0.49,"weight":0.1807,"label":"Credit Spread"},"yield_curve":{"score":80.5,"raw_value":0.8048,"weight":0.1807,"label":"Yield Curve"}}}
