@@ -726,7 +726,7 @@ const App: React.FC = () => {
           <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl mb-8">
             <h3 className="text-lg font-bold text-white mb-4">How the Bubble Index Works</h3>
             <p className="text-slate-400 leading-relaxed mb-4">
-              The Market Bubble Index is a composite score (0-100) that aggregates <span className="text-white font-semibold">8 independent market indicators</span> across
+              The Market Bubble Index is a composite score (0-100) that aggregates <span className="text-white font-semibold">7 independent market indicators</span> across
               three categories&mdash;sentiment, liquidity, and valuation&mdash;to measure the degree of speculative excess.
               Each indicator is converted to a percentile rank within a rolling lookback window (50-252 trading days depending on the indicator),
               then combined via weighted average into the composite score. If any indicator is unavailable, its weight is automatically redistributed among the remaining indicators.
