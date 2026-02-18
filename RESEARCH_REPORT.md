@@ -1,14 +1,22 @@
-# Drawdown Probability Model v2.0 — Strategy Research Report
+# Drawdown Probability Model v3.0 — Strategy Research Report
 
 ## Executive Summary
 
-The Market Bubble Index drawdown probability model was upgraded from v1.0 to v2.0 with three key improvements:
+The Market Bubble Index drawdown probability model was upgraded through three versions:
 
-1. **Forward window**: 63 days → **126 days** (~6 months)
-2. **Features**: composite_score only → **6 multi-feature logistic regression**
-3. **Validation**: No OOS metrics → **70/30 chronological train/test split**
+| Version | Forward Window | Features | Key Metric (>20% DD) |
+|---------|---------------|----------|---------------------|
+| v1.0 | 63 days | composite_score only | AUC ~0.518 |
+| v2.0 | 126 days | 6 shared features | AUC 0.884, BSS -8.0% |
+| **v3.0** | **180 days** | **Per-threshold optimized** | **AUC 0.921, BSS +35.8%** |
 
-The v2.0 model achieves **AUC 0.884 OOS** for predicting >20% drawdowns within 6 months, a significant improvement over the v1.0 model which had AUC ~0.518 at 63 days.
+v3.0 key improvements over v2.0:
+1. **Forward window**: 126 days → **180 days** (~9 months)
+2. **Per-threshold optimization**: Each threshold gets its own features, drawdown definition, and regularization
+3. **Engineered features**: Smoothed indicators (SMA, EMA), score volatility, interactions, 5-day momentum
+4. **Two drawdown definitions**: "drop-from-today" (def B) for 10%, "peak-to-trough" (def A) for 20%
+5. **StandardScaler**: Feature normalization for numerical stability
+6. **Positive BSS**: Both thresholds now beat the climatological baseline (v2 had BSS -24.6% for 10%)
 
 ---
 
@@ -50,18 +58,25 @@ The feature engineering agent tested all available features using four methods (
 
 **Critical finding**: The composite score alone ranks 13th-18th in predictive power. Individual indicators (especially VIX and credit spread) are much more predictive of drawdowns than the aggregated score.
 
-### 2.2 Feature Selection for v2.0
+### 2.2 Feature Selection for v3.0
 
-Selected 6 features for the final model:
+v3.0 uses **per-threshold optimized feature sets** discovered via forward feature selection over 30+ engineered candidates:
 
+**>10% DD model (5 features):**
 ```
-composite_score, score_velocity, ind_vix_level, ind_credit_spread, ind_qqq_deviation, score_sma_60d
+ind_qqq_deviation_sma_20d, ind_vix_level, score_ema_20d, ind_yield_curve, ind_vix_level_change_5d
+```
+
+**>20% DD model (6 features):**
+```
+ind_qqq_deviation_sma_20d, score_std_20d, ind_yield_curve, score_ema_20d, vix_x_credit, ind_vix_level_change_5d
 ```
 
 Rationale:
-- All 6 are available on the frontend for live computation
-- Covers 3 information dimensions: level (score, sma), momentum (velocity), and stress (VIX, credit, deviation)
-- L2 regularization prevents overfitting with moderate feature count
+- Engineered features (SMA, EMA, std, interactions) outperform raw indicators by smoothing noise
+- Different thresholds benefit from different feature combinations
+- All features are computable on the frontend from bubble history data
+- Covers 4 information dimensions: trend (SMA, EMA), volatility (std, VIX change), stress (yield curve, VIX×credit), and overextension (QQQ deviation)
 
 ---
 
@@ -76,24 +91,34 @@ Rationale:
 | **126d** | **~6 months** | **~59%** | **~19%** | **v2.0 optimal, best AUC** |
 | 252d | ~1 year | ~70% | ~25% | Long-term, also strong |
 
-### 3.2 Why 126 Days?
+### 3.2 Why 180 Days (v3.0)?
 
-The 126-day (6-month) window maximizes AUC because:
-1. **Sufficient event frequency**: ~19% of days see a >20% drawdown within 6 months (vs ~12% at 63d)
-2. **Signal persistence**: Market stress signals (high VIX, wide credit spreads) need 3-6 months to manifest as full drawdowns
-3. **Balanced bias-variance**: Long enough to capture tail events, short enough to maintain signal relevance
+The v3.0 optimization found 180-day (~9 months) window optimal for both 10% and 20% thresholds:
+1. **Higher base rates**: ~33% of days see a >10% drop-from-today within 180d (vs ~27% at 126d)
+2. **Signal persistence**: Market stress signals need 3-9 months to manifest as full drawdowns
+3. **Better BSS**: Longer windows improve calibration — BSS for 10% DD jumps from +14.9% (126d) to +18.9% (180d) in CV
+4. **Per-threshold definitions**: 10% uses "drop-from-today" (what investors care about), 20% uses "peak-to-trough" (captures bear market severity)
 
 ---
 
 ## 4. Model Architecture
 
-### 4.1 Hybrid 3-Layer Design
+### 4.1 Hybrid 3-Layer Design (v3.0)
 
 ```
-Layer 1: L2-Regularized Logistic Regression (10%, 20% thresholds)
-         Features: [composite_score, score_velocity, ind_vix_level,
-                    ind_credit_spread, ind_qqq_deviation, score_sma_60d]
-         Regularization: C=1.0 (sklearn default, moderate L2)
+Layer 1a: >10% DD — L2-Logistic + StandardScaler
+          DD Definition: drop-from-today (def B)
+          Forward Window: 180 trading days
+          Regularization: C=1.0
+          Features: [ind_qqq_deviation_sma_20d, ind_vix_level, score_ema_20d,
+                     ind_yield_curve, ind_vix_level_change_5d]
+
+Layer 1b: >20% DD — L2-Logistic + StandardScaler
+          DD Definition: peak-to-trough (def A)
+          Forward Window: 180 trading days
+          Regularization: C=10.0
+          Features: [ind_qqq_deviation_sma_20d, score_std_20d, ind_yield_curve,
+                     score_ema_20d, vix_x_credit, ind_vix_level_change_5d]
 
 Layer 2: Bayesian Beta-Binomial with PAVA Monotonicity (20%, 30%)
          Conditioning: composite_score bins [0-20, 20-40, ..., 80-100]
@@ -118,42 +143,52 @@ This is expected: with ~2800 observations and high autocorrelation, tree-based m
 
 ## 5. Out-of-Sample Results
 
-### 5.1 10% Drawdown Prediction
+### 5.1 10% Drawdown Prediction (v3.0 — drop-from-today, 180d)
 
-| Metric | Train | Test |
-|--------|-------|------|
-| N observations | 1,952 | 838 |
-| N events | 1,301 (66.6%) | 368 (43.9%) |
-| AUC | 0.741 | 0.569 |
-| Brier Score | 0.187 | 0.307 |
-| BSS | — | -24.6% |
+| Metric | v2.0 | v3.0 Train | v3.0 Test |
+|--------|------|------------|-----------|
+| N observations | 838 | 1,952 | 838 |
+| N events | 368 (43.9%) | 745 (38.2%) | 179 (21.4%) |
+| AUC | 0.569 | 0.686 | **0.855** |
+| Brier Score | 0.307 | — | 0.147 |
+| BSS | -24.6% | — | **+12.4%** |
 
-**Interpretation**: The 10% threshold suffers from **distribution shift** — the training period (2015-2021) had a much higher drawdown rate (66.6%) than the test period (2021-2026, 43.9%). This is partly because 2015-2020 included multiple volatile episodes while 2021-2024 was dominated by the post-COVID bull market. AUC of 0.569 shows weak but above-random ranking ability.
+**Interpretation**: v3.0 dramatically improves on v2.0 through three changes: (1) switching to "drop-from-today" DD definition which better captures the risk investors actually face; (2) using 180d window which allows more time for drawdowns to materialize; (3) engineered features (ind_qqq_deviation_sma_20d, score_ema_20d) that smooth out noise. BSS is now positive (+12.4%), meaning the model beats the climatological baseline.
 
-### 5.2 20% Drawdown Prediction
+### 5.2 20% Drawdown Prediction (v3.0 — peak-to-trough, 180d)
 
-| Metric | Train | Test |
-|--------|-------|------|
-| N observations | 1,952 | 838 |
-| N events | 431 (22.1%) | 97 (11.6%) |
-| AUC | 0.725 | **0.884** |
-| Brier Score | 0.149 | 0.111 |
-| BSS | — | -8.0% |
+| Metric | v2.0 | v3.0 Train | v3.0 Test |
+|--------|------|------------|-----------|
+| N observations | 838 | 1,952 | 838 |
+| N events | 97 (11.6%) | 593 (30.4%) | 151 (18.0%) |
+| AUC | 0.884 | 0.779 | **0.921** |
+| Brier Score | 0.111 | — | 0.095 |
+| BSS | -8.0% | — | **+35.8%** |
 
-**Interpretation**: The 20% drawdown model shows **excellent discrimination** (AUC 0.884) — it can effectively distinguish between periods that will and won't experience major drawdowns. The negative BSS indicates slight miscalibration (probability estimates are somewhat off), but the model's ranking ability is strong.
+**Interpretation**: The 20% drawdown model achieves **excellent discrimination** (AUC 0.921) and **strong calibration** (BSS +35.8%), meaning it both ranks risk correctly AND produces well-calibrated probability estimates. The positive BSS is particularly notable — it means the model's probabilistic forecasts are 35.8% better than simply predicting the historical base rate.
 
-### 5.3 Coefficient Interpretation
+### 5.3 Coefficient Interpretation (v3.0, standardized)
+
+**10% Drawdown Model Coefficients:**
+
+| Feature | Weight | Direction | Interpretation |
+|---------|--------|-----------|----------------|
+| ind_qqq_deviation_sma_20d | -0.743 | Lower → more risk | QQQ underperforming its 200-SMA trend |
+| ind_vix_level | -0.644 | Lower → more risk | High VIX (low VIX score) = stress |
+| score_ema_20d | +1.082 | Higher → more risk | Elevated smoothed bubble score |
+| ind_yield_curve | -0.531 | Lower → more risk | Inverted/flat yield curve |
+| ind_vix_level_change_5d | +0.237 | Rising → more risk | VIX score rising = volatility spike |
 
 **20% Drawdown Model Coefficients:**
 
 | Feature | Weight | Direction | Interpretation |
 |---------|--------|-----------|----------------|
-| composite_score | +0.032 | Higher score → more risk | Bubble-like conditions increase drawdown probability |
-| score_velocity | -0.007 | Negative velocity → more risk | Score declining from high levels signals danger |
-| ind_vix_level | -0.023 | Lower VIX score → more risk | High VIX (low VIX score) = stress, drawdown imminent |
-| ind_credit_spread | +0.024 | Higher credit score → more risk | Wide credit spreads (high score) = financial stress |
-| ind_qqq_deviation | -0.012 | Lower deviation → more risk | QQQ already falling from peak = drawdown in progress |
-| score_sma_60d | -0.029 | Lower SMA → more risk | Persistent low regime = ongoing bear market |
+| ind_qqq_deviation_sma_20d | -1.270 | Lower → more risk | QQQ falling from trend (strongest signal) |
+| score_std_20d | +0.515 | Higher → more risk | Score instability = regime transition |
+| ind_yield_curve | -0.801 | Lower → more risk | Inverted yield curve = recession risk |
+| score_ema_20d | +2.195 | Higher → more risk | Elevated bubble conditions (strongest) |
+| vix_x_credit | -1.108 | Lower → more risk | VIX×credit interaction: dual stress |
+| ind_vix_level_change_5d | +0.282 | Rising → more risk | Recent VIX spike |
 
 ---
 
@@ -173,12 +208,12 @@ This is expected: with ~2800 observations and high autocorrelation, tree-based m
 
 ### 6.2 Confidence Assessment
 
-| Threshold | Confidence | Basis |
-|-----------|-----------|-------|
-| >10% DD | Moderate | Large sample, but weak OOS signal |
-| >20% DD | Low-to-Moderate | Strong AUC, slight miscalibration |
-| >30% DD | Model-Dependent | Very few events, Bayesian priors dominate |
-| >40% DD | Extrapolated | Zero events at 126d, purely EVT-based |
+| Threshold | v2.0 | v3.0 | Basis |
+|-----------|------|------|-------|
+| >10% DD | Moderate (AUC 0.569) | **Moderate-High** (AUC 0.855, BSS +12.4%) | Strong discrimination and calibration |
+| >20% DD | Low-Moderate (AUC 0.884) | **Moderate-High** (AUC 0.921, BSS +35.8%) | Excellent on both metrics |
+| >30% DD | Model-Dependent | Model-Dependent | Very few events, Bayesian priors dominate |
+| >40% DD | Extrapolated | Extrapolated | Purely EVT-based |
 
 ---
 
@@ -215,7 +250,8 @@ The declining score velocity combined with very high credit spread score and mod
 
 ### 8.2 Usage Guidance
 
-- **High confidence signal**: When the model predicts >50% chance of >20% drawdown, this has historically been reliable (AUC 0.884).
+- **High confidence signal**: When the model predicts >50% chance of >20% drawdown, this has historically been reliable (AUC 0.921, BSS +35.8%).
+- **Moderate confidence signal**: The >10% drawdown probability is well-calibrated (BSS +12.4%) and useful for position sizing.
 - **Low confidence signal**: The >30% and >40% probabilities should be treated as rough estimates only.
 - **Best for**: Risk management (position sizing), not timing (entry/exit signals).
 - **Update frequency**: Re-calibrate monthly or quarterly as new data accumulates.
@@ -286,5 +322,5 @@ Score 85-100 bin has extremely strong signal (85% chance of >10% drawdown, 45% c
 
 ---
 
-*Report generated 2026-02-18, updated with extended history analysis results. Model version 2.0.*
+*Report generated 2026-02-18, updated with v3.0 per-threshold optimization results. Model version 3.0.*
 *Not financial advice. Past performance does not guarantee future results.*

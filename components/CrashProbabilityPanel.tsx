@@ -11,7 +11,7 @@ interface Props {
 }
 
 // ---------------------------------------------------------------------------
-// Probability computation — v2.0 multi-feature + v1.0 fallback
+// Probability computation — v3.0 per-threshold + v2.0/v1.0 fallback
 // ---------------------------------------------------------------------------
 
 function sigmoid(z: number): number {
@@ -44,26 +44,60 @@ function buildFeatureValues(
     score_velocity: scoreVelocity,
   };
 
-  // Map indicator names — extract .score from BubbleIndicator
+  // Direct indicator scores
   if (indicators) {
     values.ind_vix_level = indicators.vix_level?.score ?? 50;
     values.ind_credit_spread = indicators.credit_spread?.score ?? 50;
     values.ind_qqq_deviation = indicators.qqq_deviation?.score ?? 50;
+    values.ind_yield_curve = indicators.yield_curve?.score ?? 50;
+    values.ind_sector_breadth = indicators.sector_breadth?.score ?? 50;
+    values.ind_cape_ratio = indicators.cape_ratio?.score ?? 50;
+    values.ind_put_call_ratio = indicators.put_call_ratio?.score ?? 50;
   }
 
-  // Compute score_sma_60d from history
+  // Derived features from history
   if (history && history.length >= 20) {
-    const recent = history.slice(-60);
-    const sum = recent.reduce((acc, h) => acc + h.composite_score, 0);
-    values.score_sma_60d = sum / recent.length;
-  } else {
-    values.score_sma_60d = currentScore;
+    const recent20 = history.slice(-20);
+    const recent60 = history.slice(-60);
+
+    // score_ema_20d: exponential moving average of composite score
+    let ema = recent20[0].composite_score;
+    const alpha = 2 / (20 + 1);
+    for (let i = 1; i < recent20.length; i++) {
+      ema = alpha * recent20[i].composite_score + (1 - alpha) * ema;
+    }
+    values.score_ema_20d = ema;
+
+    // score_std_20d: rolling standard deviation of composite score
+    const scores20 = recent20.map(h => h.composite_score);
+    const mean20 = scores20.reduce((a, b) => a + b, 0) / scores20.length;
+    const variance20 = scores20.reduce((a, v) => a + (v - mean20) ** 2, 0) / (scores20.length - 1);
+    values.score_std_20d = Math.sqrt(Math.max(0, variance20));
+
+    // score_sma_60d: 60-day SMA of composite score
+    const sum60 = recent60.reduce((acc, h) => acc + h.composite_score, 0);
+    values.score_sma_60d = sum60 / recent60.length;
+
+    // ind_qqq_deviation_sma_20d: 20-day SMA of QQQ deviation indicator
+    const devScores = recent20.map(h => h.indicators?.qqq_deviation ?? 50);
+    values.ind_qqq_deviation_sma_20d = devScores.reduce((a, b) => a + (b ?? 50), 0) / devScores.length;
+
+    // ind_vix_level_change_5d: 5-day change in VIX level indicator
+    if (history.length >= 5) {
+      const todayVix = indicators?.vix_level?.score ?? 50;
+      const fiveDaysAgo = history[history.length - 5]?.indicators?.vix_level ?? 50;
+      values.ind_vix_level_change_5d = todayVix - (fiveDaysAgo ?? 50);
+    }
   }
 
-  // Fallback to model's pre-computed current features
+  // Interaction features
+  values.vix_x_credit = (values.ind_vix_level ?? 50) * (values.ind_credit_spread ?? 50) / 100;
+  values.is_elevated = currentScore > 60 ? 1 : 0;
+
+  // Fallback to model's pre-computed current features for any missing values
   if (model.current_features) {
     for (const [key, val] of Object.entries(model.current_features)) {
-      if (!(key in values) || values[key] === 50) {
+      if (!(key in values)) {
         values[key] = val;
       }
     }
@@ -81,22 +115,38 @@ interface DrawdownProb {
   bgColor: string;
 }
 
+/** Apply logistic model with optional StandardScaler (v3.0) */
+function applyLogistic(
+  coefs: DrawdownModelData['logistic_coefficients'][string],
+  featureValues: Record<string, number>,
+): number {
+  if (!coefs?.weights || coefs?.intercept === undefined) return 0;
+
+  let z = coefs.intercept;
+  for (const [feat, w] of Object.entries(coefs.weights)) {
+    let x = featureValues[feat] ?? 0;
+    // Apply StandardScaler if present (v3.0)
+    if (coefs.scaler_mean && coefs.scaler_std) {
+      const mean = coefs.scaler_mean[feat] ?? 0;
+      const std = coefs.scaler_std[feat] ?? 1;
+      x = std > 0 ? (x - mean) / std : 0;
+    }
+    z += w * x;
+  }
+  return sigmoid(z);
+}
+
 function computeDrawdownProbabilities(
   model: DrawdownModelData,
   featureValues: Record<string, number>,
 ): DrawdownProb[] {
   const { logistic_coefficients: logCoefs, bayesian_lookup: bayesian, evt_parameters: evt } = model;
 
-  // --- Layer 1: Multi-feature logistic for 10% ---
+  // --- Layer 1: Logistic for 10% ---
   const c10 = logCoefs['drawdown_10pct'];
   let p10 = 0;
   if (c10?.weights && c10?.intercept !== undefined) {
-    // v2.0 multi-feature model
-    let z = c10.intercept;
-    for (const [feat, w] of Object.entries(c10.weights)) {
-      z += w * (featureValues[feat] ?? 0);
-    }
-    p10 = sigmoid(z);
+    p10 = applyLogistic(c10, featureValues);
   } else if (c10) {
     // v1.0 fallback
     const score = featureValues.composite_score ?? 0;
@@ -112,11 +162,7 @@ function computeDrawdownProbabilities(
   const c20 = logCoefs['drawdown_20pct'];
   let p20_logistic = 0;
   if (c20?.weights && c20?.intercept !== undefined) {
-    let z = c20.intercept;
-    for (const [feat, w] of Object.entries(c20.weights)) {
-      z += w * (featureValues[feat] ?? 0);
-    }
-    p20_logistic = sigmoid(z);
+    p20_logistic = applyLogistic(c20, featureValues);
   } else if (c20) {
     const score = featureValues.composite_score ?? 0;
     const vel = featureValues.score_velocity ?? 0;
@@ -183,6 +229,7 @@ function computeDrawdownProbabilities(
 // ---------------------------------------------------------------------------
 
 const CONFIDENCE_DISPLAY: Record<string, { label: string; color: string }> = {
+  'moderate-high': { label: 'Mod-High', color: 'text-emerald-400' },
   moderate: { label: 'Moderate', color: 'text-emerald-400' },
   low: { label: 'Low', color: 'text-yellow-400' },
   model_dependent: { label: 'Model-Dep.', color: 'text-orange-400' },
@@ -223,7 +270,9 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
     return { c10, c20 };
   }, [model]);
 
-  const isV2 = model.model_version === '2.0';
+  const modelVersion = model.model_version ?? '1.0';
+  const isV3 = modelVersion.startsWith('3');
+  const isV2Plus = modelVersion >= '2.0';
 
   return (
     <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl">
@@ -235,11 +284,9 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
           QQQ Drawdown Probability
         </h3>
         <div className="flex items-center gap-2">
-          {isV2 && (
-            <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-              v2.0
-            </span>
-          )}
+          <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+            v{modelVersion}
+          </span>
           <span className="text-xs text-slate-500 bg-slate-800 px-3 py-1 rounded-full">
             Next {model.forward_window_label}
           </span>
@@ -290,7 +337,7 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
         })}
       </div>
 
-      {/* OOS Performance Metrics (v2.0 only) */}
+      {/* OOS Performance Metrics */}
       {oosMetrics && (
         <div className="bg-slate-800/30 rounded-xl p-4 mb-4">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
@@ -299,7 +346,7 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <span className="text-slate-500 text-xs">AUC (10% DD)</span>
-              <p className={`font-semibold ${(oosMetrics.c10?.auc_test ?? 0) > 0.6 ? 'text-emerald-400' : 'text-yellow-400'}`}>
+              <p className={`font-semibold ${(oosMetrics.c10?.auc_test ?? 0) > 0.7 ? 'text-emerald-400' : (oosMetrics.c10?.auc_test ?? 0) > 0.6 ? 'text-yellow-400' : 'text-red-400'}`}>
                 {oosMetrics.c10?.auc_test?.toFixed(3) ?? 'N/A'}
               </p>
             </div>
@@ -311,7 +358,7 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
             </div>
             <div>
               <span className="text-slate-500 text-xs">AUC (20% DD)</span>
-              <p className={`font-semibold ${(oosMetrics.c20?.auc_test ?? 0) > 0.6 ? 'text-emerald-400' : 'text-yellow-400'}`}>
+              <p className={`font-semibold ${(oosMetrics.c20?.auc_test ?? 0) > 0.7 ? 'text-emerald-400' : (oosMetrics.c20?.auc_test ?? 0) > 0.6 ? 'text-yellow-400' : 'text-red-400'}`}>
                 {oosMetrics.c20?.auc_test?.toFixed(3) ?? 'N/A'}
               </p>
             </div>
@@ -355,8 +402,13 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
       {/* Model description */}
       <div className="bg-slate-800/30 rounded-xl p-4 space-y-1">
         <p className="text-sm text-slate-400">
-          <span className="text-white font-semibold">Hybrid 3-layer model {isV2 ? 'v2.0' : ''}</span>:
-          {isV2 ? (
+          <span className="text-white font-semibold">Hybrid 3-layer model v{modelVersion}</span>:
+          {isV3 ? (
+            <> Per-threshold optimized L2-logistic regression with StandardScaler
+            (10%: drop-from-today, 5 features; 20%: peak-to-trough, 6 features),
+            Bayesian Beta-Binomial + PAVA monotonicity (20-30%), EVT/GPD tail extrapolation (40%).
+            Forward window: <span className="text-white">{model.forward_window_days} trading days</span> (~{model.forward_window_label}).</>
+          ) : isV2Plus ? (
             <> Multi-feature L2-regularized logistic regression ({model.feature_names?.length ?? 6} features) for 10-20% thresholds,
             Bayesian Beta-Binomial with PAVA monotonicity (20-30%), EVT/GPD tail extrapolation (40%).
             Forward window: <span className="text-white">{model.forward_window_days} trading days</span> (~{model.forward_window_label}).</>
@@ -368,7 +420,7 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
         </p>
         <p className="text-[10px] text-slate-600">
           Calibrated on {model.calibration_date} with {model.forward_window_days}-day forward drawdowns.
-          {isV2 && model.feature_names && (
+          {isV2Plus && model.feature_names && (
             <> Features: {model.feature_names.join(', ')}. Train/test split: {model.train_test_split}.</>
           )}
           {' '}Probabilities are conditional on current market conditions (score {currentScore.toFixed(1)}, velocity {scoreVelocity.toFixed(1)}).

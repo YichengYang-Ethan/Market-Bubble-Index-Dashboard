@@ -6,7 +6,7 @@
 
 **Live:** [yichengyang-ethan.github.io/Market-Bubble-Index-Dashboard](https://yichengyang-ethan.github.io/Market-Bubble-Index-Dashboard/)
 
-A professional financial dashboard that quantifies market bubble risk through a composite index of **7 weighted indicators** across sentiment, liquidity, and valuation. Features regime classification, signal backtesting with two optimized strategies that beat Buy & Hold on risk-adjusted returns, **QQQ drawdown probability prediction** (hybrid 3-layer model v2.0 with AUC 0.884 OOS for >20% drawdowns), GSADF bubble detection, Markov regime switching, and a QQQ deviation tracker with interactive backtesting.
+A professional financial dashboard that quantifies market bubble risk through a composite index of **7 weighted indicators** across sentiment, liquidity, and valuation. Features regime classification, signal backtesting with two optimized strategies that beat Buy & Hold on risk-adjusted returns, **QQQ drawdown probability prediction** (hybrid 3-layer model v3.0 with AUC 0.921 / BSS +35.8% OOS for >20% drawdowns), GSADF bubble detection, Markov regime switching, and a QQQ deviation tracker with interactive backtesting.
 
 ## Composite Index
 
@@ -68,41 +68,53 @@ Uses the first derivative (rate of change) of the composite score as a leading i
 
 Both strategies display side-by-side comparison against Buy & Hold with: Sharpe Ratio, Sortino Ratio, Calmar Ratio, CAGR, Max Drawdown, Volatility, and Worst Day.
 
-## QQQ Drawdown Probability (v2.0)
+## QQQ Drawdown Probability (v3.0)
 
-The dashboard features a **hybrid 3-layer drawdown probability model** that predicts the chance of QQQ experiencing significant drawdowns over the next 6 months (126 trading days).
+The dashboard features a **hybrid 3-layer drawdown probability model** that predicts the chance of QQQ experiencing significant drawdowns over the next ~9 months (180 trading days).
 
 ### Model Architecture
 
 | Layer | Method | Thresholds | Description |
 |-------|--------|------------|-------------|
-| 1 | L2-Regularized Logistic Regression | 10%, 20% | 6-feature multi-variable model with proper train/test validation |
+| 1 | Per-threshold L2-Logistic + StandardScaler | 10%, 20% | Separate optimized models with different features and DD definitions |
 | 2 | Bayesian Beta-Binomial + PAVA | 20%, 30% | Score-conditioned posteriors with monotonicity enforcement |
 | 3 | EVT/GPD Tail Extrapolation | 40% | Generalized Pareto Distribution for extreme tail probabilities |
 
-### Features (v2.0)
+### Per-Threshold Models (v3.0)
 
-The logistic layer uses 6 predictive features instead of composite score alone:
+Each threshold has its own optimized feature set, drawdown definition, and regularization — discovered via expanding-window cross-validation over 30+ candidate features:
 
-| Feature | Description | Predictive Power |
-|---------|-------------|-----------------|
-| `composite_score` | Bubble index composite | Regime indicator |
-| `score_velocity` | Rate of score change | Leading momentum signal |
-| `ind_vix_level` | VIX percentile rank | #1 individual predictor |
-| `ind_credit_spread` | HYG-IEF credit spread | Credit stress leads drawdowns |
-| `ind_qqq_deviation` | QQQ deviation from 200-SMA | Overextension signal |
-| `score_sma_60d` | 60-day smoothed score | More stable than raw score |
+**>10% Drawdown** (drop-from-today, C=1.0):
+
+| Feature | Description |
+|---------|-------------|
+| `ind_qqq_deviation_sma_20d` | 20-day SMA of QQQ deviation indicator |
+| `ind_vix_level` | VIX percentile rank |
+| `score_ema_20d` | 20-day EMA of composite score |
+| `ind_yield_curve` | Yield curve indicator |
+| `ind_vix_level_change_5d` | 5-day change in VIX indicator |
+
+**>20% Drawdown** (peak-to-trough, C=10.0):
+
+| Feature | Description |
+|---------|-------------|
+| `ind_qqq_deviation_sma_20d` | 20-day SMA of QQQ deviation indicator |
+| `score_std_20d` | 20-day rolling std of composite score |
+| `ind_yield_curve` | Yield curve indicator |
+| `score_ema_20d` | 20-day EMA of composite score |
+| `vix_x_credit` | VIX × credit spread interaction |
+| `ind_vix_level_change_5d` | 5-day change in VIX indicator |
 
 ### Out-of-Sample Performance (70/30 chronological split)
 
-| Threshold | AUC (OOS) | Brier Skill Score | Confidence |
-|-----------|-----------|-------------------|------------|
-| >10% drawdown | 0.569 | -24.6% | Moderate |
-| >20% drawdown | **0.884** | -8.0% | Low-to-Moderate |
-| >30% drawdown | — | — | Model-Dependent (Bayesian) |
-| >40% drawdown | — | — | Extrapolated (EVT) |
+| Threshold | AUC (OOS) | Brier Skill Score | Confidence | v2.0 AUC |
+|-----------|-----------|-------------------|------------|----------|
+| >10% drawdown | **0.855** | **+12.4%** | Moderate-High | 0.569 |
+| >20% drawdown | **0.921** | **+35.8%** | Moderate-High | 0.884 |
+| >30% drawdown | — | — | Model-Dependent (Bayesian) | — |
+| >40% drawdown | — | — | Extrapolated (EVT) | — |
 
-Key finding: Individual indicators (VIX, credit spread) are far more predictive than the composite score alone (which ranks 13th-18th in variable importance). See [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md) for the full strategy research report.
+Key findings: Engineered features (smoothed indicators, score volatility, interactions) dramatically outperform raw indicators. Different drawdown definitions work better for different thresholds. See [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md) for the full strategy research report.
 
 ## Signal Analysis
 

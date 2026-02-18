@@ -58,10 +58,15 @@ export interface DrawdownModelData {
   feature_names?: string[];
   current_features?: Record<string, number>;
   logistic_coefficients: Record<string, {
-    // v2.0 multi-feature format
+    // v3.0 per-threshold optimized format
     features?: string[];
     weights?: Record<string, number>;
     intercept?: number;
+    scaler_mean?: Record<string, number>;
+    scaler_std?: Record<string, number>;
+    dd_definition?: string;
+    forward_window?: number;
+    regularization_C?: number;
     n_train?: number;
     n_test?: number;
     n_events_train?: number;
