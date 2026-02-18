@@ -49,35 +49,34 @@ def _dump_json(obj) -> str:
 # Configuration
 # ---------------------------------------------------------------------------
 
-# Existing weights scaled by 0.88 to accommodate new leverage_sentiment (0.12)
 INDICATOR_CONFIG = {
     "qqq_deviation": {
         "label": "QQQ Deviation",
-        "weight": round(0.17 * 0.88, 4),   # 0.1496
+        "weight": 0.17,
         "lookback": 200,
         "category": "sentiment",
     },
     "vix_level": {
         "label": "VIX Level",
-        "weight": round(0.15 * 0.88, 4),   # 0.132
+        "weight": 0.15,
         "lookback": 252,
         "category": "sentiment",
     },
     "sector_breadth": {
         "label": "Sector Breadth",
-        "weight": round(0.13 * 0.88, 4),   # 0.1144
+        "weight": 0.13,
         "lookback": 50,
         "category": "liquidity",
     },
     "credit_spread": {
         "label": "Credit Spread",
-        "weight": round(0.13 * 0.88, 4),   # 0.1144
+        "weight": 0.13,
         "lookback": 252,
         "category": "liquidity",
     },
     "put_call_ratio": {
         "label": "Put/Call Ratio (SKEW)",
-        "weight": round(0.14 * 0.88, 4),   # 0.1232
+        "weight": 0.14,
         "lookback": 252,
         "source": "yfinance",
         "ticker": "^SKEW",
@@ -85,7 +84,7 @@ INDICATOR_CONFIG = {
     },
     "yield_curve": {
         "label": "Yield Curve",
-        "weight": round(0.13 * 0.88, 4),   # 0.1144
+        "weight": 0.13,
         "lookback": 252,
         "source": "fred",
         "series_id": "T10Y2Y",
@@ -93,15 +92,9 @@ INDICATOR_CONFIG = {
     },
     "cape_ratio": {
         "label": "CAPE Valuation",
-        "weight": round(0.15 * 0.88, 4),   # 0.132
+        "weight": 0.15,
         "lookback": 252,
         "category": "valuation",
-    },
-    "leverage_sentiment": {
-        "label": "Leverage Sentiment",
-        "weight": 0.12,
-        "lookback": 252,
-        "category": "sentiment",
     },
 }
 
@@ -248,16 +241,6 @@ def compute_cape_ratio(lookback: int = 252) -> pd.Series | None:
         return None
 
 
-def compute_leverage_sentiment(lookback: int = 252) -> pd.Series:
-    """TQQQ/(TQQQ+SQQQ) volume ratio as retail sentiment proxy."""
-    data = yf.download(["TQQQ", "SQQQ"], start="2014-01-01", progress=False)
-    tqqq_vol = data["Volume"]["TQQQ"]
-    sqqq_vol = data["Volume"]["SQQQ"]
-    ratio = tqqq_vol / (tqqq_vol + sqqq_vol)
-    ratio = ratio.rolling(window=5).mean()  # smooth daily noise
-    return percentile_rank_hybrid(ratio.dropna(), lookback)
-
-
 # ---------------------------------------------------------------------------
 # Bootstrap confidence interval
 # ---------------------------------------------------------------------------
@@ -284,7 +267,6 @@ COMPUTE_FNS = {
     "put_call_ratio": lambda fred: compute_put_call_ratio(INDICATOR_CONFIG["put_call_ratio"]["lookback"]),
     "yield_curve": lambda fred: compute_yield_curve(fred, INDICATOR_CONFIG["yield_curve"]["lookback"]),
     "cape_ratio": lambda fred: compute_cape_ratio(INDICATOR_CONFIG["cape_ratio"]["lookback"]),
-    "leverage_sentiment": lambda fred: compute_leverage_sentiment(INDICATOR_CONFIG["leverage_sentiment"]["lookback"]),
 }
 
 

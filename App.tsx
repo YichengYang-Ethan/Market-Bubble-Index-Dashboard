@@ -279,8 +279,8 @@ const App: React.FC = () => {
           <div className="text-center mb-8">
             <h1 className="text-4xl font-black text-white mb-3">Market Bubble Index</h1>
             <p className="text-lg text-slate-400 max-w-3xl mx-auto">
-              A composite measure of market euphoria across <span className="text-white font-semibold">8 indicators</span> including
-              QQQ deviation, VIX, sector breadth, credit spreads, put/call ratio, yield curve, CAPE valuation, and leverage sentiment.
+              A composite measure of market euphoria across <span className="text-white font-semibold">7 indicators</span> including
+              QQQ deviation, VIX, sector breadth, credit spreads, put/call ratio, yield curve, and CAPE valuation.
             </p>
           </div>
 
@@ -770,14 +770,13 @@ const App: React.FC = () => {
                 <h4 className="text-sm font-semibold text-slate-300 mb-3 uppercase tracking-wide">Indicator Weights</h4>
                 <div className="space-y-2">
                   {[
-                    { label: 'QQQ Deviation', weight: 15, cat: 'Sentiment' },
-                    { label: 'CAPE Valuation', weight: 13, cat: 'Valuation' },
-                    { label: 'VIX Level', weight: 13, cat: 'Sentiment' },
-                    { label: 'Leverage Sentiment', weight: 12, cat: 'Sentiment' },
-                    { label: 'Tail Risk (SKEW)', weight: 12, cat: 'Sentiment' },
-                    { label: 'Sector Breadth', weight: 12, cat: 'Liquidity' },
-                    { label: 'Credit Spread', weight: 12, cat: 'Liquidity' },
-                    { label: 'Yield Curve', weight: 11, cat: 'Liquidity' },
+                    { label: 'QQQ Deviation', weight: 17, cat: 'Sentiment' },
+                    { label: 'CAPE Valuation', weight: 15, cat: 'Valuation' },
+                    { label: 'VIX Level', weight: 15, cat: 'Sentiment' },
+                    { label: 'Tail Risk (SKEW)', weight: 14, cat: 'Sentiment' },
+                    { label: 'Sector Breadth', weight: 13, cat: 'Liquidity' },
+                    { label: 'Credit Spread', weight: 13, cat: 'Liquidity' },
+                    { label: 'Yield Curve', weight: 13, cat: 'Liquidity' },
                   ].map(item => (
                     <div key={item.label} className="flex items-center gap-3 text-sm">
                       <span className="text-slate-400 w-36 truncate">{item.label}</span>
@@ -825,7 +824,7 @@ const App: React.FC = () => {
       {/* ========== FOOTER ========== */}
       <footer className="border-t border-slate-800 py-10 text-center text-slate-500 text-xs">
         <p>&copy; 2025-2026 Market Bubble Index Dashboard. Daily market data via Yahoo Finance &amp; FRED, updated by GitHub Actions.</p>
-        <p className="mt-2">Not financial advice. 8 indicators across sentiment, liquidity, and valuation dimensions. 10-year rolling data window.</p>
+        <p className="mt-2">Not financial advice. 7 indicators across sentiment, liquidity, and valuation dimensions. 10-year rolling data window.</p>
       </footer>
     </div>
   );

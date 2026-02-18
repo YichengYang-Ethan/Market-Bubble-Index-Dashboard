@@ -26,8 +26,8 @@ describe("DEVIATION_CONFIG", () => {
 });
 
 describe("INDICATOR_META", () => {
-  it("should have 8 entries", () => {
-    expect(INDICATOR_META).toHaveLength(8);
+  it("should have 7 entries", () => {
+    expect(INDICATOR_META).toHaveLength(7);
   });
 
   it("each entry should have key, label, color, description, and category", () => {
