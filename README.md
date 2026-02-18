@@ -6,7 +6,7 @@
 
 **Live:** [yichengyang-ethan.github.io/Market-Bubble-Index-Dashboard](https://yichengyang-ethan.github.io/Market-Bubble-Index-Dashboard/)
 
-A professional financial dashboard that quantifies market bubble risk through a composite index of **7 weighted indicators** across sentiment, liquidity, and valuation. Features regime classification, signal backtesting with two optimized strategies that beat Buy & Hold on risk-adjusted returns, GSADF bubble detection, Markov regime switching, and a QQQ deviation tracker with interactive backtesting.
+A professional financial dashboard that quantifies market bubble risk through a composite index of **7 weighted indicators** across sentiment, liquidity, and valuation. Features regime classification, signal backtesting with two optimized strategies that beat Buy & Hold on risk-adjusted returns, **QQQ drawdown probability prediction** (hybrid 3-layer model v2.0 with AUC 0.884 OOS for >20% drawdowns), GSADF bubble detection, Markov regime switching, and a QQQ deviation tracker with interactive backtesting.
 
 ## Composite Index
 
@@ -68,6 +68,42 @@ Uses the first derivative (rate of change) of the composite score as a leading i
 
 Both strategies display side-by-side comparison against Buy & Hold with: Sharpe Ratio, Sortino Ratio, Calmar Ratio, CAGR, Max Drawdown, Volatility, and Worst Day.
 
+## QQQ Drawdown Probability (v2.0)
+
+The dashboard features a **hybrid 3-layer drawdown probability model** that predicts the chance of QQQ experiencing significant drawdowns over the next 6 months (126 trading days).
+
+### Model Architecture
+
+| Layer | Method | Thresholds | Description |
+|-------|--------|------------|-------------|
+| 1 | L2-Regularized Logistic Regression | 10%, 20% | 6-feature multi-variable model with proper train/test validation |
+| 2 | Bayesian Beta-Binomial + PAVA | 20%, 30% | Score-conditioned posteriors with monotonicity enforcement |
+| 3 | EVT/GPD Tail Extrapolation | 40% | Generalized Pareto Distribution for extreme tail probabilities |
+
+### Features (v2.0)
+
+The logistic layer uses 6 predictive features instead of composite score alone:
+
+| Feature | Description | Predictive Power |
+|---------|-------------|-----------------|
+| `composite_score` | Bubble index composite | Regime indicator |
+| `score_velocity` | Rate of score change | Leading momentum signal |
+| `ind_vix_level` | VIX percentile rank | #1 individual predictor |
+| `ind_credit_spread` | HYG-IEF credit spread | Credit stress leads drawdowns |
+| `ind_qqq_deviation` | QQQ deviation from 200-SMA | Overextension signal |
+| `score_sma_60d` | 60-day smoothed score | More stable than raw score |
+
+### Out-of-Sample Performance (70/30 chronological split)
+
+| Threshold | AUC (OOS) | Brier Skill Score | Confidence |
+|-----------|-----------|-------------------|------------|
+| >10% drawdown | 0.569 | -24.6% | Moderate |
+| >20% drawdown | **0.884** | -8.0% | Low-to-Moderate |
+| >30% drawdown | — | — | Model-Dependent (Bayesian) |
+| >40% drawdown | — | — | Extrapolated (EVT) |
+
+Key finding: Individual indicators (VIX, credit spread) are far more predictive than the composite score alone (which ranks 13th-18th in variable importance). See [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md) for the full strategy research report.
+
 ## Signal Analysis
 
 - **Signal Backtest** — Forward return analysis at 1d/5d/20d/60d horizons for buy (score < 25) and sell (score > 75) signals with hit rates and t-statistics
@@ -80,12 +116,13 @@ Both strategies display side-by-side comparison against Buy & Hold with: Sharpe 
 
 1. **Overview** — Large composite gauge with regime badge, 3 sub-scores, velocity, confidence interval, and data quality
 2. **Indicator Grid** — 7 cards with score, trend arrow, 30-day sparkline, and day-over-day change
-3. **Composite History** — Full time series with toggleable sub-scores, individual indicators, QQQ/SPY price overlay, and time range selector
+3. **Composite History** — Full time series with toggleable sub-scores, individual indicators, QQQ/SPY price overlay, QQQ drawdown overlay, and time range selector
 4. **Bubble Index Backtest** — Two optimized strategies (Hysteresis Binary, Velocity Signal) with adjustable parameters and full risk metrics
-5. **Signal Analysis** — Position mapping, forward return backtest, sensitivity analysis, Markov regimes
+5. **Crash Probability** — 4 circular gauges showing P(drawdown >10/20/30/40%) over next 6 months, with OOS performance metrics (AUC, BSS), empirical context per score bin, and model description
+6. **Signal Analysis** — Position mapping, forward return backtest, sensitivity analysis, Markov regimes
 6. **Indicator Deep Dive** — Individual accordion charts for all 7 indicators with regime bands
-7. **QQQ Deviation Tracker** — Multi-ticker deviation analysis (QQQ/SPY/TQQQ/IWM) with interactive threshold backtesting
-8. **Methodology** — Regime guide, indicator weights, data sources, normalization methodology
+8. **QQQ Deviation Tracker** — Multi-ticker deviation analysis (QQQ/SPY/TQQQ/IWM) with interactive threshold backtesting
+9. **Methodology** — Regime guide, indicator weights, data sources, normalization methodology
 
 ## Data Pipeline
 
@@ -93,6 +130,7 @@ Data is refreshed daily via GitHub Actions at 9:30 PM UTC on weekdays (after US 
 
 1. `scripts/fetch_qqq_data.py` — Fetches 10-year QQQ/SPY/TQQQ/IWM price and deviation data from Yahoo Finance
 2. `scripts/fetch_bubble.py` — Computes all 7 bubble indicators, composite index with PCA orthogonalization, bootstrap confidence intervals, velocity/acceleration, GSADF test, Markov regime model, and forward-return backtest
+3. `scripts/fit_drawdown_model.py` — Fits the v2.0 hybrid 3-layer drawdown probability model (multi-feature logistic + Bayesian + EVT/GPD) with 70/30 train/test split
 
 ### Output Files
 
@@ -103,6 +141,8 @@ Data is refreshed daily via GitHub Actions at 9:30 PM UTC on weekdays (after US 
 | `backtest_results.json` | Forward return statistics for buy/sell signals |
 | `gsadf_results.json` | GSADF bubble period detection |
 | `markov_regimes.json` | Markov regime probabilities and transition matrix |
+| `drawdown_model.json` | v2.0 drawdown probability model coefficients, OOS metrics, Bayesian lookup tables |
+| `qqq_drawdown.json` | QQQ rolling peak-to-trough drawdown series for chart overlay |
 | `qqq.json`, `spy.json`, `tqqq.json`, `iwm.json` | Ticker price/deviation data |
 
 ### Secrets
@@ -113,7 +153,7 @@ Set `FRED_API_KEY` as a repository secret to enable the yield curve indicator. A
 
 - **Frontend:** React 19, TypeScript, Recharts 3.6, Tailwind CSS
 - **Build:** Vite 6
-- **Data:** Python 3 (yfinance, fredapi, arch, statsmodels, scipy)
+- **Data:** Python 3 (yfinance, fredapi, arch, statsmodels, scipy, scikit-learn)
 - **CI/CD:** GitHub Actions (daily data update + GitHub Pages deployment)
 - **Testing:** Vitest
 
@@ -130,9 +170,10 @@ npm run build    # Production build
 ### Regenerate Data Locally
 
 ```bash
-pip install yfinance fredapi arch statsmodels scipy numpy pandas
+pip install yfinance fredapi arch statsmodels scipy numpy pandas scikit-learn
 FRED_API_KEY=your_key python scripts/fetch_bubble.py
 python scripts/fetch_qqq_data.py
+python scripts/fit_drawdown_model.py
 ```
 
 ## License

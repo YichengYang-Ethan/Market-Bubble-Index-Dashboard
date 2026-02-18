@@ -165,7 +165,7 @@ This is expected: with ~2800 observations and high autocorrelation, tree-based m
 
 2. **Non-stationarity**: Market regimes change. The train period (2015-2021) includes COVID crash, while the test period (2021-2026) includes the 2022 rate-hike correction.
 
-3. **No pre-2015 data**: The bubble index only starts in 2015. Extending to include 2000-2002 dot-com crash and 2008 GFC would significantly improve tail estimates.
+3. **Extended history doesn't help**: We tested a 25-year QQQ model (1999-2026) using SMA200 deviation, 60d volatility, and 6-month momentum. The extended model's OOS AUC (0.390) was *worse* than the 10-year model (0.639), because the 2000-2002 dot-com era had fundamentally different market structure. Blindly adding historical data degrades performance.
 
 4. **Autocorrelation**: Consecutive days are highly correlated. The effective sample size is ~70 independent observations (2800 / 40-day decorrelation), not 2800.
 
@@ -203,15 +203,15 @@ The declining score velocity combined with very high credit spread score and mod
 
 ### 8.1 Model Improvements (Future Work)
 
-1. **Extended history**: Download QQQ/NDX data since 1999 to include dot-com crash and GFC. Fit a separate "universal" model using SMA200 deviation, volatility, and momentum as features (available for the full history).
+1. **Calibration**: Apply Platt scaling or isotonic regression to calibrate probability estimates (would improve BSS while preserving AUC).
 
-2. **Ensemble**: Combine the bubble-index-based model (2015+) with the extended-history model (1999+) via stacking or simple averaging.
+2. **Regime-aware**: Fit separate models for different Markov regimes, or include regime as a feature.
 
-3. **Calibration**: Apply Platt scaling or isotonic regression to calibrate probability estimates (would improve BSS while preserving AUC).
+3. **Cross-validation**: Use expanding-window cross-validation instead of single train/test split for more robust OOS estimates.
 
-4. **Regime-aware**: Fit separate models for different Markov regimes, or include regime as a feature.
+4. **Ensemble with extended history**: The 25-year QQQ model (tested, AUC 0.39 OOS) performs poorly alone due to structural change, but could add value as an ensemble member weighted toward tail events. A stacking approach weighting recent data more heavily may capture both tail coverage and modern signal.
 
-5. **Cross-validation**: Use expanding-window cross-validation instead of single train/test split for more robust OOS estimates.
+5. **Additional features**: Consider adding VIX term structure (VIX/VIX3M ratio), options market sentiment, or macro indicators (ISM, unemployment claims) as features.
 
 ### 8.2 Usage Guidance
 
@@ -222,5 +222,69 @@ The declining score velocity combined with very high credit spread score and mod
 
 ---
 
-*Report generated 2026-02-18. Model version 2.0.*
+---
+
+## Appendix A: Extended History Analysis (QQQ 1999-2026)
+
+Analysis of 6,778 QQQ trading days (1999-03-10 to 2026-02-18) with cross-asset comparison.
+
+### A.1 Unconditional Base Rates (126-day window)
+
+| Threshold | QQQ | NDX |
+|-----------|-----|-----|
+| >10% drawdown | 32.3% | 30.9% |
+| >20% drawdown | 14.5% | 11.8% |
+| >30% drawdown | 8.5% | 7.0% |
+| >40% drawdown | 4.9% | 3.3% |
+| >50% drawdown | 1.0% | 0.7% |
+
+### A.2 QQQ Drawdown Episodes >20% (1999-2026)
+
+| # | Peak | Trough | Depth | SMA200 Dev | 60d Vol | 6m Mom |
+|---|------|--------|-------|------------|---------|--------|
+| 1 | 2000-03-27 | 2002-10-09 | -83.0% | +56.0% | 55.6% | +94.6% |
+| 2 | 2018-08-29 | 2018-12-24 | -22.8% | +11.8% | 12.9% | +14.0% |
+| 3 | 2020-02-19 | 2020-03-16 | -28.6% | +20.5% | 12.2% | +26.3% |
+| 4 | 2021-12-27 | 2022-11-03 | -35.1% | +12.4% | 18.8% | +14.3% |
+| 5 | 2025-02-19 | 2025-04-08 | -22.8% | +10.6% | 17.6% | +13.9% |
+
+### A.3 Extended History Model Performance
+
+The 25-year model (SMA200 deviation + 60d volatility + 6-month momentum) showed:
+- **AUC train: 0.785, AUC test: 0.390** — severe overfitting due to structural regime change
+- The dot-com era (2000-2002) had fundamentally different dynamics: SMA200 deviations of 50-60% (vs modern max of ~30%), volatility of 55% (vs modern max of ~22%)
+- **Conclusion**: Using bubble index features on 10-year data outperforms universal features on 25-year data
+
+### A.4 Bayesian Priors from Extended History (126-day, SMA200 deviation percentile)
+
+| SMA200 Pctile | Avg Dev | P(>10%) | P(>20%) | P(>30%) | P(>40%) |
+|---------------|---------|---------|---------|---------|---------|
+| [0-20) | -15.9% | 55.2% | 36.7% | 26.7% | 14.7% |
+| [20-40) | +1.1% | 28.3% | 12.5% | 9.7% | 7.8% |
+| [40-60) | +6.7% | 29.3% | 4.7% | 1.9% | 1.4% |
+| [60-80) | +10.4% | 28.3% | 9.2% | 2.5% | 0.9% |
+| [80-100) | +18.7% | 23.7% | 11.3% | 2.1% | 0.3% |
+
+---
+
+## Appendix B: Bubble Score Conditional Drawdown Matrix (2015-2026)
+
+P(max drawdown > X% within Y trading days), conditioned on bubble score bin.
+
+### 252-day (1-year) horizon
+
+| Score Bin | P(>10%) | P(>20%) | P(>30%) | N |
+|-----------|---------|---------|---------|---|
+| 0-20 | 32.2% | 8.6% | 0.0% | 152 |
+| 20-30 | 43.1% | 9.2% | 0.0% | 218 |
+| 30-50 | 41.4% | 9.8% | 2.7% | 716 |
+| 50-70 | 40.0% | 13.1% | 2.4% | 1,061 |
+| 70-85 | 23.9% | 14.4% | 2.7% | 632 |
+| **85-100** | **85.0%** | **45.0%** | 0.0% | 20 |
+
+Score 85-100 bin has extremely strong signal (85% chance of >10% drawdown, 45% chance of >20%) but only 20 sample days.
+
+---
+
+*Report generated 2026-02-18, updated with extended history analysis results. Model version 2.0.*
 *Not financial advice. Past performance does not guarantee future results.*

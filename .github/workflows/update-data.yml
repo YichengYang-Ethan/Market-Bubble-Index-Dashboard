@@ -25,7 +25,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install Python dependencies
-        run: pip install yfinance pandas numpy fredapi statsmodels scipy
+        run: pip install yfinance pandas numpy fredapi statsmodels scipy scikit-learn
 
       - name: Fetch all ticker data
         run: python scripts/fetch_qqq_data.py QQQ SPY TQQQ IWM
