@@ -27,8 +27,18 @@ const IndicatorDeepDive: React.FC<IndicatorDeepDiveProps> = ({ history }) => {
     setOpenSections((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // Get the latest scores from history for the badge
-  const latestPoint = history.length > 0 ? history[history.length - 1] : null;
+  // For each indicator, find its most recent non-null score from history.
+  // Different data sources (e.g. FRED, SKEW) may lag by a day or two,
+  // so the absolute last history entry can have nulls for some indicators.
+  const latestScores: Record<string, number | null> = {};
+  for (const meta of INDICATOR_META) {
+    let score: number | null = null;
+    for (let i = history.length - 1; i >= 0; i--) {
+      const val = history[i].indicators?.[meta.key];
+      if (val != null) { score = val; break; }
+    }
+    latestScores[meta.key] = score;
+  }
 
   return (
     <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl">
@@ -42,7 +52,7 @@ const IndicatorDeepDive: React.FC<IndicatorDeepDiveProps> = ({ history }) => {
       <div className="space-y-2">
         {INDICATOR_META.map((meta) => {
           const isOpen = openSections[meta.key] ?? false;
-          const currentScore = latestPoint?.indicators?.[meta.key];
+          const currentScore = latestScores[meta.key];
 
           return (
             <div key={meta.key} className="border border-slate-800 rounded-xl overflow-hidden">
