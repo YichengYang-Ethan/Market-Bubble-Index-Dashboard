@@ -8,7 +8,7 @@ import BubbleHistoryChart from './components/BubbleHistoryChart';
 import IndicatorGrid from './components/IndicatorGrid';
 import IndicatorDeepDive from './components/IndicatorDeepDive';
 import { fetchRealData, getMarketSummary, detectHistoricalSignals } from './services/dataService';
-import { fetchBubbleIndex, fetchBubbleHistory } from './services/bubbleService';
+import { fetchBubbleIndex, fetchBubbleHistory, fetchTickerPrice } from './services/bubbleService';
 import { DataPoint, MarketSummary, BacktestSignal, HistoricalSignal, BubbleIndexData, BubbleHistoryPoint } from './types';
 import { DEVIATION_CONFIG, SUPPORTED_TICKERS, TICKER_LABELS, TickerSymbol, BUBBLE_REGIME_CONFIG, INDICATOR_META } from './constants';
 
@@ -55,6 +55,7 @@ const App: React.FC = () => {
   const [bubbleHistory, setBubbleHistory] = useState<BubbleHistoryPoint[]>([]);
   const [bubbleLoading, setBubbleLoading] = useState(true);
   const [bubbleError, setBubbleError] = useState<string | null>(null);
+  const [priceData, setPriceData] = useState<{ qqq: DataPoint[]; spy: DataPoint[] }>({ qqq: [], spy: [] });
 
   // Refs for scroll-spy
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -123,12 +124,15 @@ const App: React.FC = () => {
     setBubbleLoading(true);
     setBubbleError(null);
     try {
-      const [indexData, historyData] = await Promise.all([
+      const [indexData, historyData, qqqData, spyData] = await Promise.all([
         fetchBubbleIndex(),
         fetchBubbleHistory(),
+        fetchTickerPrice('qqq'),
+        fetchTickerPrice('spy'),
       ]);
       setBubbleData(indexData);
       setBubbleHistory(historyData.history);
+      setPriceData({ qqq: qqqData, spy: spyData });
     } catch (e) {
       setBubbleError(e instanceof Error ? e.message : 'Failed to load bubble data');
     } finally {
@@ -323,7 +327,7 @@ const App: React.FC = () => {
         >
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl font-bold text-white mb-6">Composite History</h2>
-            <BubbleHistoryChart history={bubbleHistory} />
+            <BubbleHistoryChart history={bubbleHistory} priceData={priceData} />
           </div>
         </section>
       )}
