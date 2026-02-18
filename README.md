@@ -13,7 +13,7 @@ A single-page financial dashboard that tracks market bubble risk through a compo
 |-----------|--------|--------|--------|
 | QQQ Deviation | 20% | Yahoo Finance | 200-day SMA deviation, percentile-ranked |
 | VIX Level | 18% | Yahoo Finance | Inverted VIX (low VIX = complacency) |
-| Put/Call Ratio | 17% | FRED (PCCE) | Inverted equity put/call ratio |
+| Tail Risk (SKEW) | 17% | Yahoo Finance (^SKEW) | CBOE SKEW index — high SKEW = complacency |
 | Sector Breadth | 15% | Yahoo Finance | Fraction of sectors above 50-day SMA |
 | Credit Spread | 15% | Yahoo Finance | HYG/IEF ratio (tight spreads = risk-on) |
 | Yield Curve | 15% | FRED (T10Y2Y) | 10Y-2Y spread (steepening = risk-on) |
@@ -52,7 +52,7 @@ Data is refreshed daily via GitHub Actions at 9:30 PM UTC on weekdays:
 1. `scripts/fetch_qqq_data.py` — Fetches QQQ/SPY/TQQQ/IWM deviation data from Yahoo Finance
 2. `scripts/fetch_bubble.py` — Computes all 6 bubble indicators and generates composite index
 
-Set `FRED_API_KEY` as a repository secret to enable put/call ratio and yield curve indicators.
+Set `FRED_API_KEY` as a repository secret to enable the yield curve indicator. The SKEW indicator uses Yahoo Finance (no key needed).
 
 ## Quick Start
 

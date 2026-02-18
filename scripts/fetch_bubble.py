@@ -52,11 +52,11 @@ INDICATOR_CONFIG = {
         "lookback": 252,
     },
     "put_call_ratio": {
-        "label": "Put/Call Ratio",
+        "label": "Put/Call Ratio (SKEW)",
         "weight": 0.17,
         "lookback": 252,
-        "source": "fred",
-        "series_id": "PCCE",
+        "source": "yfinance",
+        "ticker": "^SKEW",
     },
     "yield_curve": {
         "label": "Yield Curve",
@@ -152,19 +152,18 @@ def compute_credit_spread(lookback: int = 252) -> pd.Series:
     return percentile_rank(ratio, lookback)
 
 
-def compute_put_call_ratio(fred: "Fred | None", lookback: int = 252) -> pd.Series | None:
-    """CBOE equity put/call ratio from FRED. Low ratio = bullish sentiment = higher bubble score."""
-    if fred is None:
-        return None
+def compute_put_call_ratio(lookback: int = 252) -> pd.Series | None:
+    """CBOE SKEW index as sentiment proxy (replaces discontinued FRED PCCE).
+    High SKEW = heavy tail-risk hedging = complacency/bubble signal."""
     try:
-        pcr = fred.get_series("PCCE", observation_start="2023-01-01")
-        pcr = pcr.dropna()
-        if pcr.empty:
+        data = yf.download("^SKEW", period="3y", progress=False)
+        skew = data["Close"].squeeze().dropna()
+        if skew.empty:
             return None
-        inverted = -pcr
-        return percentile_rank(inverted, lookback)
+        # High SKEW -> higher bubble score (no inversion needed)
+        return percentile_rank(skew, lookback)
     except Exception as e:
-        print(f"  FRED PCCE error: {e}", file=sys.stderr)
+        print(f"  SKEW error: {e}", file=sys.stderr)
         return None
 
 
@@ -192,7 +191,7 @@ COMPUTE_FNS = {
     "vix_level": lambda fred: compute_vix_level(INDICATOR_CONFIG["vix_level"]["lookback"]),
     "sector_breadth": lambda fred: compute_sector_breadth(INDICATOR_CONFIG["sector_breadth"]["lookback"]),
     "credit_spread": lambda fred: compute_credit_spread(INDICATOR_CONFIG["credit_spread"]["lookback"]),
-    "put_call_ratio": lambda fred: compute_put_call_ratio(fred, INDICATOR_CONFIG["put_call_ratio"]["lookback"]),
+    "put_call_ratio": lambda fred: compute_put_call_ratio(INDICATOR_CONFIG["put_call_ratio"]["lookback"]),
     "yield_curve": lambda fred: compute_yield_curve(fred, INDICATOR_CONFIG["yield_curve"]["lookback"]),
 }
 

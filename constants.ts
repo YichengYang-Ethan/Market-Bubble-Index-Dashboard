@@ -66,9 +66,9 @@ export const INDICATOR_META: IndicatorMeta[] = [
   },
   {
     key: 'put_call_ratio',
-    label: 'Put/Call Ratio',
+    label: 'Tail Risk (SKEW)',
     color: '#a855f7',
-    description: 'Inverted CBOE equity put/call ratio from FRED. Low ratio = bullish sentiment.',
+    description: 'CBOE SKEW index — measures tail-risk hedging demand. High SKEW with rising markets signals complacency.',
     category: 'sentiment',
   },
   {
