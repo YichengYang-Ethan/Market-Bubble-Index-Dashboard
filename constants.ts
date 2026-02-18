@@ -85,6 +85,13 @@ export const INDICATOR_META: IndicatorMeta[] = [
     description: 'S&P 500 price relative to 10-year moving average, percentile-ranked. Higher values indicate expensive valuations typical of bubble conditions.',
     category: 'valuation',
   },
+  {
+    key: 'leverage_sentiment',
+    label: 'Leverage Sentiment',
+    color: '#ec4899',
+    description: 'TQQQ/(TQQQ+SQQQ) volume ratio — measures retail leverage sentiment. High values indicate aggressive bullish positioning.',
+    category: 'sentiment',
+  },
 ];
 
 export const BUBBLE_REGIME_CONFIG = [

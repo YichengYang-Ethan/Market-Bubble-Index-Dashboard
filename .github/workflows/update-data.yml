@@ -25,7 +25,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install Python dependencies
-        run: pip install yfinance pandas numpy fredapi
+        run: pip install yfinance pandas numpy fredapi statsmodels scipy
 
       - name: Fetch all ticker data
         run: python scripts/fetch_qqq_data.py QQQ SPY TQQQ IWM
@@ -34,6 +34,12 @@ jobs:
         env:
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: python scripts/fetch_bubble.py
+
+      - name: Run analysis scripts
+        run: |
+          python scripts/backtest_signal.py
+          python scripts/gsadf_test.py
+          python scripts/markov_regime.py
 
       - name: Commit updated data
         run: |

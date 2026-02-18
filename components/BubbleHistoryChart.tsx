@@ -11,7 +11,7 @@ import {
   ReferenceArea,
   ReferenceLine,
 } from 'recharts';
-import { BubbleHistoryPoint, DataPoint } from '../types';
+import { BubbleHistoryPoint, DataPoint, GSADFResults, MarkovRegimes } from '../types';
 import { INDICATOR_META } from '../constants';
 
 type TimeRange = '1Y' | '3Y' | '5Y' | 'ALL';
@@ -19,6 +19,8 @@ type TimeRange = '1Y' | '3Y' | '5Y' | 'ALL';
 interface BubbleHistoryChartProps {
   history: BubbleHistoryPoint[];
   priceData?: { qqq: DataPoint[]; spy: DataPoint[] };
+  gsadfResults?: GSADFResults | null;
+  markovRegimes?: MarkovRegimes | null;
 }
 
 const SUB_SCORES = [
@@ -42,7 +44,7 @@ const REGIME_BANDS = [
 
 const MAX_POINTS = 500;
 
-const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceData }) => {
+const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceData, gsadfResults, markovRegimes }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>('ALL');
   const [showSubScores, setShowSubScores] = useState<Record<string, boolean>>({
     sentiment_score: false,
@@ -58,6 +60,8 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
     qqq_price: false,
     spy_price: false,
   });
+  const [showGSADF, setShowGSADF] = useState(false);
+  const [showVelocity, setShowVelocity] = useState(false);
 
   const anyPriceActive = priceOverlays.qqq_price || priceOverlays.spy_price;
 
@@ -97,7 +101,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
       filtered = history.filter((d) => d.date >= cutoffStr);
     }
 
-    // 2. Flatten indicators + merge price data
+    // 2. Flatten indicators + merge price data + velocity
     let data = filtered.map((point) => {
       const flat: Record<string, unknown> = { ...point };
       INDICATOR_META.forEach((ind) => {
@@ -105,6 +109,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
       });
       flat.qqq_price = priceMaps.qqq.get(point.date) ?? null;
       flat.spy_price = priceMaps.spy.get(point.date) ?? null;
+      flat.score_velocity = point.score_velocity ?? null;
       return flat;
     });
 
@@ -171,6 +176,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
       valuation_score: 'Valuation',
       qqq_price: 'QQQ',
       spy_price: 'SPY',
+      score_velocity: 'Velocity',
     };
     INDICATOR_META.forEach((ind) => { m[ind.key] = ind.label; });
     return m;
@@ -352,6 +358,35 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
                 />
               ) : null
             )}
+
+            {/* GSADF bubble period overlays */}
+            {showGSADF && gsadfResults?.bubble_periods.map((period, i) => (
+              <ReferenceArea
+                key={`gsadf-${i}`}
+                x1={period.start}
+                x2={period.end}
+                yAxisId="score"
+                fill="#ef4444"
+                fillOpacity={0.15}
+              />
+            ))}
+
+            {/* Velocity line overlay */}
+            {showVelocity && (
+              <Line
+                type="monotone"
+                dataKey="score_velocity"
+                yAxisId="score"
+                stroke="#f472b6"
+                strokeWidth={1}
+                strokeDasharray="4 2"
+                dot={false}
+                activeDot={{ r: 2, fill: '#f472b6' }}
+                name={nameMap.score_velocity}
+                connectNulls
+                isAnimationActive={false}
+              />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -431,6 +466,33 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
                 {ind.label}
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Analysis overlays */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-slate-500 font-semibold uppercase tracking-wide w-20">Analysis</span>
+          <div className="flex gap-1.5 flex-wrap">
+            {gsadfResults && (
+              <button
+                onClick={() => setShowGSADF((v) => !v)}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                  showGSADF ? pillClass(true) : pillClass(false)
+                }`}
+                style={showGSADF ? { backgroundColor: '#ef4444' } : undefined}
+              >
+                GSADF Bubbles
+              </button>
+            )}
+            <button
+              onClick={() => setShowVelocity((v) => !v)}
+              className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                showVelocity ? pillClass(true) : pillClass(false)
+              }`}
+              style={showVelocity ? { backgroundColor: '#f472b6' } : undefined}
+            >
+              Velocity
+            </button>
           </div>
         </div>
       </div>

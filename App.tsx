@@ -8,8 +8,8 @@ import BubbleHistoryChart from './components/BubbleHistoryChart';
 import IndicatorGrid from './components/IndicatorGrid';
 import IndicatorDeepDive from './components/IndicatorDeepDive';
 import { fetchRealData, getMarketSummary, detectHistoricalSignals } from './services/dataService';
-import { fetchBubbleIndex, fetchBubbleHistory, fetchTickerPrice } from './services/bubbleService';
-import { DataPoint, MarketSummary, BacktestSignal, HistoricalSignal, BubbleIndexData, BubbleHistoryPoint } from './types';
+import { fetchBubbleIndex, fetchBubbleHistory, fetchTickerPrice, fetchBacktestResults, fetchGSADFResults, fetchMarkovRegimes } from './services/bubbleService';
+import { DataPoint, MarketSummary, BacktestSignal, HistoricalSignal, BubbleIndexData, BubbleHistoryPoint, BacktestResults, GSADFResults, MarkovRegimes } from './types';
 import { DEVIATION_CONFIG, SUPPORTED_TICKERS, TICKER_LABELS, TickerSymbol, BUBBLE_REGIME_CONFIG, INDICATOR_META } from './constants';
 
 type TimeRange = '1Y' | '2Y' | 'ALL';
@@ -20,6 +20,7 @@ const NAV_SECTIONS = [
   { id: 'overview', label: 'Overview' },
   { id: 'indicators', label: 'Indicators' },
   { id: 'history', label: 'History' },
+  { id: 'signal-analysis', label: 'Signal Analysis' },
   { id: 'deep-dive', label: 'Deep Dive' },
   { id: 'deviation', label: 'Deviation Tracker' },
   { id: 'methodology', label: 'Methodology' },
@@ -56,6 +57,9 @@ const App: React.FC = () => {
   const [bubbleLoading, setBubbleLoading] = useState(true);
   const [bubbleError, setBubbleError] = useState<string | null>(null);
   const [priceData, setPriceData] = useState<{ qqq: DataPoint[]; spy: DataPoint[] }>({ qqq: [], spy: [] });
+  const [backtestResults, setBacktestResults] = useState<BacktestResults | null>(null);
+  const [gsadfResults, setGsadfResults] = useState<GSADFResults | null>(null);
+  const [markovRegimes, setMarkovRegimes] = useState<MarkovRegimes | null>(null);
 
   // Refs for scroll-spy
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -124,15 +128,21 @@ const App: React.FC = () => {
     setBubbleLoading(true);
     setBubbleError(null);
     try {
-      const [indexData, historyData, qqqData, spyData] = await Promise.all([
+      const [indexData, historyData, qqqData, spyData, btResults, gsadf, markov] = await Promise.all([
         fetchBubbleIndex(),
         fetchBubbleHistory(),
         fetchTickerPrice('qqq'),
         fetchTickerPrice('spy'),
+        fetchBacktestResults(),
+        fetchGSADFResults(),
+        fetchMarkovRegimes(),
       ]);
       setBubbleData(indexData);
       setBubbleHistory(historyData.history);
       setPriceData({ qqq: qqqData, spy: spyData });
+      setBacktestResults(btResults);
+      setGsadfResults(gsadf);
+      setMarkovRegimes(markov);
     } catch (e) {
       setBubbleError(e instanceof Error ? e.message : 'Failed to load bubble data');
     } finally {
@@ -294,6 +304,9 @@ const App: React.FC = () => {
                 liquidityScore={bubbleData.liquidity_score}
                 valuationScore={bubbleData.valuation_score}
                 generatedAt={bubbleData.generated_at}
+                scoreVelocity={bubbleData.score_velocity}
+                confidenceInterval={bubbleData.confidence_interval}
+                dataQuality={bubbleData.data_quality}
               />
             </div>
           ) : null}
@@ -327,7 +340,148 @@ const App: React.FC = () => {
         >
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl font-bold text-white mb-6">Composite History</h2>
-            <BubbleHistoryChart history={bubbleHistory} priceData={priceData} />
+            <BubbleHistoryChart history={bubbleHistory} priceData={priceData} gsadfResults={gsadfResults} markovRegimes={markovRegimes} />
+          </div>
+        </section>
+      )}
+
+      {/* ========== SIGNAL ANALYSIS ========== */}
+      {(backtestResults || bubbleData?.diagnostics) && (
+        <section
+          id="signal-analysis"
+          ref={setSectionRef('signal-analysis')}
+          className="py-12 px-4 sm:px-6 lg:px-8"
+        >
+          <div className="max-w-7xl mx-auto">
+            <h2 className="text-2xl font-bold text-white mb-6">Signal Analysis</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+              {/* Position Mapping Card */}
+              {bubbleData && (
+                <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl">
+                  <h3 className="text-lg font-bold text-white mb-4">Position Mapping</h3>
+                  {(() => {
+                    const score = bubbleData.composite_score;
+                    const mapping = score < 30
+                      ? { label: '\u52A0\u4ED3 +30%', bg: 'bg-emerald-500/20', border: 'border-emerald-500/30', text: 'text-emerald-400' }
+                      : score < 50
+                      ? { label: '\u7EF4\u6301\u57FA\u51C6', bg: 'bg-slate-700/30', border: 'border-slate-600', text: 'text-slate-300' }
+                      : score < 70
+                      ? { label: '\u51CF\u4ED3 -20%', bg: 'bg-yellow-500/20', border: 'border-yellow-500/30', text: 'text-yellow-400' }
+                      : score < 85
+                      ? { label: '\u51CF\u4ED3 -50%', bg: 'bg-orange-500/20', border: 'border-orange-500/30', text: 'text-orange-400' }
+                      : { label: '\u4EC5\u4FDD\u7559 20%', bg: 'bg-red-500/20', border: 'border-red-500/30', text: 'text-red-400' };
+                    return (
+                      <div className={`${mapping.bg} border ${mapping.border} rounded-xl p-6 text-center`}>
+                        <p className={`text-3xl font-black ${mapping.text}`}>{mapping.label}</p>
+                        <p className="text-sm text-slate-400 mt-2">
+                          Based on composite score: <span className="text-white font-semibold">{score.toFixed(1)}</span>
+                        </p>
+                        {markovRegimes && (
+                          <p className="text-xs text-slate-500 mt-2">
+                            Markov regime: <span className="text-slate-300 capitalize">{markovRegimes.current_regime}</span> ({(markovRegimes.current_regime_prob * 100).toFixed(0)}%)
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* Backtest Results Card */}
+              {backtestResults && (
+                <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl lg:col-span-2">
+                  <h3 className="text-lg font-bold text-white mb-4">Signal Backtest</h3>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b border-slate-700">
+                          <th className="text-left text-slate-400 py-2 pr-4">Horizon</th>
+                          <th className="text-right text-emerald-400 py-2 px-3">Buy Avg</th>
+                          <th className="text-right text-emerald-400 py-2 px-3">Buy Hit%</th>
+                          <th className="text-right text-red-400 py-2 px-3">Sell Avg</th>
+                          <th className="text-right text-red-400 py-2 px-3">Sell Hit%</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {['1d', '5d', '20d', '60d'].map((horizon) => {
+                          const buy = backtestResults.buy_signals.stats[horizon];
+                          const sell = backtestResults.sell_signals.stats[horizon];
+                          return (
+                            <tr key={horizon} className="border-b border-slate-800">
+                              <td className="text-slate-300 py-2 pr-4 font-medium">{horizon}</td>
+                              <td className="text-right py-2 px-3">
+                                <span className={buy && buy.mean_return > 0 ? 'text-emerald-400' : 'text-red-400'}>
+                                  {buy ? `${buy.mean_return > 0 ? '+' : ''}${buy.mean_return.toFixed(2)}%` : '--'}
+                                </span>
+                              </td>
+                              <td className="text-right py-2 px-3 text-slate-300">
+                                {buy ? `${buy.hit_rate.toFixed(0)}%` : '--'}
+                              </td>
+                              <td className="text-right py-2 px-3">
+                                <span className={sell && sell.mean_return > 0 ? 'text-emerald-400' : 'text-red-400'}>
+                                  {sell ? `${sell.mean_return > 0 ? '+' : ''}${sell.mean_return.toFixed(2)}%` : '--'}
+                                </span>
+                              </td>
+                              <td className="text-right py-2 px-3 text-slate-300">
+                                {sell ? `${sell.hit_rate.toFixed(0)}%` : '--'}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="mt-4 flex gap-4 text-xs text-slate-500">
+                    <span>Buy signals: {backtestResults.buy_signals.count} (score &lt; {backtestResults.buy_signal_threshold})</span>
+                    <span>Sell signals: {backtestResults.sell_signals.count} (score &gt; {backtestResults.sell_signal_threshold})</span>
+                  </div>
+                  <div className="mt-3">
+                    <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Autocorrelation</p>
+                    <div className="flex gap-3 text-xs">
+                      {Object.entries(backtestResults.autocorrelation).map(([lag, val]) => (
+                        <span key={lag} className="text-slate-400">
+                          {lag}: <span className="text-white font-semibold">{val.toFixed(3)}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sensitivity Chart */}
+            {bubbleData?.diagnostics?.sensitivity && (
+              <div className="mt-6 bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl">
+                <h3 className="text-lg font-bold text-white mb-4">Indicator Sensitivity</h3>
+                <div className="space-y-3">
+                  {Object.entries(bubbleData.diagnostics.sensitivity)
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([key, value]) => {
+                      const meta = INDICATOR_META.find((m) => m.key === key);
+                      const maxSens = Math.max(...Object.values(bubbleData.diagnostics!.sensitivity));
+                      return (
+                        <div key={key} className="flex items-center gap-3">
+                          <span className="text-sm text-slate-400 w-40 truncate">{meta?.label ?? key}</span>
+                          <div className="flex-1 h-3 bg-slate-800 rounded-full overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all"
+                              style={{
+                                width: `${(value / maxSens) * 100}%`,
+                                backgroundColor: meta?.color ?? '#64748b',
+                              }}
+                            />
+                          </div>
+                          <span className="text-white font-semibold text-sm w-12 text-right">{value.toFixed(2)}</span>
+                        </div>
+                      );
+                    })}
+                </div>
+                <p className="text-xs text-slate-500 mt-3">
+                  Sensitivity = max score change when indicator moves 1 percentile point.
+                </p>
+              </div>
+            )}
           </div>
         </section>
       )}

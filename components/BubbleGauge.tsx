@@ -7,6 +7,14 @@ interface BubbleGaugeProps {
   liquidityScore: number | null;
   valuationScore?: number | null;
   generatedAt?: string;
+  scoreVelocity?: number;
+  confidenceInterval?: { lower: number; upper: number };
+  dataQuality?: {
+    indicators_available: number;
+    indicators_total: number;
+    completeness: number;
+    staleness_warning: boolean;
+  };
 }
 
 function getScoreColor(score: number): string {
@@ -39,21 +47,42 @@ function getRegimeBadgeClass(regime: string): string {
   }
 }
 
+function getVelocityArrow(velocity: number): { arrow: string; color: string } {
+  if (velocity < -5) return { arrow: '\u2193', color: '#22c55e' };   // strong falling
+  if (velocity < -1) return { arrow: '\u2198', color: '#4ade80' };   // falling
+  if (velocity <= 1) return { arrow: '\u2192', color: '#94a3b8' };   // flat
+  if (velocity <= 5) return { arrow: '\u2197', color: '#fb923c' };   // rising
+  return { arrow: '\u2191', color: '#ef4444' };                       // strong rising
+}
+
 function formatGeneratedAt(isoString: string): string {
   const d = new Date(isoString);
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, sentimentScore, liquidityScore, valuationScore, generatedAt }) => {
+const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, sentimentScore, liquidityScore, valuationScore, generatedAt, scoreVelocity, confidenceInterval, dataQuality }) => {
   const color = getScoreColor(compositeScore);
   const radius = 112;
   const circumference = 2 * Math.PI * radius;
   const progress = (compositeScore / 100) * circumference;
 
+  const velocityInfo = scoreVelocity != null ? getVelocityArrow(scoreVelocity) : null;
+
   return (
     <div>
-      <div className="flex flex-col items-center">
+      <div className="flex flex-col items-center relative">
+        {/* Data quality badge */}
+        {dataQuality && (
+          <div className={`absolute top-0 right-0 px-2 py-1 rounded-lg text-xs font-bold ${
+            dataQuality.staleness_warning
+              ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+              : 'bg-slate-800 text-slate-400 border border-slate-700'
+          }`}>
+            {dataQuality.indicators_available}/{dataQuality.indicators_total}
+          </div>
+        )}
+
         {/* Circular gauge */}
         <div className="relative w-64 h-64 mb-4">
           <svg className="w-full h-full transform -rotate-90" viewBox="0 0 260 260">
@@ -78,10 +107,29 @@ const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, senti
           </svg>
           {/* Center text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-5xl font-black text-white">{compositeScore.toFixed(0)}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-5xl font-black text-white">{compositeScore.toFixed(0)}</span>
+              {velocityInfo && (
+                <span className="text-2xl font-bold" style={{ color: velocityInfo.color }}>
+                  {velocityInfo.arrow}
+                </span>
+              )}
+            </div>
             <span className="text-xs text-slate-500 font-bold uppercase">Composite</span>
+            {confidenceInterval && (
+              <span className="text-xs text-slate-500 mt-0.5">
+                [{confidenceInterval.lower.toFixed(1)} - {confidenceInterval.upper.toFixed(1)}]
+              </span>
+            )}
           </div>
         </div>
+
+        {/* Velocity label */}
+        {scoreVelocity != null && (
+          <p className="text-xs text-slate-500 mb-1">
+            Velocity: <span style={{ color: velocityInfo?.color }} className="font-semibold">{scoreVelocity > 0 ? '+' : ''}{scoreVelocity.toFixed(1)}</span> pts/wk
+          </p>
+        )}
 
         {/* Updated timestamp */}
         {generatedAt && (

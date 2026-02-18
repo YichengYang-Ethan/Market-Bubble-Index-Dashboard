@@ -49,34 +49,35 @@ def _dump_json(obj) -> str:
 # Configuration
 # ---------------------------------------------------------------------------
 
+# Existing weights scaled by 0.88 to accommodate new leverage_sentiment (0.12)
 INDICATOR_CONFIG = {
     "qqq_deviation": {
         "label": "QQQ Deviation",
-        "weight": 0.17,
+        "weight": round(0.17 * 0.88, 4),   # 0.1496
         "lookback": 200,
         "category": "sentiment",
     },
     "vix_level": {
         "label": "VIX Level",
-        "weight": 0.15,
+        "weight": round(0.15 * 0.88, 4),   # 0.132
         "lookback": 252,
         "category": "sentiment",
     },
     "sector_breadth": {
         "label": "Sector Breadth",
-        "weight": 0.13,
+        "weight": round(0.13 * 0.88, 4),   # 0.1144
         "lookback": 50,
         "category": "liquidity",
     },
     "credit_spread": {
         "label": "Credit Spread",
-        "weight": 0.13,
+        "weight": round(0.13 * 0.88, 4),   # 0.1144
         "lookback": 252,
         "category": "liquidity",
     },
     "put_call_ratio": {
         "label": "Put/Call Ratio (SKEW)",
-        "weight": 0.14,
+        "weight": round(0.14 * 0.88, 4),   # 0.1232
         "lookback": 252,
         "source": "yfinance",
         "ticker": "^SKEW",
@@ -84,7 +85,7 @@ INDICATOR_CONFIG = {
     },
     "yield_curve": {
         "label": "Yield Curve",
-        "weight": 0.13,
+        "weight": round(0.13 * 0.88, 4),   # 0.1144
         "lookback": 252,
         "source": "fred",
         "series_id": "T10Y2Y",
@@ -92,9 +93,15 @@ INDICATOR_CONFIG = {
     },
     "cape_ratio": {
         "label": "CAPE Valuation",
-        "weight": 0.15,
+        "weight": round(0.15 * 0.88, 4),   # 0.132
         "lookback": 252,
         "category": "valuation",
+    },
+    "leverage_sentiment": {
+        "label": "Leverage Sentiment",
+        "weight": 0.12,
+        "lookback": 252,
+        "category": "sentiment",
     },
 }
 
@@ -121,10 +128,10 @@ def get_regime(score: float) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Percentile ranking helper
+# Percentile ranking helpers
 # ---------------------------------------------------------------------------
 
-def percentile_rank(series: pd.Series, lookback: int) -> pd.Series:
+def percentile_rank_rolling(series: pd.Series, lookback: int) -> pd.Series:
     """Rolling percentile rank (0-100) of each value within its lookback window."""
     def _rank(window):
         if len(window) < 2:
@@ -133,6 +140,15 @@ def percentile_rank(series: pd.Series, lookback: int) -> pd.Series:
         return float((window < val).sum()) / (len(window) - 1) * 100
 
     return series.rolling(window=lookback, min_periods=max(20, lookback // 4)).apply(_rank, raw=False)
+
+
+def percentile_rank_hybrid(series: pd.Series, lookback: int, expanding_weight: float = 0.3) -> pd.Series:
+    """Hybrid percentile: 70% rolling + 30% expanding for more stable rankings."""
+    rolling_pct = percentile_rank_rolling(series, lookback)
+    expanding_pct = series.expanding(min_periods=max(252, lookback)).apply(
+        lambda w: float((w < w.iloc[-1]).sum()) / (len(w) - 1) * 100 if len(w) > 1 else 50.0, raw=False
+    )
+    return (1 - expanding_weight) * rolling_pct + expanding_weight * expanding_pct
 
 
 # ---------------------------------------------------------------------------
@@ -145,7 +161,7 @@ def compute_qqq_deviation(lookback: int = 200) -> pd.Series:
     closes = data["Close"].squeeze().dropna()
     sma = closes.rolling(window=lookback).mean()
     deviation = (closes - sma) / sma
-    return percentile_rank(deviation, lookback)
+    return percentile_rank_hybrid(deviation, lookback)
 
 
 def compute_vix_level(lookback: int = 252) -> pd.Series:
@@ -155,7 +171,7 @@ def compute_vix_level(lookback: int = 252) -> pd.Series:
     vix = data["Close"].squeeze().dropna()
     # Invert: low VIX -> high score (complacency / bubble-like)
     inverted = -vix
-    return percentile_rank(inverted, lookback)
+    return percentile_rank_hybrid(inverted, lookback)
 
 
 def compute_sector_breadth(lookback: int = 50) -> pd.Series:
@@ -172,7 +188,7 @@ def compute_sector_breadth(lookback: int = 50) -> pd.Series:
 
     breadth = above_sma.mean(axis=1)
     # High breadth = more euphoric = higher bubble score
-    return percentile_rank(breadth, lookback)
+    return percentile_rank_hybrid(breadth, lookback)
 
 
 def compute_credit_spread(lookback: int = 252) -> pd.Series:
@@ -180,7 +196,7 @@ def compute_credit_spread(lookback: int = 252) -> pd.Series:
     data = yf.download(["HYG", "IEF"], start="2014-01-01", progress=False)
     closes = data["Close"]
     ratio = (closes["HYG"] / closes["IEF"]).dropna()
-    return percentile_rank(ratio, lookback)
+    return percentile_rank_hybrid(ratio, lookback)
 
 
 def compute_put_call_ratio(lookback: int = 252) -> pd.Series | None:
@@ -192,7 +208,7 @@ def compute_put_call_ratio(lookback: int = 252) -> pd.Series | None:
         if skew.empty:
             return None
         # High SKEW -> higher bubble score (no inversion needed)
-        return percentile_rank(skew, lookback)
+        return percentile_rank_hybrid(skew, lookback)
     except Exception as e:
         print(f"  SKEW error: {e}", file=sys.stderr)
         return None
@@ -207,7 +223,7 @@ def compute_yield_curve(fred: "Fred | None", lookback: int = 252) -> pd.Series |
         spread = spread.dropna()
         if spread.empty:
             return None
-        return percentile_rank(spread, lookback)
+        return percentile_rank_hybrid(spread, lookback)
     except Exception as e:
         print(f"  FRED T10Y2Y error: {e}", file=sys.stderr)
         return None
@@ -226,10 +242,34 @@ def compute_cape_ratio(lookback: int = 252) -> pd.Series | None:
         cape_proxy = cape_proxy.dropna()
         if cape_proxy.empty:
             return None
-        return percentile_rank(cape_proxy, lookback)
+        return percentile_rank_hybrid(cape_proxy, lookback)
     except Exception as e:
         print(f"  CAPE ratio error: {e}", file=sys.stderr)
         return None
+
+
+def compute_leverage_sentiment(lookback: int = 252) -> pd.Series:
+    """TQQQ/(TQQQ+SQQQ) volume ratio as retail sentiment proxy."""
+    data = yf.download(["TQQQ", "SQQQ"], start="2014-01-01", progress=False)
+    tqqq_vol = data["Volume"]["TQQQ"]
+    sqqq_vol = data["Volume"]["SQQQ"]
+    ratio = tqqq_vol / (tqqq_vol + sqqq_vol)
+    ratio = ratio.rolling(window=5).mean()  # smooth daily noise
+    return percentile_rank_hybrid(ratio.dropna(), lookback)
+
+
+# ---------------------------------------------------------------------------
+# Bootstrap confidence interval
+# ---------------------------------------------------------------------------
+
+def bootstrap_ci(combined_row, weights_dict, n=1000):
+    vals = np.array([combined_row.get(c, 50.0) for c in weights_dict])
+    w = np.array(list(weights_dict.values()))
+    scores = []
+    for _ in range(n):
+        perturbed = np.clip(vals + np.random.normal(0, 3, len(vals)), 0, 100)
+        scores.append(float(np.dot(perturbed, w)))
+    return round(float(np.percentile(scores, 2.5)), 1), round(float(np.percentile(scores, 97.5)), 1)
 
 
 # ---------------------------------------------------------------------------
@@ -244,6 +284,7 @@ COMPUTE_FNS = {
     "put_call_ratio": lambda fred: compute_put_call_ratio(INDICATOR_CONFIG["put_call_ratio"]["lookback"]),
     "yield_curve": lambda fred: compute_yield_curve(fred, INDICATOR_CONFIG["yield_curve"]["lookback"]),
     "cape_ratio": lambda fred: compute_cape_ratio(INDICATOR_CONFIG["cape_ratio"]["lookback"]),
+    "leverage_sentiment": lambda fred: compute_leverage_sentiment(INDICATOR_CONFIG["leverage_sentiment"]["lookback"]),
 }
 
 
@@ -286,6 +327,28 @@ def build_bubble_index():
     combined = pd.DataFrame(indicator_series)
     combined = combined.dropna(how="all")
 
+    # --- PCA Orthogonalization (#2) ---
+    corr_matrix = combined.corr()
+    orthogonalized = combined.copy()
+    processed = set()
+    for i, col1 in enumerate(combined.columns):
+        for col2 in combined.columns[i+1:]:
+            if abs(corr_matrix.loc[col1, col2]) > 0.7 and col2 not in processed:
+                # Regress col2 on col1, keep residuals
+                mask = combined[[col1, col2]].dropna().index
+                if len(mask) > 50:
+                    x = combined.loc[mask, col1].values
+                    y = combined.loc[mask, col2].values
+                    coeffs = np.polyfit(x, y, 1)
+                    residuals = y - np.polyval(coeffs, x)
+                    # Scale residuals back to 0-100
+                    r_min, r_max = residuals.min(), residuals.max()
+                    if r_max > r_min:
+                        scaled = (residuals - r_min) / (r_max - r_min) * 100
+                        orthogonalized.loc[mask, col2] = scaled
+                    processed.add(col2)
+    combined = orthogonalized
+
     # Re-normalize weights for available indicators only
     available = [k for k in combined.columns]
     total_weight = sum(INDICATOR_CONFIG[k]["weight"] for k in available)
@@ -295,6 +358,10 @@ def build_bubble_index():
     composite = pd.Series(0.0, index=combined.index)
     for col in available:
         composite += combined[col].fillna(50.0) * weights[col]
+
+    # --- Score Velocity & Acceleration (#6) ---
+    score_velocity = composite.diff(5)    # 5-day change
+    score_acceleration = score_velocity.diff(5)
 
     # Categorize into sub-scores by category
     sentiment_keys = {k for k in available if INDICATOR_CONFIG[k].get("category") == "sentiment"}
@@ -317,18 +384,17 @@ def build_bubble_index():
     valuation = sub_score(valuation_keys)
 
     # Build snapshot from the latest date where ALL indicators have data.
-    # Different sources (yfinance vs FRED) may end on different dates, so the
-    # absolute last row can contain NaNs.  Fall back to the overall last row
-    # if no fully-complete row exists.
     complete_rows = combined.dropna()
     if not complete_rows.empty:
         snap_row = complete_rows.iloc[-1]
-        snap_comp = float(composite.loc[complete_rows.index[-1]])
-        snap_sent = float(sentiment.loc[complete_rows.index[-1]])
-        snap_liq  = float(liquidity.loc[complete_rows.index[-1]])
-        snap_val  = float(valuation.loc[complete_rows.index[-1]])
+        snap_idx = complete_rows.index[-1]
+        snap_comp = float(composite.loc[snap_idx])
+        snap_sent = float(sentiment.loc[snap_idx])
+        snap_liq  = float(liquidity.loc[snap_idx])
+        snap_val  = float(valuation.loc[snap_idx])
     else:
         snap_row = combined.iloc[-1]
+        snap_idx = combined.index[-1]
         snap_comp = float(composite.iloc[-1])
         snap_sent = float(sentiment.iloc[-1])
         snap_liq  = float(liquidity.iloc[-1])
@@ -346,6 +412,10 @@ def build_bubble_index():
             "label": cfg["label"],
         }
 
+    # Velocity & acceleration for snapshot
+    vel = float(score_velocity.loc[snap_idx]) if not np.isnan(score_velocity.loc[snap_idx]) else 0.0
+    acc = float(score_acceleration.loc[snap_idx]) if not np.isnan(score_acceleration.loc[snap_idx]) else 0.0
+
     snapshot = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "composite_score": round(snap_comp, 1),
@@ -353,11 +423,46 @@ def build_bubble_index():
         "liquidity_score": round(snap_liq, 1) if not np.isnan(snap_liq) else None,
         "valuation_score": round(snap_val, 1) if not np.isnan(snap_val) else None,
         "regime": get_regime(snap_comp),
+        "score_velocity": round(vel, 2),
+        "score_acceleration": round(acc, 2),
         "indicators": snapshot_indicators,
     }
 
+    # --- Bootstrap CI (#10) ---
+    ci_lower, ci_upper = bootstrap_ci(snap_row.to_dict(), weights)
+    snapshot["confidence_interval"] = {"lower": ci_lower, "upper": ci_upper}
+
+    # --- Data Quality Monitoring (#7) ---
+    snapshot["data_quality"] = {
+        "indicators_available": len(available),
+        "indicators_total": len(INDICATOR_CONFIG),
+        "completeness": round(len(available) / len(INDICATOR_CONFIG) * 100, 1),
+        "data_end_dates": {name: str(indicator_series[name].index[-1])[:10] for name in available},
+        "staleness_warning": any(
+            (datetime.now().date() - indicator_series[name].index[-1].date()).days > 3 for name in available
+        ),
+    }
+
+    # --- Correlation Matrix & Sensitivity (#8, #9) ---
+    corr = combined.tail(252).corr()
+    snapshot["diagnostics"] = {
+        "correlation_matrix": {
+            row: {col: round(float(corr.loc[row, col]), 3) for col in corr.columns}
+            for row in corr.index
+        },
+    }
+
+    # Sensitivity analysis
+    sensitivity = {}
+    for drop_col in available:
+        remaining = [c for c in available if c != drop_col]
+        tw = sum(INDICATOR_CONFIG[c]["weight"] for c in remaining)
+        alt_composite = sum(combined[c].fillna(50) * INDICATOR_CONFIG[c]["weight"] / tw for c in remaining)
+        diff = float((alt_composite - composite).abs().mean())
+        sensitivity[drop_col] = round(diff, 2)
+    snapshot["diagnostics"]["sensitivity"] = sensitivity
+
     # Build previous_day data for trend arrows.
-    # Use the second-to-last complete row so values are never NaN.
     if len(complete_rows) >= 2:
         prev_row = complete_rows.iloc[-2]
         prev_indicators = {}
@@ -389,6 +494,10 @@ def build_bubble_index():
         l_val = float(liquidity.iloc[i]) if not np.isnan(liquidity.iloc[i]) else None
         v_val = float(valuation.iloc[i]) if not np.isnan(valuation.iloc[i]) else None
 
+        # Velocity & acceleration for this day
+        vel_i = float(score_velocity.iloc[i]) if not np.isnan(score_velocity.iloc[i]) else None
+        acc_i = float(score_acceleration.iloc[i]) if not np.isnan(score_acceleration.iloc[i]) else None
+
         # Per-indicator scores for this day
         day_indicators = {}
         for name in available:
@@ -402,10 +511,12 @@ def build_bubble_index():
             "liquidity_score": round(l_val, 1) if l_val is not None else None,
             "valuation_score": round(v_val, 1) if v_val is not None else None,
             "regime": get_regime(c_val),
+            "score_velocity": round(vel_i, 2) if vel_i is not None else None,
+            "score_acceleration": round(acc_i, 2) if acc_i is not None else None,
             "indicators": day_indicators,
         })
 
-    # Trim early points with poor indicator coverage (< 3/7 is noise)
+    # Trim early points with poor indicator coverage (< 3 is noise)
     MIN_INDICATORS = 3
     history_points = [
         pt for pt in history_points
@@ -425,6 +536,9 @@ def build_bubble_index():
     snapshot_path.write_text(_dump_json(snapshot))
     print(f"\nSnapshot written to {snapshot_path}")
     print(f"  Composite: {snapshot['composite_score']} | Regime: {snapshot['regime']}")
+    print(f"  Velocity: {snapshot['score_velocity']} | Acceleration: {snapshot['score_acceleration']}")
+    print(f"  CI: [{snapshot['confidence_interval']['lower']}, {snapshot['confidence_interval']['upper']}]")
+    print(f"  Data quality: {snapshot['data_quality']['completeness']}% complete")
 
     history_path = out_dir / "bubble_history.json"
     history_path.write_text(_dump_json(history))
