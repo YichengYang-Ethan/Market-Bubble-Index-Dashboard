@@ -6,18 +6,29 @@
 
 **Live:** [yichengyang-ethan.github.io/Market-Bubble-Index-Dashboard](https://yichengyang-ethan.github.io/Market-Bubble-Index-Dashboard/)
 
-A single-page financial dashboard that tracks market bubble risk through a composite index of **6 weighted indicators**. Designed as a portfolio showcase piece with professional data visualization.
+A single-page financial dashboard that tracks market bubble risk through a composite index of **7 weighted indicators** across three dimensions — sentiment, liquidity, and valuation. Uses 10-year rolling data for robust percentile rankings. Designed as a portfolio showcase piece with professional data visualization.
 
 ## Indicators
 
-| Indicator | Weight | Source | Signal |
-|-----------|--------|--------|--------|
-| QQQ Deviation | 20% | Yahoo Finance | 200-day SMA deviation, percentile-ranked |
-| VIX Level | 18% | Yahoo Finance | Inverted VIX (low VIX = complacency) |
-| Tail Risk (SKEW) | 17% | Yahoo Finance (^SKEW) | CBOE SKEW index — high SKEW = complacency |
-| Sector Breadth | 15% | Yahoo Finance | Fraction of sectors above 50-day SMA |
-| Credit Spread | 15% | Yahoo Finance | HYG/IEF ratio (tight spreads = risk-on) |
-| Yield Curve | 15% | FRED (T10Y2Y) | 10Y-2Y spread (steepening = risk-on) |
+| Indicator | Weight | Category | Source | Signal |
+|-----------|--------|----------|--------|--------|
+| QQQ Deviation | 17% | Sentiment | Yahoo Finance | 200-day SMA deviation, percentile-ranked (200-day lookback) |
+| VIX Level | 15% | Sentiment | Yahoo Finance | Inverted VIX — low VIX = complacency (252-day lookback) |
+| CAPE Valuation | 15% | Valuation | Yahoo Finance (^GSPC) | S&P 500 price / 10-year moving average, percentile-ranked |
+| Tail Risk (SKEW) | 14% | Sentiment | Yahoo Finance (^SKEW) | CBOE SKEW index — high SKEW = complacency (252-day lookback) |
+| Sector Breadth | 13% | Liquidity | Yahoo Finance | Fraction of 11 sector ETFs above 50-day SMA, percentile-ranked (50-day lookback) |
+| Credit Spread | 13% | Liquidity | Yahoo Finance | HYG/IEF ratio — tight spreads = risk-on (252-day lookback) |
+| Yield Curve | 13% | Liquidity | FRED (T10Y2Y) | 10Y-2Y Treasury spread — steepening = risk-on (252-day lookback) |
+
+**Normalization:** Each indicator is converted to a 0-100 percentile rank within its rolling lookback window. Composite score = weighted average of all available indicators. If any indicator is unavailable, weights are automatically redistributed.
+
+## Sub-Scores
+
+| Sub-Score | Indicators | Interpretation |
+|-----------|-----------|----------------|
+| Sentiment | QQQ Deviation, VIX, SKEW | Market emotion and momentum |
+| Liquidity | Sector Breadth, Credit Spread, Yield Curve | Risk appetite and market breadth |
+| Valuation | CAPE Valuation | Fundamental expense level |
 
 ## Regime Classification
 
@@ -31,12 +42,12 @@ A single-page financial dashboard that tracks market bubble risk through a compo
 
 ## Dashboard Sections
 
-- **Hero** — Large composite gauge with regime badge and sub-scores
-- **Indicator Grid** — 2x3 cards with score, trend arrow, and 30-day sparkline
-- **Composite History** — Time series with toggleable per-indicator overlays
-- **Indicator Deep Dive** — Individual accordion charts for all 6 indicators
-- **QQQ Deviation Tracker** — Detailed deviation analysis with backtesting
-- **Methodology** — Regime guide and indicator explanations
+- **Hero** — Large composite gauge with regime badge and 3 sub-scores (sentiment / liquidity / valuation)
+- **Indicator Grid** — 7 cards with score, trend arrow, and 30-day sparkline
+- **Composite History** — Full history time series with toggleable per-indicator overlays
+- **Indicator Deep Dive** — Individual accordion charts for all 7 indicators
+- **QQQ Deviation Tracker** — Detailed deviation analysis with interactive backtesting
+- **Methodology** — Regime guide, indicator weights, data sources, normalization and backtest methodology
 
 ## Tech Stack
 
@@ -48,21 +59,21 @@ A single-page financial dashboard that tracks market bubble risk through a compo
 
 ## Data Pipeline
 
-Data is refreshed daily via GitHub Actions at 9:30 PM UTC on weekdays:
+Data is refreshed daily via GitHub Actions at 9:30 PM UTC on weekdays (after US market close):
 
-1. `scripts/fetch_qqq_data.py` — Fetches QQQ/SPY/TQQQ/IWM deviation data from Yahoo Finance
-2. `scripts/fetch_bubble.py` — Computes all 6 bubble indicators and generates composite index
+1. `scripts/fetch_qqq_data.py` — Fetches 10-year QQQ/SPY/TQQQ/IWM deviation data from Yahoo Finance
+2. `scripts/fetch_bubble.py` — Computes all 7 bubble indicators and generates composite index with full history
 
-Set `FRED_API_KEY` as a repository secret to enable the yield curve indicator. The SKEW indicator uses Yahoo Finance (no key needed).
+Set `FRED_API_KEY` as a repository secret to enable the yield curve indicator. All other indicators use Yahoo Finance (no key needed).
 
 ## Quick Start
 
 ```bash
-pnpm install
-pnpm run dev      # Start dev server on port 3000
-pnpm run check    # TypeScript type checking
-pnpm run test     # Run tests
-pnpm run build    # Production build
+npm install
+npm run dev      # Start dev server on port 3000
+npm run check    # TypeScript type checking
+npm run test     # Run tests
+npm run build    # Production build
 ```
 
 ## License
