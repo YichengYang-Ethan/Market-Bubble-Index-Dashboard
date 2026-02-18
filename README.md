@@ -81,6 +81,41 @@ interface DataPoint {
 | 50 - 80 | High | Extended | Reduce exposure |
 | 80 - 100 | Danger | Overextended | High pullback probability |
 
+## Statistical Analysis
+
+**Does the deviation index predict forward QQQ returns?**
+
+We bucketed historical deviation index values into quintiles (0-20, 20-40, ..., 80-100) and measured forward QQQ returns over multiple horizons. Results below are based on 551 trading days of data (Dec 2023 - Feb 2026).
+
+### Forward Return Summary by Quintile
+
+| Quintile | N | 5d Mean | 21d Mean | 63d Mean | 126d Mean |
+|----------|---|---------|----------|----------|-----------|
+| 0-20 (Oversold) | 11 | +4.70% | +14.91% | +27.35% | +38.03% |
+| 20-40 | 36 | -0.37% | +1.07% | +14.83% | +26.39% |
+| 40-60 | 147 | +1.09% | +2.83% | +6.23% | +9.60% |
+| 60-80 | 338 | +0.23% | +1.56% | +3.76% | +9.43% |
+| 80-100 (Extended) | 19 | -1.41% | -5.57% | -1.20% | +5.14% |
+
+### Welch's t-test: Bottom vs Top Quintile
+
+| Horizon | Bottom (0-20) | Top (80-100) | t-stat | p-value | Significant? |
+|---------|---------------|--------------|--------|---------|--------------|
+| 5-day | +4.70% | -1.41% | 4.130 | 0.0015 | Yes |
+| 21-day | +14.91% | -5.57% | 14.482 | <0.0001 | Yes |
+| 63-day | +27.35% | -1.20% | 24.550 | <0.0001 | Yes |
+| 126-day | +38.03% | +5.14% | 19.069 | <0.0001 | Yes |
+
+All four horizons show statistically significant differences (p < 0.05) between the bottom and top quintiles. When the deviation index is in the oversold range (0-20), forward returns are substantially higher than when the index signals an overextended market (80-100).
+
+### Forward Return Distributions
+
+<p align="center">
+  <img src="analysis/forward_returns.png" width="800" alt="Forward Returns by Deviation Index Quintile">
+</p>
+
+> Analysis script: `scripts/analyze_signals.py` -- run with `python scripts/analyze_signals.py`
+
 ## License
 
 MIT
