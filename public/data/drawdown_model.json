@@ -1,0 +1,165 @@
+{
+  "model_version": "1.0",
+  "calibration_date": "2026-02-18",
+  "data_points": 2795,
+  "effective_sample_size": 69,
+  "forward_window_days": 63,
+  "forward_window_label": "3 months",
+  "logistic_coefficients": {
+    "drawdown_10pct": {
+      "a": 0.031369,
+      "b": -3.231,
+      "a_velocity": 0.042977,
+      "b_with_velocity": -2.8849,
+      "a_score_with_velocity": 0.025247,
+      "n_events": 12,
+      "n_total": 59
+    },
+    "drawdown_20pct": {
+      "a": -0.002192,
+      "b": -2.4428,
+      "a_velocity": 0.065871,
+      "b_with_velocity": -2.087,
+      "a_score_with_velocity": -0.011134,
+      "n_events": 5,
+      "n_total": 70
+    }
+  },
+  "bayesian_lookup": {
+    "drawdown_20pct": {
+      "bin_centers": [
+        10,
+        30,
+        50,
+        70,
+        90
+      ],
+      "probabilities": [
+        0.0238,
+        0.0388,
+        0.0943,
+        0.1087,
+        0.375
+      ]
+    },
+    "drawdown_30pct": {
+      "bin_centers": [
+        10,
+        30,
+        50,
+        70,
+        90
+      ],
+      "probabilities": [
+        0.0033,
+        0.007,
+        0.0122,
+        0.0333,
+        0.1429
+      ]
+    }
+  },
+  "evt_parameters": {
+    "gpd_shape_xi": -0.1863,
+    "gpd_scale_sigma": 0.0666,
+    "threshold_u": 0.1,
+    "n_exceedances": 950,
+    "exceedance_ratios": {
+      "20pct_given_10pct": 0.1718,
+      "30pct_given_10pct": 0.0123,
+      "40pct_given_10pct": 0.0001
+    },
+    "cross_ratios": {
+      "40pct_given_30pct": 0.0045,
+      "40pct_given_20pct": 0.0003
+    }
+  },
+  "empirical_stats": {
+    "0-20": {
+      "count": 148,
+      "p_10pct": 0.5135,
+      "n_10pct": 76,
+      "p_20pct": 0.1351,
+      "n_20pct": 20,
+      "p_30pct": 0.0,
+      "n_30pct": 0,
+      "p_40pct": 0.0,
+      "n_40pct": 0,
+      "mean_dd": 11.48,
+      "median_dd": 10.84,
+      "p95_dd": 22.62
+    },
+    "20-40": {
+      "count": 529,
+      "p_10pct": 0.4631,
+      "n_10pct": 245,
+      "p_20pct": 0.0699,
+      "n_20pct": 37,
+      "p_30pct": 0.0,
+      "n_30pct": 0,
+      "p_40pct": 0.0,
+      "n_40pct": 0,
+      "mean_dd": 10.01,
+      "median_dd": 7.45,
+      "p95_dd": 21.57
+    },
+    "40-60": {
+      "count": 866,
+      "p_10pct": 0.3418,
+      "n_10pct": 296,
+      "p_20pct": 0.0693,
+      "n_20pct": 60,
+      "p_30pct": 0.0,
+      "n_30pct": 0,
+      "p_40pct": 0.0,
+      "n_40pct": 0,
+      "mean_dd": 8.65,
+      "median_dd": 7.34,
+      "p95_dd": 21.61
+    },
+    "60-80": {
+      "count": 1127,
+      "p_10pct": 0.2644,
+      "n_10pct": 298,
+      "p_20pct": 0.0488,
+      "n_20pct": 55,
+      "p_30pct": 0.0,
+      "n_30pct": 0,
+      "p_40pct": 0.0,
+      "n_40pct": 0,
+      "mean_dd": 7.85,
+      "median_dd": 7.11,
+      "p95_dd": 19.33
+    },
+    "80-100": {
+      "count": 125,
+      "p_10pct": 0.28,
+      "n_10pct": 35,
+      "p_20pct": 0.184,
+      "n_20pct": 23,
+      "p_30pct": 0.0,
+      "n_30pct": 0,
+      "p_40pct": 0.0,
+      "n_40pct": 0,
+      "mean_dd": 9.29,
+      "median_dd": 5.72,
+      "p95_dd": 28.56
+    }
+  },
+  "confidence_tiers": {
+    "10pct": "moderate",
+    "20pct": "low",
+    "30pct": "model_dependent",
+    "40pct": "extrapolated"
+  },
+  "current_probabilities": {
+    "drawdown_10pct": {
+      "logistic": 0.1684,
+      "logistic_with_velocity": 0.1632
+    },
+    "drawdown_20pct": {
+      "logistic": 0.072,
+      "logistic_with_velocity": 0.0592
+    }
+  }
+}

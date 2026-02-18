@@ -40,6 +40,7 @@ jobs:
           python scripts/backtest_signal.py
           python scripts/gsadf_test.py
           python scripts/markov_regime.py
+          python scripts/fit_drawdown_model.py
 
       - name: Commit updated data
         run: |

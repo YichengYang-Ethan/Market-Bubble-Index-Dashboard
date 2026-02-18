@@ -12,6 +12,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { BubbleHistoryPoint, DataPoint, GSADFResults, MarkovRegimes } from '../types';
+import { DrawdownPoint } from '../services/bubbleService';
 import { INDICATOR_META } from '../constants';
 
 type TimeRange = '1Y' | '3Y' | '5Y' | 'ALL';
@@ -21,6 +22,7 @@ interface BubbleHistoryChartProps {
   priceData?: { qqq: DataPoint[]; spy: DataPoint[] };
   gsadfResults?: GSADFResults | null;
   markovRegimes?: MarkovRegimes | null;
+  qqqDrawdown?: DrawdownPoint[];
 }
 
 const SUB_SCORES = [
@@ -44,7 +46,7 @@ const REGIME_BANDS = [
 
 const MAX_POINTS = 500;
 
-const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceData, gsadfResults, markovRegimes }) => {
+const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceData, gsadfResults, markovRegimes, qqqDrawdown }) => {
   const [timeRange, setTimeRange] = useState<TimeRange>('ALL');
   const [showSubScores, setShowSubScores] = useState<Record<string, boolean>>({
     sentiment_score: false,
@@ -62,6 +64,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
   });
   const [showGSADF, setShowGSADF] = useState(false);
   const [showVelocity, setShowVelocity] = useState(false);
+  const [showDrawdown, setShowDrawdown] = useState(false);
 
   const anyPriceActive = priceOverlays.qqq_price || priceOverlays.spy_price;
 
@@ -87,8 +90,12 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
     if (priceData?.spy) {
       for (const p of priceData.spy) spyMap.set(p.date, p.price);
     }
-    return { qqq: qqqMap, spy: spyMap };
-  }, [priceData]);
+    const ddMap = new Map<string, number>();
+    if (qqqDrawdown) {
+      for (const d of qqqDrawdown) ddMap.set(d.date, d.drawdown);
+    }
+    return { qqq: qqqMap, spy: spyMap, drawdown: ddMap };
+  }, [priceData, qqqDrawdown]);
 
   const chartData = useMemo(() => {
     // 1. Filter by time range
@@ -110,6 +117,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
       flat.qqq_price = priceMaps.qqq.get(point.date) ?? null;
       flat.spy_price = priceMaps.spy.get(point.date) ?? null;
       flat.score_velocity = point.score_velocity ?? null;
+      flat.qqq_drawdown = priceMaps.drawdown.get(point.date) ?? null;
       return flat;
     });
 
@@ -152,8 +160,11 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
         <p className="text-slate-400 mb-1.5 font-medium">{label}</p>
         {payload.map((entry: any) => {
           const isPrice = entry.dataKey === 'qqq_price' || entry.dataKey === 'spy_price';
+          const isDrawdown = entry.dataKey === 'qqq_drawdown';
           const val = entry.value != null
-            ? isPrice ? `$${Number(entry.value).toFixed(2)}` : Number(entry.value).toFixed(1)
+            ? isPrice ? `$${Number(entry.value).toFixed(2)}`
+            : isDrawdown ? `${Number(entry.value).toFixed(1)}%`
+            : Number(entry.value).toFixed(1)
             : '--';
           return (
             <div key={entry.dataKey} className="flex items-center gap-2 py-0.5">
@@ -177,6 +188,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
       qqq_price: 'QQQ',
       spy_price: 'SPY',
       score_velocity: 'Velocity',
+      qqq_drawdown: 'QQQ Drawdown',
     };
     INDICATOR_META.forEach((ind) => { m[ind.key] = ind.label; });
     return m;
@@ -241,6 +253,19 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
               tickLine={{ stroke: '#334155' }}
               axisLine={{ stroke: '#334155' }}
             />
+
+            {/* Right Y-axis: drawdown (only when active and no price) */}
+            {showDrawdown && !anyPriceActive && (
+              <YAxis
+                yAxisId="drawdown"
+                orientation="right"
+                domain={[-60, 0]}
+                tick={{ fill: '#64748b', fontSize: 11 }}
+                tickLine={{ stroke: '#334155' }}
+                axisLine={{ stroke: '#334155' }}
+                tickFormatter={(v: number) => `${v}%`}
+              />
+            )}
 
             {/* Right Y-axis: price (only when active) */}
             {anyPriceActive && (
@@ -387,6 +412,24 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
                 isAnimationActive={false}
               />
             )}
+
+            {/* QQQ Drawdown overlay */}
+            {showDrawdown && (
+              <Area
+                type="monotone"
+                dataKey="qqq_drawdown"
+                yAxisId={anyPriceActive ? 'price' : showDrawdown && !anyPriceActive ? 'drawdown' : 'score'}
+                fill="#ef4444"
+                fillOpacity={0.15}
+                stroke="#ef4444"
+                strokeWidth={1}
+                dot={false}
+                activeDot={{ r: 2, fill: '#ef4444' }}
+                name={nameMap.qqq_drawdown}
+                connectNulls
+                isAnimationActive={false}
+              />
+            )}
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -493,6 +536,17 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
             >
               Velocity
             </button>
+            {qqqDrawdown && qqqDrawdown.length > 0 && (
+              <button
+                onClick={() => setShowDrawdown((v) => !v)}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                  showDrawdown ? pillClass(true) : pillClass(false)
+                }`}
+                style={showDrawdown ? { backgroundColor: '#ef4444' } : undefined}
+              >
+                QQQ Drawdown
+              </button>
+            )}
           </div>
         </div>
       </div>

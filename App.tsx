@@ -6,10 +6,11 @@ import BacktestPanel from './components/BacktestPanel';
 import BubbleGauge from './components/BubbleGauge';
 import BubbleHistoryChart from './components/BubbleHistoryChart';
 import BubbleBacktestPanel from './components/BubbleBacktestPanel';
+import CrashProbabilityPanel from './components/CrashProbabilityPanel';
 import IndicatorGrid from './components/IndicatorGrid';
 import IndicatorDeepDive from './components/IndicatorDeepDive';
 import { fetchRealData, getMarketSummary, detectHistoricalSignals } from './services/dataService';
-import { fetchBubbleIndex, fetchBubbleHistory, fetchTickerPrice, fetchBacktestResults, fetchGSADFResults, fetchMarkovRegimes } from './services/bubbleService';
+import { fetchBubbleIndex, fetchBubbleHistory, fetchTickerPrice, fetchBacktestResults, fetchGSADFResults, fetchMarkovRegimes, fetchDrawdownModel, fetchQQQDrawdown, DrawdownModelData, DrawdownPoint } from './services/bubbleService';
 import { DataPoint, MarketSummary, BacktestSignal, HistoricalSignal, BubbleIndexData, BubbleHistoryPoint, BacktestResults, GSADFResults, MarkovRegimes } from './types';
 import { DEVIATION_CONFIG, SUPPORTED_TICKERS, TICKER_LABELS, TickerSymbol, BUBBLE_REGIME_CONFIG, INDICATOR_META } from './constants';
 
@@ -61,6 +62,8 @@ const App: React.FC = () => {
   const [backtestResults, setBacktestResults] = useState<BacktestResults | null>(null);
   const [gsadfResults, setGsadfResults] = useState<GSADFResults | null>(null);
   const [markovRegimes, setMarkovRegimes] = useState<MarkovRegimes | null>(null);
+  const [drawdownModel, setDrawdownModel] = useState<DrawdownModelData | null>(null);
+  const [qqqDrawdown, setQqqDrawdown] = useState<DrawdownPoint[]>([]);
 
   // Refs for scroll-spy
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -129,7 +132,7 @@ const App: React.FC = () => {
     setBubbleLoading(true);
     setBubbleError(null);
     try {
-      const [indexData, historyData, qqqData, spyData, btResults, gsadf, markov] = await Promise.all([
+      const [indexData, historyData, qqqData, spyData, btResults, gsadf, markov, ddModel, ddSeries] = await Promise.all([
         fetchBubbleIndex(),
         fetchBubbleHistory(),
         fetchTickerPrice('qqq'),
@@ -137,6 +140,8 @@ const App: React.FC = () => {
         fetchBacktestResults(),
         fetchGSADFResults(),
         fetchMarkovRegimes(),
+        fetchDrawdownModel(),
+        fetchQQQDrawdown(),
       ]);
       setBubbleData(indexData);
       setBubbleHistory(historyData.history);
@@ -144,6 +149,8 @@ const App: React.FC = () => {
       setBacktestResults(btResults);
       setGsadfResults(gsadf);
       setMarkovRegimes(markov);
+      setDrawdownModel(ddModel);
+      setQqqDrawdown(ddSeries);
     } catch (e) {
       setBubbleError(e instanceof Error ? e.message : 'Failed to load bubble data');
     } finally {
@@ -341,10 +348,19 @@ const App: React.FC = () => {
         >
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl font-bold text-white mb-6">Composite History</h2>
-            <BubbleHistoryChart history={bubbleHistory} priceData={priceData} gsadfResults={gsadfResults} markovRegimes={markovRegimes} />
+            <BubbleHistoryChart history={bubbleHistory} priceData={priceData} gsadfResults={gsadfResults} markovRegimes={markovRegimes} qqqDrawdown={qqqDrawdown} />
             {priceData.qqq.length > 0 && (
               <div className="mt-8">
                 <BubbleBacktestPanel history={bubbleHistory} priceData={priceData.qqq} ticker="QQQ" />
+              </div>
+            )}
+            {drawdownModel && bubbleData && (
+              <div className="mt-8">
+                <CrashProbabilityPanel
+                  model={drawdownModel}
+                  currentScore={bubbleData.composite_score}
+                  scoreVelocity={bubbleData.score_velocity ?? 0}
+                />
               </div>
             )}
           </div>

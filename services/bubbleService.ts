@@ -48,3 +48,54 @@ export const fetchMarkovRegimes = async (): Promise<MarkovRegimes | null> => {
     return res.json();
   } catch { return null; }
 };
+
+export interface DrawdownModelData {
+  model_version: string;
+  calibration_date: string;
+  forward_window_days: number;
+  forward_window_label: string;
+  logistic_coefficients: Record<string, {
+    a: number;
+    b: number;
+    a_velocity: number;
+    b_with_velocity: number;
+    a_score_with_velocity: number;
+    n_events: number;
+    n_total: number;
+  }>;
+  bayesian_lookup: Record<string, {
+    bin_centers: number[];
+    probabilities: number[];
+  }>;
+  evt_parameters: {
+    gpd_shape_xi: number;
+    gpd_scale_sigma: number;
+    threshold_u: number;
+    n_exceedances: number;
+    exceedance_ratios: Record<string, number>;
+    cross_ratios: Record<string, number>;
+  };
+  empirical_stats: Record<string, Record<string, number>>;
+  confidence_tiers: Record<string, string>;
+}
+
+export const fetchDrawdownModel = async (): Promise<DrawdownModelData | null> => {
+  try {
+    const res = await fetch(`${BASE}data/drawdown_model.json`);
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
+};
+
+export interface DrawdownPoint {
+  date: string;
+  drawdown: number;
+}
+
+export const fetchQQQDrawdown = async (): Promise<DrawdownPoint[]> => {
+  try {
+    const res = await fetch(`${BASE}data/qqq_drawdown.json`);
+    if (!res.ok) return [];
+    return res.json();
+  } catch { return []; }
+};
