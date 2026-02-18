@@ -2,6 +2,10 @@
 import React, { useState, useMemo } from 'react';
 import { BubbleHistoryPoint, DataPoint } from '../types';
 
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
 interface RiskMetrics {
   totalReturn: number;
   cagr: number;
@@ -11,19 +15,16 @@ interface RiskMetrics {
   sortino: number;
   calmar: number;
   worstDay: number;
-  exposure: number;
 }
 
-interface BubbleBacktestResult {
-  numTrades: number;
-  signals: { date: string; type: 'buy' | 'sell'; price: number; score: number }[];
-  finalValue: number;
+interface BacktestResult {
   strategy: RiskMetrics;
   buyHold: RiskMetrics;
-  winRate: number;       // % of round-trip trades that were profitable
-  avgWin: number;        // avg return of winning round trips
-  avgLoss: number;       // avg return of losing round trips
-  profitFactor: number;  // total gains / total losses
+  finalValue: number;
+  bhFinalValue: number;
+  rebalances: number;
+  avgExposure: number;
+  allocationChanges: { date: string; score: number; allocation: number; price: number }[];
 }
 
 interface Props {
@@ -32,57 +33,93 @@ interface Props {
   ticker: string;
 }
 
-const RISK_FREE_RATE = 0.045; // 4.5% annualized
+// ---------------------------------------------------------------------------
+// Position sizing tiers (matches Position Mapping card in App.tsx)
+// ---------------------------------------------------------------------------
+
+interface Tier {
+  maxScore: number;
+  allocation: number;  // fraction of portfolio in equities
+  label: string;
+}
+
+const DEFAULT_TIERS: Tier[] = [
+  { maxScore: 30,  allocation: 1.00, label: 'Full 100%' },
+  { maxScore: 50,  allocation: 1.00, label: 'Full 100%' },
+  { maxScore: 70,  allocation: 0.80, label: 'Reduce 80%' },
+  { maxScore: 85,  allocation: 0.50, label: 'Defensive 50%' },
+  { maxScore: 100, allocation: 0.20, label: 'Minimal 20%' },
+];
+
+const LEVERAGED_TIERS: Tier[] = [
+  { maxScore: 30,  allocation: 1.30, label: 'Overweight 130%' },
+  { maxScore: 50,  allocation: 1.00, label: 'Full 100%' },
+  { maxScore: 70,  allocation: 0.80, label: 'Reduce 80%' },
+  { maxScore: 85,  allocation: 0.50, label: 'Defensive 50%' },
+  { maxScore: 100, allocation: 0.20, label: 'Minimal 20%' },
+];
+
+const RISK_FREE_RATE = 0.045;
+
+// ---------------------------------------------------------------------------
+// Core engine
+// ---------------------------------------------------------------------------
+
+function getAllocation(score: number, tiers: Tier[]): number {
+  for (const t of tiers) {
+    if (score < t.maxScore) return t.allocation;
+  }
+  return tiers[tiers.length - 1].allocation;
+}
 
 function computeRiskMetrics(dailyValues: number[], totalDays: number): RiskMetrics {
-  const dailyReturns: number[] = [];
+  const returns: number[] = [];
   let peak = dailyValues[0];
   let maxDrawdown = 0;
-  let daysExposed = 0;
 
   for (let i = 1; i < dailyValues.length; i++) {
     const prev = dailyValues[i - 1];
     const cur = dailyValues[i];
-    dailyReturns.push((cur - prev) / prev);
+    if (prev > 0) returns.push((cur - prev) / prev);
     if (cur > peak) peak = cur;
-    const dd = (peak - cur) / peak;
+    const dd = peak > 0 ? (peak - cur) / peak : 0;
     if (dd > maxDrawdown) maxDrawdown = dd;
-    if (Math.abs(cur - prev) > 0.001) daysExposed++;
+  }
+
+  if (returns.length === 0) {
+    return { totalReturn: 0, cagr: 0, maxDrawdown: 0, annualizedVol: 0, sharpe: 0, sortino: 0, calmar: 0, worstDay: 0 };
   }
 
   const totalReturn = (dailyValues[dailyValues.length - 1] - dailyValues[0]) / dailyValues[0];
   const years = totalDays / 365.25;
   const cagr = years > 0 ? Math.pow(1 + totalReturn, 1 / years) - 1 : 0;
 
-  const meanReturn = dailyReturns.reduce((a, b) => a + b, 0) / dailyReturns.length;
-  const variance = dailyReturns.reduce((a, r) => a + (r - meanReturn) ** 2, 0) / dailyReturns.length;
-  const dailyStd = Math.sqrt(variance);
-  const annualizedVol = dailyStd * Math.sqrt(252);
+  const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+  const variance = returns.reduce((a, r) => a + (r - mean) ** 2, 0) / returns.length;
+  const std = Math.sqrt(variance);
+  const annualizedVol = std * Math.sqrt(252);
 
   const rfDaily = RISK_FREE_RATE / 252;
-  const sharpe = dailyStd > 0 ? ((meanReturn - rfDaily) / dailyStd) * Math.sqrt(252) : 0;
+  const sharpe = std > 0 ? ((mean - rfDaily) / std) * Math.sqrt(252) : 0;
 
-  const negReturns = dailyReturns.filter(r => r < 0);
-  const downsideVar = negReturns.length > 0
-    ? negReturns.reduce((a, r) => a + r * r, 0) / negReturns.length
-    : 0.0001;
-  const downsideStd = Math.sqrt(downsideVar) * Math.sqrt(252);
-  const sortino = downsideStd > 0 ? (cagr - RISK_FREE_RATE) / downsideStd : 0;
+  const negRet = returns.filter(r => r < 0);
+  const downVar = negRet.length > 0 ? negRet.reduce((a, r) => a + r * r, 0) / negRet.length : 1e-8;
+  const downStd = Math.sqrt(downVar) * Math.sqrt(252);
+  const sortino = downStd > 0 ? (cagr - RISK_FREE_RATE) / downStd : 0;
 
   const calmar = maxDrawdown > 0 ? cagr / maxDrawdown : 0;
-  const worstDay = dailyReturns.length > 0 ? Math.min(...dailyReturns) : 0;
-  const exposure = daysExposed / Math.max(dailyReturns.length, 1);
+  const worstDay = Math.min(...returns);
 
-  return { totalReturn, cagr, maxDrawdown, annualizedVol, sharpe, sortino, calmar, worstDay, exposure };
+  return { totalReturn, cagr, maxDrawdown, annualizedVol, sharpe, sortino, calmar, worstDay };
 }
 
-function runBubbleBacktest(
+function runGraduatedBacktest(
   history: BubbleHistoryPoint[],
   priceData: DataPoint[],
-  buyThreshold: number,
-  sellThreshold: number,
+  tiers: Tier[],
   initialInvestment: number,
-): BubbleBacktestResult | null {
+  rebalanceDays: number,
+): BacktestResult | null {
   const priceMap = new Map<string, number>();
   for (const p of priceData) priceMap.set(p.date, p.price);
 
@@ -92,158 +129,190 @@ function runBubbleBacktest(
 
   if (merged.length < 20) return null;
 
-  const signals: BubbleBacktestResult['signals'] = [];
+  // Strategy: graduated position sizing with periodic rebalancing
+  // Portfolio = equity portion (in QQQ) + cash portion (earns risk-free rate)
+  let equity = 0;
   let cash = initialInvestment;
   let shares = 0;
-  let inPosition = false;
+  let currentAllocation = 0;
+  let daysSinceRebalance = rebalanceDays; // force rebalance on first day
 
-  const strategyValues: number[] = [initialInvestment];
-  const bhValues: number[] = [merged[0].price];
+  const stratValues: number[] = [];
+  const bhValues: number[] = [];
+  const changes: BacktestResult['allocationChanges'] = [];
+  let totalExposure = 0;
+  let rebalances = 0;
 
-  // Track round trips for win rate
-  let entryPrice = 0;
-  const roundTrips: number[] = [];
+  const rfDailyRate = RISK_FREE_RATE / 252;
 
-  for (const point of merged) {
-    const portfolioValue = inPosition ? shares * point.price : cash;
-    strategyValues.push(portfolioValue);
-    bhValues.push(point.price);
+  for (let i = 0; i < merged.length; i++) {
+    const pt = merged[i];
+    const targetAlloc = getAllocation(pt.score, tiers);
 
-    if (!inPosition && point.score <= buyThreshold) {
-      shares = cash / point.price;
-      cash = 0;
-      inPosition = true;
-      entryPrice = point.price;
-      signals.push({ date: point.date, type: 'buy', price: point.price, score: point.score });
-    } else if (inPosition && point.score >= sellThreshold) {
-      cash = shares * point.price;
-      const tripReturn = (point.price - entryPrice) / entryPrice;
-      roundTrips.push(tripReturn);
-      shares = 0;
-      inPosition = false;
-      signals.push({ date: point.date, type: 'sell', price: point.price, score: point.score });
+    // Current portfolio value
+    const equityValue = shares * pt.price;
+    const portfolioValue = equityValue + cash;
+    stratValues.push(portfolioValue);
+    bhValues.push(pt.price);
+
+    totalExposure += equityValue / Math.max(portfolioValue, 1);
+
+    // Rebalance if allocation tier changed OR periodic rebalance
+    daysSinceRebalance++;
+    const allocChanged = Math.abs(targetAlloc - currentAllocation) > 0.01;
+
+    if (allocChanged || daysSinceRebalance >= rebalanceDays) {
+      const targetEquity = portfolioValue * Math.min(targetAlloc, 1.3);
+      const targetCash = portfolioValue - targetEquity;
+
+      // If leveraged (>100%), we allow negative cash (margin)
+      shares = targetEquity / pt.price;
+      cash = targetCash;
+      currentAllocation = targetAlloc;
+      daysSinceRebalance = 0;
+
+      if (allocChanged) {
+        rebalances++;
+        changes.push({ date: pt.date, score: pt.score, allocation: targetAlloc, price: pt.price });
+      }
+    }
+
+    // Cash earns risk-free rate daily
+    if (cash > 0) {
+      cash *= (1 + rfDailyRate);
+    } else {
+      // Margin interest on borrowed cash (same rate for simplicity)
+      cash *= (1 + rfDailyRate);
     }
   }
 
-  // If still in position, count as open round trip
-  if (inPosition) {
-    const lastPrice = merged[merged.length - 1].price;
-    roundTrips.push((lastPrice - entryPrice) / entryPrice);
-  }
-
-  const finalValue = inPosition ? shares * merged[merged.length - 1].price : cash;
-  strategyValues[strategyValues.length - 1] = finalValue;
+  // Final values
+  const lastPrice = merged[merged.length - 1].price;
+  const finalValue = shares * lastPrice + cash;
+  stratValues.push(finalValue);
+  bhValues.push(lastPrice);
 
   const totalDays = (new Date(merged[merged.length - 1].date).getTime() - new Date(merged[0].date).getTime()) / (1000 * 60 * 60 * 24);
 
-  // Normalize B&H values to same initial investment
   const bhScale = initialInvestment / bhValues[0];
   const bhNormalized = bhValues.map(v => v * bhScale);
 
-  const strategy = computeRiskMetrics(strategyValues, totalDays);
+  const strategy = computeRiskMetrics(stratValues, totalDays);
   const buyHold = computeRiskMetrics(bhNormalized, totalDays);
-
-  // Win rate & profit factor
-  const wins = roundTrips.filter(r => r > 0);
-  const losses = roundTrips.filter(r => r <= 0);
-  const winRate = roundTrips.length > 0 ? wins.length / roundTrips.length : 0;
-  const avgWin = wins.length > 0 ? wins.reduce((a, b) => a + b, 0) / wins.length : 0;
-  const avgLoss = losses.length > 0 ? losses.reduce((a, b) => a + b, 0) / losses.length : 0;
-  const totalGains = wins.reduce((a, b) => a + b, 0);
-  const totalLosses = Math.abs(losses.reduce((a, b) => a + b, 0));
-  const profitFactor = totalLosses > 0 ? totalGains / totalLosses : totalGains > 0 ? Infinity : 0;
+  const avgExposure = totalExposure / merged.length;
 
   return {
-    numTrades: signals.length,
-    signals,
-    finalValue,
     strategy,
     buyHold,
-    winRate,
-    avgWin,
-    avgLoss,
-    profitFactor,
+    finalValue,
+    bhFinalValue: bhNormalized[bhNormalized.length - 1],
+    rebalances,
+    avgExposure,
+    allocationChanges: changes,
   };
 }
 
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 const BubbleBacktestPanel: React.FC<Props> = ({ history, priceData, ticker }) => {
-  const [buyThreshold, setBuyThreshold] = useState(25);
-  const [sellThreshold, setSellThreshold] = useState(85);
   const [initialInvestment, setInitialInvestment] = useState(10000);
+  const [rebalanceDays, setRebalanceDays] = useState(5);
+  const [useLeverage, setUseLeverage] = useState(false);
+
+  const tiers = useMemo(() => {
+    return useLeverage ? LEVERAGED_TIERS : DEFAULT_TIERS;
+  }, [useLeverage]);
 
   const result = useMemo(() => {
-    return runBubbleBacktest(history, priceData, buyThreshold, sellThreshold, initialInvestment);
-  }, [history, priceData, buyThreshold, sellThreshold, initialInvestment]);
+    return runGraduatedBacktest(history, priceData, tiers, initialInvestment, rebalanceDays);
+  }, [history, priceData, tiers, initialInvestment, rebalanceDays]);
 
   if (!result) return null;
 
   const fmt = (v: number) => (v * 100).toFixed(1) + '%';
-  const fmtRatio = (v: number) => v === Infinity ? '--' : v.toFixed(2);
+  const fmtRatio = (v: number) => isFinite(v) ? v.toFixed(2) : '--';
   const fmtMoney = (v: number) => '$' + v.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-  // Determine which metric is better for coloring
-  const better = (strat: number, bh: number, higherIsBetter: boolean) => {
-    if (higherIsBetter) return strat > bh + 0.001 ? 'text-emerald-400' : strat < bh - 0.001 ? 'text-red-400' : 'text-slate-300';
-    return strat < bh - 0.001 ? 'text-emerald-400' : strat > bh + 0.001 ? 'text-red-400' : 'text-slate-300';
+  const betterClass = (strat: number, bh: number, higherIsBetter: boolean) => {
+    const diff = higherIsBetter ? strat - bh : bh - strat;
+    if (diff > 0.001) return 'text-emerald-400';
+    if (diff < -0.001) return 'text-red-400';
+    return 'text-slate-300';
   };
 
   const { strategy: s, buyHold: bh } = result;
 
-  const metrics: { label: string; strat: string; bh: string; higherBetter: boolean; stratVal: number; bhVal: number; tip: string }[] = [
-    { label: 'Total Return', strat: fmt(s.totalReturn), bh: fmt(bh.totalReturn), higherBetter: true, stratVal: s.totalReturn, bhVal: bh.totalReturn, tip: 'Cumulative return over the full period' },
-    { label: 'CAGR', strat: fmt(s.cagr), bh: fmt(bh.cagr), higherBetter: true, stratVal: s.cagr, bhVal: bh.cagr, tip: 'Compound Annual Growth Rate' },
-    { label: 'Sharpe Ratio', strat: fmtRatio(s.sharpe), bh: fmtRatio(bh.sharpe), higherBetter: true, stratVal: s.sharpe, bhVal: bh.sharpe, tip: 'Risk-adjusted return (excess return / volatility)' },
-    { label: 'Sortino Ratio', strat: fmtRatio(s.sortino), bh: fmtRatio(bh.sortino), higherBetter: true, stratVal: s.sortino, bhVal: bh.sortino, tip: 'Return per unit of downside risk only' },
-    { label: 'Calmar Ratio', strat: fmtRatio(s.calmar), bh: fmtRatio(bh.calmar), higherBetter: true, stratVal: s.calmar, bhVal: bh.calmar, tip: 'CAGR / Max Drawdown' },
-    { label: 'Max Drawdown', strat: fmt(s.maxDrawdown), bh: fmt(bh.maxDrawdown), higherBetter: false, stratVal: s.maxDrawdown, bhVal: bh.maxDrawdown, tip: 'Largest peak-to-trough decline' },
-    { label: 'Volatility', strat: fmt(s.annualizedVol), bh: fmt(bh.annualizedVol), higherBetter: false, stratVal: s.annualizedVol, bhVal: bh.annualizedVol, tip: 'Annualized standard deviation of daily returns' },
-    { label: 'Worst Day', strat: fmt(s.worstDay), bh: fmt(bh.worstDay), higherBetter: false, stratVal: Math.abs(s.worstDay), bhVal: Math.abs(bh.worstDay), tip: 'Largest single-day loss' },
+  const metrics: { label: string; sVal: number; bVal: number; sFmt: string; bFmt: string; higher: boolean; tip: string }[] = [
+    { label: 'Total Return', sVal: s.totalReturn, bVal: bh.totalReturn, sFmt: fmt(s.totalReturn), bFmt: fmt(bh.totalReturn), higher: true, tip: 'Cumulative return' },
+    { label: 'CAGR', sVal: s.cagr, bVal: bh.cagr, sFmt: fmt(s.cagr), bFmt: fmt(bh.cagr), higher: true, tip: 'Compound Annual Growth Rate' },
+    { label: 'Sharpe Ratio', sVal: s.sharpe, bVal: bh.sharpe, sFmt: fmtRatio(s.sharpe), bFmt: fmtRatio(bh.sharpe), higher: true, tip: 'Excess return per unit of total risk' },
+    { label: 'Sortino Ratio', sVal: s.sortino, bVal: bh.sortino, sFmt: fmtRatio(s.sortino), bFmt: fmtRatio(bh.sortino), higher: true, tip: 'Excess return per unit of downside risk' },
+    { label: 'Calmar Ratio', sVal: s.calmar, bVal: bh.calmar, sFmt: fmtRatio(s.calmar), bFmt: fmtRatio(bh.calmar), higher: true, tip: 'CAGR divided by Max Drawdown' },
+    { label: 'Max Drawdown', sVal: s.maxDrawdown, bVal: bh.maxDrawdown, sFmt: fmt(s.maxDrawdown), bFmt: fmt(bh.maxDrawdown), higher: false, tip: 'Largest peak-to-trough decline' },
+    { label: 'Volatility', sVal: s.annualizedVol, bVal: bh.annualizedVol, sFmt: fmt(s.annualizedVol), bFmt: fmt(bh.annualizedVol), higher: false, tip: 'Annualized standard deviation' },
+    { label: 'Worst Day', sVal: Math.abs(s.worstDay), bVal: Math.abs(bh.worstDay), sFmt: fmt(s.worstDay), bFmt: fmt(bh.worstDay), higher: false, tip: 'Largest single-day loss' },
   ];
 
-  // Count how many metrics strategy wins
-  const strategyWins = metrics.filter(m => m.higherBetter ? m.stratVal > m.bhVal + 0.001 : m.stratVal < m.bhVal - 0.001).length;
-  const bhWins = metrics.filter(m => m.higherBetter ? m.bhVal > m.stratVal + 0.001 : m.bhVal < m.stratVal - 0.001).length;
+  const sWins = metrics.filter(m => (m.higher ? m.sVal - m.bVal : m.bVal - m.sVal) > 0.001).length;
+  const bWins = metrics.filter(m => (m.higher ? m.bVal - m.sVal : m.sVal - m.bVal) > 0.001).length;
 
   return (
     <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-sm">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-2">
         <div>
           <h2 className="text-xl font-bold text-white">Bubble Index Backtest</h2>
-          <p className="text-sm text-slate-500">Buy in fear, sell in euphoria — based on composite bubble score</p>
+          <p className="text-sm text-slate-500">Graduated position sizing based on composite bubble score</p>
         </div>
         <span className="text-xs text-slate-500 bg-slate-800 px-3 py-1 rounded-full">{ticker}</span>
+      </div>
+
+      {/* Allocation Tiers Visual */}
+      <div className="mb-6">
+        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Allocation Tiers</p>
+        <div className="flex gap-1 h-8 rounded-lg overflow-hidden">
+          {tiers.map((t, i) => {
+            const prevMax = i > 0 ? tiers[i - 1].maxScore : 0;
+            const width = t.maxScore - prevMax;
+            const colors = ['bg-emerald-500/60', 'bg-slate-600/60', 'bg-yellow-500/50', 'bg-orange-500/50', 'bg-red-500/50'];
+            return (
+              <div
+                key={t.maxScore}
+                className={`${colors[i]} flex items-center justify-center text-xs font-semibold text-white`}
+                style={{ width: `${width}%` }}
+                title={`Score ${prevMax}-${t.maxScore}: ${(t.allocation * 100).toFixed(0)}% equity`}
+              >
+                {(t.allocation * 100).toFixed(0)}%
+              </div>
+            );
+          })}
+        </div>
+        <div className="flex justify-between text-[10px] text-slate-500 mt-1 px-0.5">
+          <span>0 (Fear)</span>
+          <span>30</span>
+          <span>50</span>
+          <span>70</span>
+          <span>85</span>
+          <span>100 (Euphoria)</span>
+        </div>
       </div>
 
       {/* Controls */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div>
           <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            Buy Threshold: <span className="text-emerald-400">{buyThreshold}</span>
+            Rebalance Every: <span className="text-blue-400">{rebalanceDays} days</span>
           </label>
           <input
             type="range"
-            min={5}
-            max={50}
-            value={buyThreshold}
-            onChange={e => setBuyThreshold(Number(e.target.value))}
-            className="w-full accent-emerald-500"
+            min={1}
+            max={20}
+            value={rebalanceDays}
+            onChange={e => setRebalanceDays(Number(e.target.value))}
+            className="w-full accent-blue-500"
           />
-          <p className="text-[10px] text-slate-600 mt-1">Buy {ticker} when bubble score drops below this level</p>
-        </div>
-
-        <div>
-          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            Sell Threshold: <span className="text-red-400">{sellThreshold}</span>
-          </label>
-          <input
-            type="range"
-            min={50}
-            max={95}
-            value={sellThreshold}
-            onChange={e => setSellThreshold(Number(e.target.value))}
-            className="w-full accent-red-500"
-          />
-          <p className="text-[10px] text-slate-600 mt-1">Sell {ticker} when bubble score rises above this level</p>
+          <p className="text-[10px] text-slate-600 mt-1">Also rebalances immediately on tier change</p>
         </div>
 
         <div>
@@ -259,16 +328,28 @@ const BubbleBacktestPanel: React.FC<Props> = ({ history, priceData, ticker }) =>
             className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
           />
         </div>
+
+        <div className="flex items-end pb-1">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={useLeverage}
+              onChange={e => setUseLeverage(e.target.checked)}
+              className="w-4 h-4 accent-blue-500 rounded"
+            />
+            <span className="text-sm text-slate-300">Allow 130% leverage in fear zone</span>
+          </label>
+        </div>
       </div>
 
       {/* Side-by-side Comparison Table */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Strategy vs Buy & Hold</p>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Graduated Strategy vs Buy & Hold</p>
           <div className="flex gap-3 text-xs">
-            <span className="text-emerald-400">Strategy wins: {strategyWins}</span>
+            <span className="text-emerald-400">Strategy: {sWins}</span>
             <span className="text-slate-500">|</span>
-            <span className="text-blue-400">B&H wins: {bhWins}</span>
+            <span className="text-blue-400">B&H: {bWins}</span>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -283,17 +364,18 @@ const BubbleBacktestPanel: React.FC<Props> = ({ history, priceData, ticker }) =>
             </thead>
             <tbody>
               {metrics.map(m => {
-                const edge = m.higherBetter ? m.stratVal - m.bhVal : m.bhVal - m.stratVal;
-                const edgeStr = m.label.includes('Ratio')
+                const edge = m.higher ? m.sVal - m.bVal : m.bVal - m.sVal;
+                const isRatio = m.label.includes('Ratio');
+                const edgeStr = isRatio
                   ? (edge > 0 ? '+' : '') + edge.toFixed(2)
                   : (edge > 0 ? '+' : '') + (edge * 100).toFixed(1) + '%';
                 return (
                   <tr key={m.label} className="border-b border-slate-800" title={m.tip}>
                     <td className="text-slate-300 py-2 pr-4">{m.label}</td>
-                    <td className={`text-right py-2 px-3 font-semibold ${better(m.stratVal, m.bhVal, m.higherBetter)}`}>
-                      {m.strat}
+                    <td className={`text-right py-2 px-3 font-semibold ${betterClass(m.sVal, m.bVal, m.higher)}`}>
+                      {m.sFmt}
                     </td>
-                    <td className="text-right py-2 px-3 text-slate-300">{m.bh}</td>
+                    <td className="text-right py-2 px-3 text-slate-300">{m.bFmt}</td>
                     <td className={`text-right py-2 pl-3 text-xs ${edge > 0.001 ? 'text-emerald-400' : edge < -0.001 ? 'text-red-400' : 'text-slate-500'}`}>
                       {edgeStr}
                     </td>
@@ -305,68 +387,66 @@ const BubbleBacktestPanel: React.FC<Props> = ({ history, priceData, ticker }) =>
         </div>
       </div>
 
-      {/* Trade Quality Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      {/* Key stats row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-slate-800/50 p-4 rounded-xl">
-          <p className="text-[10px] text-slate-500 uppercase font-semibold mb-1">Trades</p>
-          <p className="text-lg font-bold text-white">{result.numTrades}</p>
+          <p className="text-[10px] text-slate-500 uppercase font-semibold mb-1">Rebalances</p>
+          <p className="text-lg font-bold text-white">{result.rebalances}</p>
         </div>
         <div className="bg-slate-800/50 p-4 rounded-xl">
-          <p className="text-[10px] text-slate-500 uppercase font-semibold mb-1">Win Rate</p>
-          <p className={`text-lg font-bold ${result.winRate >= 0.5 ? 'text-emerald-400' : 'text-red-400'}`}>
-            {fmt(result.winRate)}
-          </p>
+          <p className="text-[10px] text-slate-500 uppercase font-semibold mb-1">Avg Exposure</p>
+          <p className="text-lg font-bold text-blue-400">{fmt(result.avgExposure)}</p>
         </div>
         <div className="bg-slate-800/50 p-4 rounded-xl">
-          <p className="text-[10px] text-slate-500 uppercase font-semibold mb-1">Avg Win</p>
-          <p className="text-lg font-bold text-emerald-400">+{fmt(result.avgWin)}</p>
+          <p className="text-[10px] text-slate-500 uppercase font-semibold mb-1">Strategy Final</p>
+          <p className="text-lg font-bold text-emerald-400">{fmtMoney(result.finalValue)}</p>
         </div>
         <div className="bg-slate-800/50 p-4 rounded-xl">
-          <p className="text-[10px] text-slate-500 uppercase font-semibold mb-1">Avg Loss</p>
-          <p className="text-lg font-bold text-red-400">{fmt(result.avgLoss)}</p>
-        </div>
-        <div className="bg-slate-800/50 p-4 rounded-xl">
-          <p className="text-[10px] text-slate-500 uppercase font-semibold mb-1">Profit Factor</p>
-          <p className={`text-lg font-bold ${result.profitFactor >= 1 ? 'text-emerald-400' : 'text-red-400'}`}>
-            {result.profitFactor === Infinity ? '--' : result.profitFactor.toFixed(1)}x
-          </p>
+          <p className="text-[10px] text-slate-500 uppercase font-semibold mb-1">B&H Final</p>
+          <p className="text-lg font-bold text-slate-300">{fmtMoney(result.bhFinalValue)}</p>
         </div>
       </div>
 
-      {/* Trade log */}
-      {result.signals.length > 0 && (
+      {/* Recent allocation changes */}
+      {result.allocationChanges.length > 0 && (
         <div className="mb-6">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Trade History</p>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Recent Allocation Changes</p>
           <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
-            {result.signals.map((s, i) => (
-              <span
-                key={i}
-                className={`text-xs px-2 py-1 rounded ${
-                  s.type === 'buy'
-                    ? 'bg-emerald-500/20 text-emerald-400'
-                    : 'bg-red-500/20 text-red-400'
-                }`}
-              >
-                {s.type.toUpperCase()} {s.date} @ ${s.price.toFixed(0)} (score {s.score.toFixed(0)})
-              </span>
-            ))}
+            {result.allocationChanges.slice(-15).map((c, i) => {
+              const pct = (c.allocation * 100).toFixed(0);
+              const color = c.allocation >= 1.0 ? 'bg-emerald-500/20 text-emerald-400'
+                : c.allocation >= 0.8 ? 'bg-slate-600/30 text-slate-300'
+                : c.allocation >= 0.5 ? 'bg-yellow-500/20 text-yellow-400'
+                : 'bg-red-500/20 text-red-400';
+              return (
+                <span key={i} className={`text-xs px-2 py-1 rounded ${color}`}>
+                  {c.date} &rarr; {pct}% (score {c.score.toFixed(0)})
+                </span>
+              );
+            })}
           </div>
         </div>
       )}
 
       {/* Summary */}
-      <div className="bg-slate-800/30 rounded-xl p-4">
+      <div className="bg-slate-800/30 rounded-xl p-4 space-y-2">
         <p className="text-sm text-slate-400">
-          {fmtMoney(initialInvestment)} invested
-          {' '}&rarr;{' '}
+          <span className="text-white font-semibold">Risk management overlay</span>: stay fully invested in normal conditions,
+          reduce to {tiers[2].allocation * 100}% in elevated zones, {tiers[3].allocation * 100}% in high-risk,
+          and {tiers[4].allocation * 100}% in extreme bubble territory.
+          Cash earns {(RISK_FREE_RATE * 100).toFixed(1)}% risk-free rate.
+        </p>
+        <p className="text-sm text-slate-400">
+          {fmtMoney(initialInvestment)} &rarr;{' '}
           <span className="text-white font-semibold">{fmtMoney(result.finalValue)}</span>
-          {' '}({fmt(result.strategy.totalReturn)})
           {' '}vs B&H{' '}
-          <span className="text-slate-300">{fmtMoney(initialInvestment * (1 + result.buyHold.totalReturn))}</span>
-          {' '}({fmt(result.buyHold.totalReturn)}).
-          {' '}Market exposure:{' '}
-          <span className="text-white font-semibold">{(result.strategy.exposure * 100).toFixed(0)}%</span>
-          {' '}of the time.
+          <span className="text-slate-300">{fmtMoney(result.bhFinalValue)}</span>.
+          {s.maxDrawdown < bh.maxDrawdown - 0.005 && (
+            <>{' '}Drawdown reduced by <span className="text-emerald-400 font-semibold">{((bh.maxDrawdown - s.maxDrawdown) * 100).toFixed(1)}%</span>.</>
+          )}
+          {s.annualizedVol < bh.annualizedVol - 0.005 && (
+            <>{' '}Volatility reduced by <span className="text-emerald-400 font-semibold">{((bh.annualizedVol - s.annualizedVol) * 100).toFixed(1)}%</span>.</>
+          )}
         </p>
       </div>
     </div>
