@@ -5,6 +5,7 @@ interface BubbleGaugeProps {
   regime: string;
   sentimentScore: number | null;
   liquidityScore: number | null;
+  generatedAt?: string;
 }
 
 function getScoreColor(score: number): string {
@@ -37,38 +38,37 @@ function getRegimeBadgeClass(regime: string): string {
   }
 }
 
-const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, sentimentScore, liquidityScore }) => {
+function formatGeneratedAt(isoString: string): string {
+  const d = new Date(isoString);
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+}
+
+const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, sentimentScore, liquidityScore, generatedAt }) => {
   const color = getScoreColor(compositeScore);
-  const radius = 80;
+  const radius = 112;
   const circumference = 2 * Math.PI * radius;
   const progress = (compositeScore / 100) * circumference;
 
   return (
-    <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl">
-      <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-        <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
-        </svg>
-        Bubble Index
-      </h3>
-
+    <div>
       <div className="flex flex-col items-center">
         {/* Circular gauge */}
-        <div className="relative w-48 h-48 mb-4">
-          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 200 200">
+        <div className="relative w-64 h-64 mb-4">
+          <svg className="w-full h-full transform -rotate-90" viewBox="0 0 260 260">
             {/* Background circle */}
             <circle
-              cx="100" cy="100" r={radius}
+              cx="130" cy="130" r={radius}
               fill="transparent"
               stroke="#1e293b"
-              strokeWidth="12"
+              strokeWidth="14"
             />
             {/* Progress arc */}
             <circle
-              cx="100" cy="100" r={radius}
+              cx="130" cy="130" r={radius}
               fill="transparent"
               stroke={color}
-              strokeWidth="12"
+              strokeWidth="14"
               strokeLinecap="round"
               strokeDasharray={`${progress} ${circumference}`}
               className="transition-all duration-1000"
@@ -77,10 +77,15 @@ const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, senti
           </svg>
           {/* Center text */}
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-4xl font-black text-white">{compositeScore.toFixed(0)}</span>
+            <span className="text-5xl font-black text-white">{compositeScore.toFixed(0)}</span>
             <span className="text-xs text-slate-500 font-bold uppercase">Composite</span>
           </div>
         </div>
+
+        {/* Updated timestamp */}
+        {generatedAt && (
+          <p className="text-sm text-slate-500 mb-3">Updated: {formatGeneratedAt(generatedAt)}</p>
+        )}
 
         {/* Regime badge */}
         <span className={`px-4 py-1.5 rounded-full text-sm font-bold ${getRegimeBadgeClass(regime)}`}>

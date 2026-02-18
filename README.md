@@ -1,120 +1,68 @@
-# QQQ 200-Day Moving Average Deviation Dashboard
+# Market Bubble Index Dashboard
 
-**[Live Demo](https://yichengyang-ethan.github.io/QQQ-200D-Deviation-Dashboard/)** | Daily QQQ deviation monitoring via Yahoo Finance data
+[![Deploy](https://github.com/yichengyang-ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/deploy.yml/badge.svg)](https://github.com/yichengyang-ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/deploy.yml)
+[![Update Data](https://github.com/yichengyang-ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/update-data.yml/badge.svg)](https://github.com/yichengyang-ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/update-data.yml)
 
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
-![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
-[![Deploy](https://github.com/YichengYang-Ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/deploy.yml/badge.svg)](https://github.com/YichengYang-Ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/deploy.yml)
-[![Data Update](https://github.com/YichengYang-Ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/update-data.yml/badge.svg)](https://github.com/YichengYang-Ethan/QQQ-200D-Deviation-Dashboard/actions/workflows/update-data.yml)
+**Live:** [yichengyang-ethan.github.io/QQQ-200D-Deviation-Dashboard](https://yichengyang-ethan.github.io/QQQ-200D-Deviation-Dashboard/)
 
-## Preview
+A single-page financial dashboard that tracks market bubble risk through a composite index of **6 weighted indicators**. Designed as a portfolio showcase piece with professional data visualization.
 
-<p align="center">
-  <img src="docs/screenshot.png" width="800" alt="QQQ 200D Deviation Dashboard">
-</p>
+## Indicators
 
-## Why This Matters
+| Indicator | Weight | Source | Signal |
+|-----------|--------|--------|--------|
+| QQQ Deviation | 20% | Yahoo Finance | 200-day SMA deviation, percentile-ranked |
+| VIX Level | 18% | Yahoo Finance | Inverted VIX (low VIX = complacency) |
+| Put/Call Ratio | 17% | FRED (PCCE) | Inverted equity put/call ratio |
+| Sector Breadth | 15% | Yahoo Finance | Fraction of sectors above 50-day SMA |
+| Credit Spread | 15% | Yahoo Finance | HYG/IEF ratio (tight spreads = risk-on) |
+| Yield Curve | 15% | FRED (T10Y2Y) | 10Y-2Y spread (steepening = risk-on) |
 
-The 200-day moving average (200 DMA) is one of the most watched technical indicators:
+## Regime Classification
 
-- **When QQQ is significantly ABOVE the 200 DMA** (index > 80): Market may be overextended, historically signals potential pullback
-- **When QQQ is significantly BELOW the 200 DMA** (index < 20): Market may be oversold, historically signals potential bounce
+| Regime | Score Range | Interpretation |
+|--------|-------------|----------------|
+| Low | 0–30 | Depressed sentiment, accumulation zone |
+| Moderate | 30–50 | Normal conditions, balanced risk |
+| Elevated | 50–70 | Rising euphoria, tighten risk mgmt |
+| High | 70–85 | Frothy, consider reducing exposure |
+| Extreme | 85–100 | Bubble territory, high correction risk |
 
-> *"Historically, when the deviation index surpasses 80, it signals a high-probability market pullback."*
+## Dashboard Sections
 
-## Features
-
-- **Daily QQQ Data**: Real market data fetched via Yahoo Finance, updated daily by GitHub Actions
-- **Interactive Chart**: Historical deviation with trend visualization (1Y / 2Y / All views)
-- **Risk Level Indicator**: Low / Moderate / High / Danger zones
-- **Stats Dashboard**: Current price, SMA, daily change
-- **Demo Fallback**: If data fetch fails, falls back to simulated data with a clear "Demo Mode" indicator
-
-## Data Pipeline
-
-Market data is updated automatically via a GitHub Actions workflow that runs after US market close on weekdays:
-
-1. `scripts/fetch_qqq_data.py` fetches QQQ history via `yfinance`
-2. Calculates the 200-day SMA and deviation index
-3. Writes `public/data/qqq.json` (included in the build as a static asset)
-4. The React app fetches this JSON at runtime
+- **Hero** — Large composite gauge with regime badge and sub-scores
+- **Indicator Grid** — 2x3 cards with score, trend arrow, and 30-day sparkline
+- **Composite History** — Time series with toggleable per-indicator overlays
+- **Indicator Deep Dive** — Individual accordion charts for all 6 indicators
+- **QQQ Deviation Tracker** — Detailed deviation analysis with backtesting
+- **Methodology** — Regime guide and indicator explanations
 
 ## Tech Stack
 
-- React + TypeScript (strict mode)
-- Vite
-- Recharts for data visualization
-- GitHub Actions for data pipeline
-- Deployed on GitHub Pages
+- React 19 + TypeScript
+- Recharts 3.6 for data visualization
+- Tailwind CSS for styling
+- Vite for build tooling
+- GitHub Actions for daily data updates + deployment
+
+## Data Pipeline
+
+Data is refreshed daily via GitHub Actions at 9:30 PM UTC on weekdays:
+
+1. `scripts/fetch_qqq_data.py` — Fetches QQQ/SPY/TQQQ/IWM deviation data from Yahoo Finance
+2. `scripts/fetch_bubble.py` — Computes all 6 bubble indicators and generates composite index
+
+Set `FRED_API_KEY` as a repository secret to enable put/call ratio and yield curve indicators.
 
 ## Quick Start
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm run dev      # Start dev server on port 3000
+pnpm run check    # TypeScript type checking
+pnpm run test     # Run tests
+pnpm run build    # Production build
 ```
-
-To generate fresh data locally:
-```bash
-pip install yfinance
-python scripts/fetch_qqq_data.py
-```
-
-## Data Structure
-
-```typescript
-interface DataPoint {
-  date: string;
-  price: number;      // Current QQQ price
-  sma200: number;     // 200-day simple moving average
-  deviation: number;  // Raw deviation percentage
-  index: number;      // Normalized 0-100 index
-}
-```
-
-## Interpretation Guide
-
-| Index Range | Risk Level | Market Condition | Historical Action |
-|-------------|------------|------------------|-------------------|
-| 0 - 20 | Low | Oversold | Potential buying opportunity |
-| 20 - 50 | Moderate | Normal range | Hold / monitor |
-| 50 - 80 | High | Extended | Reduce exposure |
-| 80 - 100 | Danger | Overextended | High pullback probability |
-
-## Statistical Analysis
-
-**Does the deviation index predict forward QQQ returns?**
-
-We bucketed historical deviation index values into quintiles (0-20, 20-40, ..., 80-100) and measured forward QQQ returns over multiple horizons. Results below are based on 551 trading days of data (Dec 2023 - Feb 2026).
-
-### Forward Return Summary by Quintile
-
-| Quintile | N | 5d Mean | 21d Mean | 63d Mean | 126d Mean |
-|----------|---|---------|----------|----------|-----------|
-| 0-20 (Oversold) | 11 | +4.70% | +14.91% | +27.35% | +38.03% |
-| 20-40 | 36 | -0.37% | +1.07% | +14.83% | +26.39% |
-| 40-60 | 147 | +1.09% | +2.83% | +6.23% | +9.60% |
-| 60-80 | 338 | +0.23% | +1.56% | +3.76% | +9.43% |
-| 80-100 (Extended) | 19 | -1.41% | -5.57% | -1.20% | +5.14% |
-
-### Welch's t-test: Bottom vs Top Quintile
-
-| Horizon | Bottom (0-20) | Top (80-100) | t-stat | p-value | Significant? |
-|---------|---------------|--------------|--------|---------|--------------|
-| 5-day | +4.70% | -1.41% | 4.130 | 0.0015 | Yes |
-| 21-day | +14.91% | -5.57% | 14.482 | <0.0001 | Yes |
-| 63-day | +27.35% | -1.20% | 24.550 | <0.0001 | Yes |
-| 126-day | +38.03% | +5.14% | 19.069 | <0.0001 | Yes |
-
-All four horizons show statistically significant differences (p < 0.05) between the bottom and top quintiles. When the deviation index is in the oversold range (0-20), forward returns are substantially higher than when the index signals an overextended market (80-100).
-
-### Forward Return Distributions
-
-<p align="center">
-  <img src="analysis/forward_returns.png" width="800" alt="Forward Returns by Deviation Index Quintile">
-</p>
-
-> Analysis script: `scripts/analyze_signals.py` -- run with `python scripts/analyze_signals.py`
 
 ## License
 

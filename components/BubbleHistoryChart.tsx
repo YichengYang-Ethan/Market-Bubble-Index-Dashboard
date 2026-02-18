@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -10,12 +10,49 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { BubbleHistoryPoint } from '../types';
+import { INDICATOR_META } from '../constants';
 
 interface BubbleHistoryChartProps {
   history: BubbleHistoryPoint[];
 }
 
 const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history }) => {
+  const [enabledIndicators, setEnabledIndicators] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {};
+    INDICATOR_META.forEach((ind) => {
+      initial[ind.key] = false;
+    });
+    return initial;
+  });
+
+  const toggleIndicator = (key: string) => {
+    setEnabledIndicators((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  // Transform history data to flatten indicator values to top-level keys for Recharts
+  const chartData = useMemo(() => {
+    return history.map((point) => {
+      const flat: Record<string, unknown> = { ...point };
+      INDICATOR_META.forEach((ind) => {
+        flat[ind.key] = point.indicators?.[ind.key] ?? null;
+      });
+      return flat;
+    });
+  }, [history]);
+
+  // Build tooltip labels including indicator names
+  const tooltipLabels = useMemo(() => {
+    const labels: Record<string, string> = {
+      composite_score: 'Composite',
+      sentiment_score: 'Sentiment',
+      liquidity_score: 'Liquidity',
+    };
+    INDICATOR_META.forEach((ind) => {
+      labels[ind.key] = ind.label;
+    });
+    return labels;
+  }, []);
+
   return (
     <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl">
       <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -27,7 +64,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history }) => {
 
       <div className="h-72">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={history} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
+          <LineChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
             <XAxis
               dataKey="date"
@@ -57,12 +94,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history }) => {
               }}
               labelFormatter={(label) => `Date: ${label}`}
               formatter={(value?: number, name?: string) => {
-                const labels: Record<string, string> = {
-                  composite_score: 'Composite',
-                  sentiment_score: 'Sentiment',
-                  liquidity_score: 'Liquidity',
-                };
-                return [value != null ? value.toFixed(1) : '--', labels[name ?? ''] || name || ''];
+                return [value != null ? Number(value).toFixed(1) : '--', tooltipLabels[name ?? ''] || name || ''];
               }}
             />
             {/* Danger line at 85 */}
@@ -106,11 +138,27 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history }) => {
               dot={false}
               activeDot={{ r: 3, fill: '#34d399' }}
             />
+            {/* Per-indicator lines (toggled) */}
+            {INDICATOR_META.map((ind) =>
+              enabledIndicators[ind.key] ? (
+                <Line
+                  key={ind.key}
+                  type="monotone"
+                  dataKey={ind.key}
+                  stroke={ind.color}
+                  strokeWidth={1.5}
+                  strokeDasharray="2 2"
+                  dot={false}
+                  activeDot={{ r: 3, fill: ind.color }}
+                  connectNulls
+                />
+              ) : null
+            )}
           </LineChart>
         </ResponsiveContainer>
       </div>
 
-      {/* Legend */}
+      {/* Legend - core lines */}
       <div className="flex items-center justify-center gap-6 mt-4 text-xs text-slate-400">
         <div className="flex items-center gap-1.5">
           <div className="w-4 h-0.5 bg-blue-500 rounded" />
@@ -124,6 +172,39 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history }) => {
           <div className="w-4 h-0.5 bg-emerald-400 rounded" style={{ borderTop: '2px dashed #34d399' }} />
           <span>Liquidity</span>
         </div>
+      </div>
+
+      {/* Indicator toggles */}
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 mt-3 text-xs text-slate-400">
+        {INDICATOR_META.map((ind) => (
+          <label key={ind.key} className="flex items-center gap-1.5 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={enabledIndicators[ind.key]}
+              onChange={() => toggleIndicator(ind.key)}
+              className="sr-only"
+            />
+            <span
+              className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${
+                enabledIndicators[ind.key]
+                  ? 'border-transparent'
+                  : 'border-slate-600 bg-slate-800'
+              }`}
+              style={enabledIndicators[ind.key] ? { backgroundColor: ind.color } : undefined}
+            >
+              {enabledIndicators[ind.key] && (
+                <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </span>
+            <span
+              className="w-2 h-2 rounded-full"
+              style={{ backgroundColor: ind.color }}
+            />
+            <span>{ind.label}</span>
+          </label>
+        ))}
       </div>
     </div>
   );

@@ -286,6 +286,17 @@ def build_bubble_index():
         "indicators": snapshot_indicators,
     }
 
+    # Build previous_day data (second-to-last entry) for trend arrows
+    if len(composite) >= 2:
+        prev_indicators = {}
+        for name in available:
+            val = combined[name].iloc[-2]
+            prev_indicators[name] = round(float(val), 1) if not np.isnan(val) else None
+        snapshot["previous_day"] = {
+            "composite_score": round(float(composite.iloc[-2]), 1),
+            "indicators": prev_indicators,
+        }
+
     # Build history (last 365 trading days)
     history_points = []
     for i in range(max(0, len(composite) - 365), len(composite)):
@@ -294,12 +305,20 @@ def build_bubble_index():
         c_val = float(composite.iloc[i])
         s_val = float(sentiment.iloc[i]) if not np.isnan(sentiment.iloc[i]) else None
         l_val = float(liquidity.iloc[i]) if not np.isnan(liquidity.iloc[i]) else None
+
+        # Per-indicator scores for this day
+        day_indicators = {}
+        for name in available:
+            val = combined[name].iloc[i]
+            day_indicators[name] = round(float(val), 1) if not np.isnan(val) else None
+
         history_points.append({
             "date": date_str,
             "composite_score": round(c_val, 1),
             "sentiment_score": round(s_val, 1) if s_val is not None else None,
             "liquidity_score": round(l_val, 1) if l_val is not None else None,
             "regime": get_regime(c_val),
+            "indicators": day_indicators,
         })
 
     history = {
