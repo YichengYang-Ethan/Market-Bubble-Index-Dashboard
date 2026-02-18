@@ -159,13 +159,17 @@ const App: React.FC = () => {
     }
   }, [allData, timeRange]);
 
-  // Eager-load both datasets on mount
+  // Load bubble data once on mount
+  useEffect(() => {
+    loadBubbleData();
+  }, [loadBubbleData]);
+
+  // Load deviation data on mount and ticker change
   useEffect(() => {
     loadData(selectedTicker);
-    loadBubbleData();
     const interval = setInterval(() => loadData(selectedTicker), REFRESH_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [selectedTicker, loadData, loadBubbleData]);
+  }, [selectedTicker, loadData]);
 
   const handleExportCSV = () => {
     const headers = ['Date', 'Price', 'SMA200', 'Deviation%', 'Index'];
