@@ -5,6 +5,7 @@ import StatsCard from './components/StatsCard';
 import BacktestPanel from './components/BacktestPanel';
 import BubbleGauge from './components/BubbleGauge';
 import BubbleHistoryChart from './components/BubbleHistoryChart';
+import BubbleBacktestPanel from './components/BubbleBacktestPanel';
 import IndicatorGrid from './components/IndicatorGrid';
 import IndicatorDeepDive from './components/IndicatorDeepDive';
 import { fetchRealData, getMarketSummary, detectHistoricalSignals } from './services/dataService';
@@ -341,6 +342,11 @@ const App: React.FC = () => {
           <div className="max-w-7xl mx-auto">
             <h2 className="text-2xl font-bold text-white mb-6">Composite History</h2>
             <BubbleHistoryChart history={bubbleHistory} priceData={priceData} gsadfResults={gsadfResults} markovRegimes={markovRegimes} />
+            {priceData.qqq.length > 0 && (
+              <div className="mt-8">
+                <BubbleBacktestPanel history={bubbleHistory} priceData={priceData.qqq} ticker="QQQ" />
+              </div>
+            )}
           </div>
         </section>
       )}
