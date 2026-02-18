@@ -54,14 +54,33 @@ export interface DrawdownModelData {
   calibration_date: string;
   forward_window_days: number;
   forward_window_label: string;
+  train_test_split?: string;
+  feature_names?: string[];
+  current_features?: Record<string, number>;
   logistic_coefficients: Record<string, {
-    a: number;
-    b: number;
-    a_velocity: number;
-    b_with_velocity: number;
-    a_score_with_velocity: number;
-    n_events: number;
-    n_total: number;
+    // v2.0 multi-feature format
+    features?: string[];
+    weights?: Record<string, number>;
+    intercept?: number;
+    n_train?: number;
+    n_test?: number;
+    n_events_train?: number;
+    n_events_test?: number;
+    base_rate_train?: number;
+    base_rate_test?: number;
+    auc_train?: number;
+    auc_test?: number;
+    brier_train?: number;
+    brier_test?: number;
+    bss_test?: number;
+    // v1.0 legacy format
+    a?: number;
+    b?: number;
+    a_velocity?: number;
+    b_with_velocity?: number;
+    a_score_with_velocity?: number;
+    n_events?: number;
+    n_total?: number;
   }>;
   bayesian_lookup: Record<string, {
     bin_centers: number[];

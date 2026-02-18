@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
-"""Fit drawdown probability model from bubble history + QQQ price data.
+"""Fit drawdown probability model v2.0 from bubble history + QQQ price data.
+
+Improvements over v1.0:
+  - Forward window: 126 trading days (~6 months) instead of 63
+  - Multi-feature logistic regression (5 features instead of composite_score only)
+  - Proper 70/30 chronological train/test split with OOS metrics
+  - Derived features: score_sma_60d, qqq_vol_60d
 
 Hybrid 3-layer model:
-  Layer 1: Logistic regression for 10% and 20% thresholds
+  Layer 1: Multi-feature logistic regression for 10% and 20% thresholds
   Layer 2: Bayesian Beta-Binomial with monotonicity for 20% and 30%
   Layer 3: EVT (GPD) tail extrapolation for 40%
 
-Output: public/data/drawdown_model.json
+Output: public/data/drawdown_model.json, public/data/qqq_drawdown.json
 """
 
 from __future__ import annotations
@@ -20,34 +26,66 @@ import numpy as np
 import pandas as pd
 from scipy import stats
 from scipy.optimize import minimize
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score, brier_score_loss
 
 warnings.filterwarnings("ignore")
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR.parent / "public" / "data"
 
-FORWARD_WINDOW = 63  # trading days (~3 months)
-DECORRELATION_DAYS = 40  # for effective sample size
-MIN_EPISODE_GAP = 30  # min gap between drawdown episodes
+FORWARD_WINDOW = 126  # trading days (~6 months) — v2.0 change from 63
+DECORRELATION_DAYS = 40
+MIN_EPISODE_GAP = 30
+TRAIN_RATIO = 0.70
 
 DRAWDOWN_THRESHOLDS = [0.10, 0.20, 0.30, 0.40]
 SCORE_BINS = [(0, 20), (20, 40), (40, 60), (60, 80), (80, 100)]
 BIN_CENTERS = [10, 30, 50, 70, 90]
 
+# Features used in the multi-feature logistic model
+FEATURE_COLS = [
+    "composite_score",
+    "score_velocity",
+    "ind_vix_level",
+    "ind_credit_spread",
+    "ind_qqq_deviation",
+    "score_sma_60d",
+]
+
 
 def load_data() -> pd.DataFrame:
-    """Load and merge bubble history with QQQ price data."""
+    """Load and merge bubble history with QQQ price data, extract all features."""
     history = json.loads((DATA_DIR / "bubble_history.json").read_text())["history"]
     qqq_raw = json.loads((DATA_DIR / "qqq.json").read_text())
     qqq = qqq_raw["data"] if isinstance(qqq_raw, dict) and "data" in qqq_raw else qqq_raw
 
-    df_h = pd.DataFrame(history)[["date", "composite_score", "score_velocity"]].copy()
+    df_h = pd.DataFrame(history)
+
+    # Extract indicators from nested dict
+    indicators = pd.json_normalize(df_h["indicators"])
+    indicators.columns = ["ind_" + c for c in indicators.columns]
+    df_h = pd.concat([df_h.drop(columns=["indicators"]), indicators], axis=1)
+
     df_h["score_velocity"] = df_h["score_velocity"].fillna(0)
+
+    # Derived feature: 60-day SMA of composite score
+    df_h["score_sma_60d"] = df_h["composite_score"].rolling(60, min_periods=20).mean()
 
     df_q = pd.DataFrame(qqq)[["date", "price"]].copy()
     df_q.rename(columns={"price": "qqq_price"}, inplace=True)
 
+    # Derived feature: 60-day annualized volatility of QQQ
+    df_q["qqq_returns"] = df_q["qqq_price"].pct_change()
+    df_q["qqq_vol_60d"] = df_q["qqq_returns"].rolling(60, min_periods=20).std() * np.sqrt(252) * 100
+
     df = df_h.merge(df_q, on="date", how="inner").sort_values("date").reset_index(drop=True)
+
+    # Fill NaN indicators with median for robustness
+    for col in FEATURE_COLS:
+        if col in df.columns:
+            df[col] = df[col].fillna(df[col].median())
+
     return df
 
 
@@ -59,7 +97,7 @@ def compute_forward_drawdowns(df: pd.DataFrame) -> pd.DataFrame:
     max_dd = np.full(n, np.nan)
     for i in range(n):
         end = min(i + FORWARD_WINDOW + 1, n)
-        if end - i < 5:
+        if end - i < 10:
             continue
         window = prices[i:end]
         peak = prices[i]
@@ -85,58 +123,87 @@ def compute_rolling_drawdown(df: pd.DataFrame) -> pd.DataFrame:
     for i, p in enumerate(prices):
         if p > peak:
             peak = p
-        dd[i] = (p - peak) / peak  # negative values
+        dd[i] = (p - peak) / peak
     df = df.copy()
     df["drawdown"] = dd
     return df
 
 
-def subsample_episodes(df: pd.DataFrame, threshold: float) -> pd.DataFrame:
-    """Subsample to approximately independent episodes for logistic regression."""
-    # For event days: group consecutive event days, take first of each cluster
-    # For non-event days: take one per DECORRELATION_DAYS block
-    is_event = df["max_forward_dd"] >= threshold
-    rows = []
+def fit_multi_feature_logistic(
+    df: pd.DataFrame, threshold: float, features: list[str]
+) -> dict:
+    """Fit L2-regularized logistic regression with train/test split and OOS metrics."""
+    # Prepare data
+    valid_mask = df[features].notna().all(axis=1)
+    sub = df[valid_mask].copy()
+    X = sub[features].values
+    y = (sub["max_forward_dd"] >= threshold).astype(float).values
 
-    # Events: cluster with MIN_EPISODE_GAP
-    event_indices = df.index[is_event].tolist()
-    if event_indices:
-        clusters = [[event_indices[0]]]
-        for idx in event_indices[1:]:
-            if idx - clusters[-1][-1] <= MIN_EPISODE_GAP:
-                clusters[-1].append(idx)
-            else:
-                clusters.append([idx])
-        for cluster in clusters:
-            rows.append(cluster[0])
+    n = len(X)
+    split_idx = int(n * TRAIN_RATIO)
 
-    # Non-events: one per decorrelation window
-    non_event = df[~is_event]
-    if len(non_event) > 0:
-        step = max(1, DECORRELATION_DAYS)
-        rows.extend(non_event.index[::step].tolist())
+    X_train, X_test = X[:split_idx], X[split_idx:]
+    y_train, y_test = y[:split_idx], y[split_idx:]
 
-    return df.loc[sorted(set(rows))].copy()
+    n_events_train = int(y_train.sum())
+    n_events_test = int(y_test.sum())
 
+    result = {
+        "features": features,
+        "n_train": len(X_train),
+        "n_test": len(X_test),
+        "n_events_train": n_events_train,
+        "n_events_test": n_events_test,
+        "base_rate_train": round(float(y_train.mean()), 4),
+        "base_rate_test": round(float(y_test.mean()), 4),
+    }
 
-def fit_logistic(X: np.ndarray, y: np.ndarray) -> tuple[float, float]:
-    """Fit logistic regression with Firth-like penalty for small samples."""
-    # P(y=1) = sigmoid(a*x + b)
-    # Add small L2 penalty for stability
+    if n_events_train < 3 or n_events_train == len(y_train):
+        # Can't fit model
+        result["weights"] = {f: 0.0 for f in features}
+        result["intercept"] = -5.0
+        result["auc_train"] = 0.5
+        result["auc_test"] = 0.5
+        result["brier_train"] = 0.25
+        result["brier_test"] = 0.25
+        return result
 
-    def neg_log_likelihood(params):
-        a, b = params
-        z = a * X + b
-        z = np.clip(z, -30, 30)
-        p = 1 / (1 + np.exp(-z))
-        p = np.clip(p, 1e-10, 1 - 1e-10)
-        ll = np.sum(y * np.log(p) + (1 - y) * np.log(1 - p))
-        # Firth-like penalty
-        penalty = 0.5 * (a**2 + b**2) * 0.01
-        return -ll + penalty
+    # Fit L2-regularized logistic regression (C=1.0 = moderate regularization)
+    model = LogisticRegression(max_iter=2000, C=1.0, solver="lbfgs")
+    model.fit(X_train, y_train)
 
-    result = minimize(neg_log_likelihood, [0.01, -2.0], method="Nelder-Mead")
-    return float(result.x[0]), float(result.x[1])
+    # Coefficients
+    weights = {f: round(float(c), 6) for f, c in zip(features, model.coef_[0])}
+    intercept = round(float(model.intercept_[0]), 4)
+
+    # Train metrics
+    y_pred_train = model.predict_proba(X_train)[:, 1]
+    auc_train = roc_auc_score(y_train, y_pred_train)
+    brier_train = brier_score_loss(y_train, y_pred_train)
+
+    # Test metrics
+    y_pred_test = model.predict_proba(X_test)[:, 1]
+    if len(np.unique(y_test)) == 2:
+        auc_test = roc_auc_score(y_test, y_pred_test)
+    else:
+        auc_test = float("nan")
+    brier_test = brier_score_loss(y_test, y_pred_test)
+
+    # Brier Skill Score (BSS) = 1 - Brier / Brier_climatology
+    brier_clim = y_test.mean() * (1 - y_test.mean())
+    bss_test = round(1 - brier_test / max(brier_clim, 1e-10), 4) if brier_clim > 0 else 0.0
+
+    result.update({
+        "weights": weights,
+        "intercept": intercept,
+        "auc_train": round(float(auc_train), 4),
+        "auc_test": round(float(auc_test), 4) if not np.isnan(auc_test) else 0.5,
+        "brier_train": round(float(brier_train), 4),
+        "brier_test": round(float(brier_test), 4),
+        "bss_test": bss_test,
+    })
+
+    return result
 
 
 def bayesian_beta_binomial(
@@ -147,7 +214,7 @@ def bayesian_beta_binomial(
     for i, (lo, hi) in enumerate(SCORE_BINS):
         mask = (df["composite_score"] >= lo) & (df["composite_score"] < hi)
         subset = df[mask]
-        n_obs = max(1, len(subset) // DECORRELATION_DAYS)  # effective sample size
+        n_obs = max(1, len(subset) // DECORRELATION_DAYS)
         n_events = int((subset["max_forward_dd"] >= threshold).sum() / max(1, DECORRELATION_DAYS // 2))
         n_events = min(n_events, n_obs)
 
@@ -155,7 +222,6 @@ def bayesian_beta_binomial(
         beta_post = prior_betas[i] + n_obs - n_events
         posteriors.append(alpha_post / (alpha_post + beta_post))
 
-    # Enforce monotonicity via Pool Adjacent Violators (PAVA)
     posteriors = pava_monotone(posteriors)
     return posteriors
 
@@ -171,7 +237,6 @@ def pava_monotone(values: list[float]) -> list[float]:
         i = 0
         while i < n - 1:
             if result[i] > result[i + 1]:
-                # Pool
                 w_sum = weights[i] + weights[i + 1]
                 pooled = (result[i] * weights[i] + result[i + 1] * weights[i + 1]) / w_sum
                 result[i] = pooled
@@ -188,12 +253,10 @@ def pava_monotone(values: list[float]) -> list[float]:
 def fit_gpd(exceedances: np.ndarray) -> tuple[float, float]:
     """Fit GPD to exceedances above threshold using MLE."""
     if len(exceedances) < 3:
-        # Not enough data, return conservative defaults
         return 0.1, 0.05
 
     try:
         shape, loc, scale = stats.genpareto.fit(exceedances, floc=0)
-        # Bound shape parameter for stability
         shape = np.clip(shape, -0.5, 0.5)
         return float(shape), float(scale)
     except Exception:
@@ -214,15 +277,24 @@ def gpd_exceedance_prob(x: float, u: float, xi: float, sigma: float) -> float:
 
 
 def main():
-    print("Loading data...")
+    print("=" * 70)
+    print("DRAWDOWN PROBABILITY MODEL v2.0")
+    print("=" * 70)
+
+    print("\nLoading data...")
     df = load_data()
     print(f"  {len(df)} merged trading days")
+    print(f"  Date range: {df['date'].iloc[0]} to {df['date'].iloc[-1]}")
+    print(f"  Features: {FEATURE_COLS}")
 
-    print("Computing forward drawdowns...")
+    print("\nComputing forward drawdowns (126-day window)...")
     df = compute_forward_drawdowns(df)
     print(f"  {len(df)} days with forward drawdown data")
+    print(f"  Forward DD stats: mean={df['max_forward_dd'].mean():.2%}, "
+          f"median={df['max_forward_dd'].median():.2%}, "
+          f"max={df['max_forward_dd'].max():.2%}")
 
-    # Also compute rolling drawdown for the chart overlay data
+    # Rolling drawdown for chart overlay
     df_full = load_data()
     df_full = compute_rolling_drawdown(df_full)
     drawdown_series = [
@@ -230,8 +302,10 @@ def main():
         for _, row in df_full.iterrows()
     ]
 
+    # -----------------------------------------------------------------------
     # Empirical stats per bin
-    print("\nEmpirical drawdown statistics per score bin:")
+    # -----------------------------------------------------------------------
+    print("\nEmpirical drawdown statistics per score bin (126d window):")
     empirical = {}
     for lo, hi in SCORE_BINS:
         mask = (df["composite_score"] >= lo) & (df["composite_score"] < hi)
@@ -255,63 +329,50 @@ def main():
               f"P(>30%)={bin_stats.get('p_30pct', 0):.1%}")
 
     # -----------------------------------------------------------------------
-    # Layer 1: Logistic regression for 10% and 20%
+    # Layer 1: Multi-feature logistic regression for 10% and 20%
     # -----------------------------------------------------------------------
-    print("\nFitting logistic regression (Firth-penalized)...")
+    print("\n" + "=" * 70)
+    print("LAYER 1: Multi-feature Logistic Regression (L2-regularized)")
+    print("=" * 70)
+
     logistic_coefs = {}
     for t in [0.10, 0.20]:
         pct = int(t * 100)
-        sub = subsample_episodes(df, t)
-        X = sub["composite_score"].values
-        y = (sub["max_forward_dd"] >= t).astype(float).values
-        a, b = fit_logistic(X, y)
-        n_events = int(y.sum())
-        n_total = len(y)
+        print(f"\n--- Drawdown >= {pct}% ---")
 
-        # Also fit with velocity
-        # P(y=1) = sigmoid(a1*score + a2*velocity + b)
-        def neg_ll_2d(params):
-            a1, a2, b0 = params
-            z = a1 * sub["composite_score"].values + a2 * sub["score_velocity"].values + b0
-            z = np.clip(z, -30, 30)
-            p = 1 / (1 + np.exp(-z))
-            p = np.clip(p, 1e-10, 1 - 1e-10)
-            ll = np.sum(y * np.log(p) + (1 - y) * np.log(1 - p))
-            penalty = 0.5 * (a1**2 + a2**2 + b0**2) * 0.01
-            return -ll + penalty
+        result = fit_multi_feature_logistic(df, t, FEATURE_COLS)
+        logistic_coefs[f"drawdown_{pct}pct"] = result
 
-        res2 = minimize(neg_ll_2d, [a, 0.0, b], method="Nelder-Mead")
-        a1, a2, b0 = res2.x
-
-        logistic_coefs[f"drawdown_{pct}pct"] = {
-            "a": round(float(a), 6),
-            "b": round(float(b), 4),
-            "a_velocity": round(float(a2), 6),
-            "b_with_velocity": round(float(b0), 4),
-            "a_score_with_velocity": round(float(a1), 6),
-            "n_events": n_events,
-            "n_total": n_total,
-        }
-        print(f"  {pct}%: a={a:.4f}, b={b:.3f} (events={n_events}/{n_total})")
-        print(f"    +velocity: a_score={a1:.4f}, a_vel={a2:.4f}, b={b0:.3f}")
+        print(f"  Train: {result['n_train']} obs, {result['n_events_train']} events ({result['base_rate_train']:.1%})")
+        print(f"  Test:  {result['n_test']} obs, {result['n_events_test']} events ({result['base_rate_test']:.1%})")
+        print(f"  AUC train: {result['auc_train']:.4f}")
+        print(f"  AUC test:  {result['auc_test']:.4f}")
+        print(f"  Brier train: {result['brier_train']:.4f}")
+        print(f"  Brier test:  {result['brier_test']:.4f}")
+        print(f"  BSS test:    {result.get('bss_test', 'N/A')}")
+        print(f"  Coefficients:")
+        for feat, w in result["weights"].items():
+            print(f"    {feat:<22}: {w:+.6f}")
+        print(f"    {'intercept':<22}: {result['intercept']:+.4f}")
 
     # -----------------------------------------------------------------------
     # Layer 2: Bayesian Beta-Binomial for 20% and 30%
     # -----------------------------------------------------------------------
-    print("\nFitting Bayesian Beta-Binomial with monotonicity...")
-    bayesian_lookup = {}
+    print("\n" + "=" * 70)
+    print("LAYER 2: Bayesian Beta-Binomial with Monotonicity (PAVA)")
+    print("=" * 70)
 
-    # Priors informed by longer NASDAQ history (1971-present):
-    # 20% drawdown within 63 days: ~15-25% unconditional probability in bear markets
-    # Higher score bins get stronger priors toward higher probability
+    bayesian_lookup = {}
     for t in [0.20, 0.30]:
         pct = int(t * 100)
+        # Priors informed by extended NASDAQ history
+        # With 126d window, drawdown probabilities are higher than 63d
         if t == 0.20:
-            prior_alphas = [1, 1.5, 2, 3, 5]
-            prior_betas = [80, 50, 30, 15, 8]
+            prior_alphas = [1, 2, 3, 4, 6]
+            prior_betas = [60, 40, 25, 12, 6]
         else:  # 0.30
-            prior_alphas = [0.5, 0.8, 1, 2, 3]
-            prior_betas = [150, 100, 60, 30, 15]
+            prior_alphas = [0.5, 1, 1.5, 2.5, 4]
+            prior_betas = [120, 80, 50, 25, 12]
 
         probs = bayesian_beta_binomial(df, t, prior_alphas, prior_betas)
         bayesian_lookup[f"drawdown_{pct}pct"] = {
@@ -323,15 +384,17 @@ def main():
     # -----------------------------------------------------------------------
     # Layer 3: EVT (GPD) for tail extrapolation
     # -----------------------------------------------------------------------
-    print("\nFitting GPD for tail extrapolation...")
-    evt_threshold = 0.10  # exceedances above 10%
+    print("\n" + "=" * 70)
+    print("LAYER 3: EVT/GPD Tail Extrapolation")
+    print("=" * 70)
+
+    evt_threshold = 0.10
     exceedances = df[df["max_forward_dd"] >= evt_threshold]["max_forward_dd"].values - evt_threshold
     n_exceed = len(exceedances)
 
     xi, sigma = fit_gpd(exceedances)
     print(f"  GPD: xi={xi:.4f}, sigma={sigma:.4f}, n_exceedances={n_exceed}")
 
-    # Compute extrapolation ratios
     ratios = {}
     for t in [0.20, 0.30, 0.40]:
         pct = int(t * 100)
@@ -339,7 +402,6 @@ def main():
         ratios[f"{pct}pct_given_10pct"] = round(r, 4)
         print(f"  P(>{pct}% | >10%) = {r:.4f}")
 
-    # Cross-threshold ratios
     r_40_30 = gpd_exceedance_prob(0.40, evt_threshold, xi, sigma) / max(
         gpd_exceedance_prob(0.30, evt_threshold, xi, sigma), 1e-10
     )
@@ -360,34 +422,34 @@ def main():
     }
 
     # -----------------------------------------------------------------------
-    # Current score probabilities
+    # Current predictions
     # -----------------------------------------------------------------------
-    current_score = df["composite_score"].iloc[-1]
-    current_velocity = df["score_velocity"].iloc[-1]
-    print(f"\nCurrent score: {current_score:.1f}, velocity: {current_velocity:.1f}")
+    print("\n" + "=" * 70)
+    print("CURRENT PREDICTIONS")
+    print("=" * 70)
 
-    current_probs = {}
-    for pct_key, coefs in logistic_coefs.items():
-        z = coefs["a"] * current_score + coefs["b"]
-        p = 1 / (1 + np.exp(-z))
-        z_v = coefs["a_score_with_velocity"] * current_score + coefs["a_velocity"] * current_velocity + coefs["b_with_velocity"]
-        p_v = 1 / (1 + np.exp(-z_v))
-        current_probs[pct_key] = {
-            "logistic": round(float(p), 4),
-            "logistic_with_velocity": round(float(p_v), 4),
-        }
-        print(f"  {pct_key}: logistic={p:.2%}, +velocity={p_v:.2%}")
+    latest = df.iloc[-1]
+    current_features = {}
+    for f in FEATURE_COLS:
+        val = latest.get(f, 0)
+        if pd.isna(val):
+            val = 0
+        current_features[f] = round(float(val), 2)
+        print(f"  {f:<22}: {val:.2f}")
 
     # -----------------------------------------------------------------------
     # Output model
     # -----------------------------------------------------------------------
     model = {
-        "model_version": "1.0",
+        "model_version": "2.0",
         "calibration_date": datetime.utcnow().strftime("%Y-%m-%d"),
         "data_points": len(df),
+        "train_test_split": f"{int(TRAIN_RATIO*100)}/{int((1-TRAIN_RATIO)*100)}",
         "effective_sample_size": max(1, len(df) // DECORRELATION_DAYS),
         "forward_window_days": FORWARD_WINDOW,
-        "forward_window_label": "3 months",
+        "forward_window_label": "6 months",
+        "feature_names": FEATURE_COLS,
+        "current_features": current_features,
         "logistic_coefficients": logistic_coefs,
         "bayesian_lookup": bayesian_lookup,
         "evt_parameters": evt_params,
@@ -398,18 +460,19 @@ def main():
             "30pct": "model_dependent",
             "40pct": "extrapolated",
         },
-        "current_probabilities": current_probs,
     }
 
-    # Write model coefficients
     out_path = DATA_DIR / "drawdown_model.json"
     out_path.write_text(json.dumps(model, indent=2, ensure_ascii=False) + "\n")
     print(f"\nModel written to {out_path}")
 
-    # Write drawdown series for chart overlay
     dd_out = DATA_DIR / "qqq_drawdown.json"
     dd_out.write_text(json.dumps(drawdown_series, ensure_ascii=False) + "\n")
     print(f"Drawdown series written to {dd_out} ({len(drawdown_series)} points)")
+
+    print("\n" + "=" * 70)
+    print("MODEL v2.0 CALIBRATION COMPLETE")
+    print("=" * 70)
 
 
 if __name__ == "__main__":

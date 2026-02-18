@@ -1,14 +1,17 @@
 import React, { useMemo } from 'react';
 import { DrawdownModelData } from '../services/bubbleService';
+import { BubbleIndicator, BubbleHistoryPoint } from '../types';
 
 interface Props {
   model: DrawdownModelData;
   currentScore: number;
   scoreVelocity: number;
+  indicators?: Record<string, BubbleIndicator>;
+  history?: BubbleHistoryPoint[];
 }
 
 // ---------------------------------------------------------------------------
-// Probability computation (mirrors Python hybrid 3-layer model)
+// Probability computation — v2.0 multi-feature + v1.0 fallback
 // ---------------------------------------------------------------------------
 
 function sigmoid(z: number): number {
@@ -28,6 +31,47 @@ function interpolateLookup(score: number, centers: number[], probs: number[]): n
   return probs[probs.length - 1];
 }
 
+/** Build current feature values from available data */
+function buildFeatureValues(
+  model: DrawdownModelData,
+  currentScore: number,
+  scoreVelocity: number,
+  indicators?: Record<string, BubbleIndicator>,
+  history?: BubbleHistoryPoint[],
+): Record<string, number> {
+  const values: Record<string, number> = {
+    composite_score: currentScore,
+    score_velocity: scoreVelocity,
+  };
+
+  // Map indicator names — extract .score from BubbleIndicator
+  if (indicators) {
+    values.ind_vix_level = indicators.vix_level?.score ?? 50;
+    values.ind_credit_spread = indicators.credit_spread?.score ?? 50;
+    values.ind_qqq_deviation = indicators.qqq_deviation?.score ?? 50;
+  }
+
+  // Compute score_sma_60d from history
+  if (history && history.length >= 20) {
+    const recent = history.slice(-60);
+    const sum = recent.reduce((acc, h) => acc + h.composite_score, 0);
+    values.score_sma_60d = sum / recent.length;
+  } else {
+    values.score_sma_60d = currentScore;
+  }
+
+  // Fallback to model's pre-computed current features
+  if (model.current_features) {
+    for (const [key, val] of Object.entries(model.current_features)) {
+      if (!(key in values) || values[key] === 50) {
+        values[key] = val;
+      }
+    }
+  }
+
+  return values;
+}
+
 interface DrawdownProb {
   threshold: number;
   label: string;
@@ -39,35 +83,62 @@ interface DrawdownProb {
 
 function computeDrawdownProbabilities(
   model: DrawdownModelData,
-  score: number,
-  velocity: number,
+  featureValues: Record<string, number>,
 ): DrawdownProb[] {
   const { logistic_coefficients: logCoefs, bayesian_lookup: bayesian, evt_parameters: evt } = model;
 
-  // Layer 1: Logistic for 10%
+  // --- Layer 1: Multi-feature logistic for 10% ---
   const c10 = logCoefs['drawdown_10pct'];
-  const p10_base = c10
-    ? sigmoid(c10.a_score_with_velocity * score + c10.a_velocity * velocity + c10.b_with_velocity)
-    : 0;
+  let p10 = 0;
+  if (c10?.weights && c10?.intercept !== undefined) {
+    // v2.0 multi-feature model
+    let z = c10.intercept;
+    for (const [feat, w] of Object.entries(c10.weights)) {
+      z += w * (featureValues[feat] ?? 0);
+    }
+    p10 = sigmoid(z);
+  } else if (c10) {
+    // v1.0 fallback
+    const score = featureValues.composite_score ?? 0;
+    const vel = featureValues.score_velocity ?? 0;
+    p10 = sigmoid(
+      (c10.a_score_with_velocity ?? 0) * score +
+      (c10.a_velocity ?? 0) * vel +
+      (c10.b_with_velocity ?? 0)
+    );
+  }
 
-  // Layer 1 + 2: Blend for 20%
+  // --- Layer 1 + 2: Blend for 20% ---
   const c20 = logCoefs['drawdown_20pct'];
-  const p20_logistic = c20
-    ? sigmoid(c20.a_score_with_velocity * score + c20.a_velocity * velocity + c20.b_with_velocity)
-    : 0;
+  let p20_logistic = 0;
+  if (c20?.weights && c20?.intercept !== undefined) {
+    let z = c20.intercept;
+    for (const [feat, w] of Object.entries(c20.weights)) {
+      z += w * (featureValues[feat] ?? 0);
+    }
+    p20_logistic = sigmoid(z);
+  } else if (c20) {
+    const score = featureValues.composite_score ?? 0;
+    const vel = featureValues.score_velocity ?? 0;
+    p20_logistic = sigmoid(
+      (c20.a_score_with_velocity ?? 0) * score +
+      (c20.a_velocity ?? 0) * vel +
+      (c20.b_with_velocity ?? 0)
+    );
+  }
   const b20 = bayesian['drawdown_20pct'];
   const p20_bayesian = b20
-    ? interpolateLookup(score, b20.bin_centers, b20.probabilities)
+    ? interpolateLookup(featureValues.composite_score ?? 0, b20.bin_centers, b20.probabilities)
     : p20_logistic;
   const p20 = 0.5 * p20_logistic + 0.5 * p20_bayesian;
 
-  // Layer 2: Bayesian for 30%
+  // --- Layer 2: Bayesian for 30% ---
   const b30 = bayesian['drawdown_30pct'];
   const p30 = b30
-    ? interpolateLookup(score, b30.bin_centers, b30.probabilities)
+    ? interpolateLookup(featureValues.composite_score ?? 0, b30.bin_centers, b30.probabilities)
     : 0;
 
-  // Layer 3: EVT extrapolation for 40%
+  // --- Layer 3: EVT extrapolation for 40% ---
   const r40_30 = evt.cross_ratios?.['40pct_given_30pct'] ?? 0.35;
   const p40 = p30 * r40_30;
 
@@ -75,7 +146,7 @@ function computeDrawdownProbabilities(
     {
       threshold: 10,
       label: '10%+',
-      probability: Math.min(p10_base, 0.99),
+      probability: Math.min(p10, 0.99),
       confidence: model.confidence_tiers['10pct'] ?? 'moderate',
       color: '#eab308',
       bgColor: 'bg-yellow-500/10 border-yellow-500/20',
@@ -122,10 +193,15 @@ const CONFIDENCE_DISPLAY: Record<string, { label: string; color: string }> = {
 // Component
 // ---------------------------------------------------------------------------
 
-const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelocity }) => {
+const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelocity, indicators, history }) => {
+  const featureValues = useMemo(
+    () => buildFeatureValues(model, currentScore, scoreVelocity, indicators, history),
+    [model, currentScore, scoreVelocity, indicators, history],
+  );
+
   const probs = useMemo(
-    () => computeDrawdownProbabilities(model, currentScore, scoreVelocity),
-    [model, currentScore, scoreVelocity],
+    () => computeDrawdownProbabilities(model, featureValues),
+    [model, featureValues],
   );
 
   // Find the current score bin for empirical stats
@@ -139,6 +215,16 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
 
   const empirical = model.empirical_stats?.[binKey];
 
+  // OOS metrics from logistic model
+  const oosMetrics = useMemo(() => {
+    const c10 = model.logistic_coefficients['drawdown_10pct'];
+    const c20 = model.logistic_coefficients['drawdown_20pct'];
+    if (!c10?.auc_test) return null;
+    return { c10, c20 };
+  }, [model]);
+
+  const isV2 = model.model_version === '2.0';
+
   return (
     <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl">
       <div className="flex items-center justify-between mb-4">
@@ -148,9 +234,16 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
           </svg>
           QQQ Drawdown Probability
         </h3>
-        <span className="text-xs text-slate-500 bg-slate-800 px-3 py-1 rounded-full">
-          Next {model.forward_window_label}
-        </span>
+        <div className="flex items-center gap-2">
+          {isV2 && (
+            <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+              v2.0
+            </span>
+          )}
+          <span className="text-xs text-slate-500 bg-slate-800 px-3 py-1 rounded-full">
+            Next {model.forward_window_label}
+          </span>
+        </div>
       </div>
 
       {/* Probability gauges */}
@@ -197,6 +290,41 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
         })}
       </div>
 
+      {/* OOS Performance Metrics (v2.0 only) */}
+      {oosMetrics && (
+        <div className="bg-slate-800/30 rounded-xl p-4 mb-4">
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            Out-of-Sample Performance ({model.train_test_split ?? '70/30'} split)
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div>
+              <span className="text-slate-500 text-xs">AUC (10% DD)</span>
+              <p className={`font-semibold ${(oosMetrics.c10?.auc_test ?? 0) > 0.6 ? 'text-emerald-400' : 'text-yellow-400'}`}>
+                {oosMetrics.c10?.auc_test?.toFixed(3) ?? 'N/A'}
+              </p>
+            </div>
+            <div>
+              <span className="text-slate-500 text-xs">BSS (10% DD)</span>
+              <p className={`font-semibold ${(oosMetrics.c10?.bss_test ?? 0) > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {oosMetrics.c10?.bss_test !== undefined ? `${oosMetrics.c10.bss_test > 0 ? '+' : ''}${(oosMetrics.c10.bss_test * 100).toFixed(1)}%` : 'N/A'}
+              </p>
+            </div>
+            <div>
+              <span className="text-slate-500 text-xs">AUC (20% DD)</span>
+              <p className={`font-semibold ${(oosMetrics.c20?.auc_test ?? 0) > 0.6 ? 'text-emerald-400' : 'text-yellow-400'}`}>
+                {oosMetrics.c20?.auc_test?.toFixed(3) ?? 'N/A'}
+              </p>
+            </div>
+            <div>
+              <span className="text-slate-500 text-xs">BSS (20% DD)</span>
+              <p className={`font-semibold ${(oosMetrics.c20?.bss_test ?? 0) > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                {oosMetrics.c20?.bss_test !== undefined ? `${oosMetrics.c20.bss_test > 0 ? '+' : ''}${(oosMetrics.c20.bss_test * 100).toFixed(1)}%` : 'N/A'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Empirical context */}
       {empirical && (
         <div className="bg-slate-800/30 rounded-xl p-4 mb-4">
@@ -227,13 +355,23 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
       {/* Model description */}
       <div className="bg-slate-800/30 rounded-xl p-4 space-y-1">
         <p className="text-sm text-slate-400">
-          <span className="text-white font-semibold">Hybrid 3-layer model</span>: Logistic regression (10-20% thresholds),
-          Bayesian Beta-Binomial with monotonicity (20-30%), EVT/GPD tail extrapolation (40%).
-          Forward window: <span className="text-white">{model.forward_window_days} trading days</span> (~{model.forward_window_label}).
+          <span className="text-white font-semibold">Hybrid 3-layer model {isV2 ? 'v2.0' : ''}</span>:
+          {isV2 ? (
+            <> Multi-feature L2-regularized logistic regression ({model.feature_names?.length ?? 6} features) for 10-20% thresholds,
+            Bayesian Beta-Binomial with PAVA monotonicity (20-30%), EVT/GPD tail extrapolation (40%).
+            Forward window: <span className="text-white">{model.forward_window_days} trading days</span> (~{model.forward_window_label}).</>
+          ) : (
+            <> Logistic regression (10-20% thresholds),
+            Bayesian Beta-Binomial with monotonicity (20-30%), EVT/GPD tail extrapolation (40%).
+            Forward window: <span className="text-white">{model.forward_window_days} trading days</span> (~{model.forward_window_label}).</>
+          )}
         </p>
         <p className="text-[10px] text-slate-600">
           Calibrated on {model.calibration_date} with {model.forward_window_days}-day forward drawdowns.
-          Includes score velocity as predictor. Probabilities are conditional on current score ({currentScore.toFixed(1)}) and velocity ({scoreVelocity.toFixed(1)}).
+          {isV2 && model.feature_names && (
+            <> Features: {model.feature_names.join(', ')}. Train/test split: {model.train_test_split}.</>
+          )}
+          {' '}Probabilities are conditional on current market conditions (score {currentScore.toFixed(1)}, velocity {scoreVelocity.toFixed(1)}).
           Confidence decreases with drawdown severity due to fewer historical events. Not financial advice.
         </p>
       </div>
