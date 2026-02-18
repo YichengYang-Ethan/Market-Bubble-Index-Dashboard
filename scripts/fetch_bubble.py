@@ -297,31 +297,60 @@ def build_bubble_index():
     liquidity = sub_score(liquidity_keys)
     valuation = sub_score(valuation_keys)
 
-    # Build snapshot (latest values)
-    latest_idx = combined.index[-1]
+    # Build snapshot from the latest date where ALL indicators have data.
+    # Different sources (yfinance vs FRED) may end on different dates, so the
+    # absolute last row can contain NaNs.  Fall back to the overall last row
+    # if no fully-complete row exists.
+    complete_rows = combined.dropna()
+    if not complete_rows.empty:
+        snap_row = complete_rows.iloc[-1]
+        snap_comp = float(composite.loc[complete_rows.index[-1]])
+        snap_sent = float(sentiment.loc[complete_rows.index[-1]])
+        snap_liq  = float(liquidity.loc[complete_rows.index[-1]])
+        snap_val  = float(valuation.loc[complete_rows.index[-1]])
+    else:
+        snap_row = combined.iloc[-1]
+        snap_comp = float(composite.iloc[-1])
+        snap_sent = float(sentiment.iloc[-1])
+        snap_liq  = float(liquidity.iloc[-1])
+        snap_val  = float(valuation.iloc[-1])
+
     snapshot_indicators = {}
     for name in available:
-        score_val = float(combined[name].iloc[-1])
+        raw_val = snap_row[name]
+        is_nan = np.isnan(raw_val) if not isinstance(raw_val, type(None)) else True
         cfg = INDICATOR_CONFIG[name]
         snapshot_indicators[name] = {
-            "score": round(score_val, 1),
-            "raw_value": round(score_val / 100.0, 4),  # normalized 0-1
+            "score": round(float(raw_val), 1) if not is_nan else None,
+            "raw_value": round(float(raw_val) / 100.0, 4) if not is_nan else None,
             "weight": round(weights[name], 4),
             "label": cfg["label"],
         }
 
     snapshot = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "composite_score": round(float(composite.iloc[-1]), 1),
-        "sentiment_score": round(float(sentiment.iloc[-1]), 1) if not np.isnan(sentiment.iloc[-1]) else None,
-        "liquidity_score": round(float(liquidity.iloc[-1]), 1) if not np.isnan(liquidity.iloc[-1]) else None,
-        "valuation_score": round(float(valuation.iloc[-1]), 1) if not np.isnan(valuation.iloc[-1]) else None,
-        "regime": get_regime(float(composite.iloc[-1])),
+        "composite_score": round(snap_comp, 1),
+        "sentiment_score": round(snap_sent, 1) if not np.isnan(snap_sent) else None,
+        "liquidity_score": round(snap_liq, 1) if not np.isnan(snap_liq) else None,
+        "valuation_score": round(snap_val, 1) if not np.isnan(snap_val) else None,
+        "regime": get_regime(snap_comp),
         "indicators": snapshot_indicators,
     }
 
-    # Build previous_day data (second-to-last entry) for trend arrows
-    if len(composite) >= 2:
+    # Build previous_day data for trend arrows.
+    # Use the second-to-last complete row so values are never NaN.
+    if len(complete_rows) >= 2:
+        prev_row = complete_rows.iloc[-2]
+        prev_indicators = {}
+        for name in available:
+            val = prev_row[name]
+            prev_indicators[name] = round(float(val), 1) if not np.isnan(val) else None
+        prev_idx = complete_rows.index[-2]
+        snapshot["previous_day"] = {
+            "composite_score": round(float(composite.loc[prev_idx]), 1),
+            "indicators": prev_indicators,
+        }
+    elif len(composite) >= 2:
         prev_indicators = {}
         for name in available:
             val = combined[name].iloc[-2]
