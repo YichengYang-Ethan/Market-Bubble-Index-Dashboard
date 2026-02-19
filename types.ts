@@ -54,6 +54,7 @@ export interface PreviousDay {
 export interface BubbleIndexData {
   generated_at: string;
   composite_score: number;
+  drawdown_risk_score?: number;
   sentiment_score: number | null;
   liquidity_score: number | null;
   valuation_score?: number | null;
@@ -79,6 +80,7 @@ export interface BubbleIndexData {
 export interface BubbleHistoryPoint {
   date: string;
   composite_score: number;
+  drawdown_risk_score?: number | null;
   sentiment_score: number | null;
   liquidity_score: number | null;
   valuation_score?: number | null;

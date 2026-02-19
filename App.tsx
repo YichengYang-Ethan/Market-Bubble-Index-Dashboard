@@ -360,6 +360,7 @@ const App: React.FC = () => {
                   model={drawdownModel}
                   currentScore={bubbleData.composite_score}
                   scoreVelocity={bubbleData.score_velocity ?? 0}
+                  drawdownRiskScore={bubbleData.drawdown_risk_score}
                   indicators={bubbleData.indicators}
                   history={bubbleHistory}
                 />

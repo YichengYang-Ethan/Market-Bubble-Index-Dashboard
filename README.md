@@ -114,7 +114,18 @@ Each threshold has its own optimized feature set, drawdown definition, and regul
 | >30% drawdown | — | — | Model-Dependent (Bayesian) | — |
 | >40% drawdown | — | — | Extrapolated (EVT) | — |
 
-Key findings: Engineered features (smoothed indicators, score volatility, interactions) dramatically outperform raw indicators. Different drawdown definitions work better for different thresholds. See [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md) for the full strategy research report.
+### Drawdown Risk Score (Logic Chain)
+
+The dashboard introduces a **Drawdown Risk Score** alongside the Bubble Index composite, solving the logical gap between "market exuberance" and "crash probability":
+
+| Score | Measures | VIX Direction | Monotonic? |
+|-------|----------|---------------|-----------|
+| Bubble Temperature | How exuberant the market is | Low VIX = complacent = high score | No (-0.6 Spearman) |
+| **Drawdown Risk** | How dangerous conditions are | High VIX = stressed = high score | **Yes (+1.0 Spearman)** |
+
+Both scores use the **same 7 indicators with the same weights** — the only difference is that the risk score inverts VIX, QQQ Deviation, and Yield Curve. This creates a monotonic relationship: higher risk score → higher drawdown probability (0% at score 20-40, 87% at score 80-100).
+
+See [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md) for the full strategy research report.
 
 ## Signal Analysis
 

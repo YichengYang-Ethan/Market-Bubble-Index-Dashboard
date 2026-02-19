@@ -97,9 +97,28 @@ def load_data() -> pd.DataFrame:
 
     # ── Feature engineering ──
 
+    # Drawdown risk score (from bubble history, if present)
+    if "drawdown_risk_score" not in df_h.columns:
+        # Compute from indicators: invert VIX, QQQ deviation, yield curve
+        risk_inversions = {"ind_qqq_deviation", "ind_vix_level", "ind_yield_curve"}
+        ind_cols_for_risk = [c for c in df_h.columns if c.startswith("ind_")]
+        if ind_cols_for_risk:
+            risk_score = pd.Series(0.0, index=df_h.index)
+            for col in ind_cols_for_risk:
+                val = df_h[col].fillna(50.0)
+                if col in risk_inversions:
+                    risk_score += (100 - val)
+                else:
+                    risk_score += val
+            df_h["drawdown_risk_score"] = risk_score / max(len(ind_cols_for_risk), 1)
+
     # Smoothed scores
     df_h["score_sma_60d"] = df_h["composite_score"].rolling(60, min_periods=20).mean()
     df_h["score_ema_20d"] = df_h["composite_score"].ewm(span=20, min_periods=10).mean()
+
+    # Risk score EMA
+    if "drawdown_risk_score" in df_h.columns:
+        df_h["risk_ema_20d"] = df_h["drawdown_risk_score"].ewm(span=20, min_periods=10).mean()
 
     # Score volatility
     df_h["score_std_20d"] = df_h["composite_score"].rolling(20, min_periods=10).std()
@@ -198,6 +217,13 @@ def fit_logistic(
 
     # Compute forward drawdowns for this specific config
     fwd_dd = compute_forward_drawdowns(df, window, dd_def)
+
+    # Check all features exist; skip missing
+    missing = [f for f in features if f not in df.columns]
+    if missing:
+        print(f"  WARNING: Missing features {missing}, filling with median")
+        for f in missing:
+            df[f] = 50.0  # neutral default
 
     # Filter valid rows (features + drawdown non-NaN)
     valid_mask = np.isfinite(fwd_dd)
@@ -409,6 +435,27 @@ def main():
               f"P(>20%)={bin_stats.get('p_20pct', 0):.1%}  "
               f"P(>30%)={bin_stats.get('p_30pct', 0):.1%}")
 
+    # ── Monotonicity validation: risk score vs composite ──
+    print("\n" + "=" * 70)
+    print("MONOTONICITY: RISK SCORE vs COMPOSITE SCORE")
+    print("=" * 70)
+
+    if "drawdown_risk_score" in df.columns:
+        for label, dd_arr in [("composite_score", fwd_dd_empirical), ("drawdown_risk_score", fwd_dd_empirical)]:
+            col = df[label].values if label in df.columns else None
+            if col is None:
+                continue
+            valid = np.isfinite(dd_arr) & np.isfinite(col)
+            print(f"\n  {label} bin → P(>20% DD, 180d peak-to-trough):")
+            for lo, hi in SCORE_BINS:
+                mask = valid & (col >= lo) & (col < hi)
+                n = int(mask.sum())
+                if n > 0:
+                    p = float((dd_arr[mask] >= 0.20).mean())
+                    print(f"    [{lo:2d}-{hi:2d}]: n={n:5d}  P(>20%)={p:.1%}")
+                else:
+                    print(f"    [{lo:2d}-{hi:2d}]: n=    0  P(>20%)=N/A")
+
     # ── Layer 1: Per-threshold optimized logistic regression ──
     print("\n" + "=" * 70)
     print("LAYER 1: Per-Threshold Optimized Logistic Regression")
@@ -504,7 +551,8 @@ def main():
 
     latest = df.iloc[-1]
     current_features = {}
-    for f in sorted(all_feature_names):
+    extra_fields = ["drawdown_risk_score", "risk_ema_20d"]
+    for f in sorted(all_feature_names | set(extra_fields)):
         val = latest.get(f, 0)
         if pd.isna(val):
             val = 0

@@ -6,6 +6,7 @@ interface Props {
   model: DrawdownModelData;
   currentScore: number;
   scoreVelocity: number;
+  drawdownRiskScore?: number;
   indicators?: Record<string, BubbleIndicator>;
   history?: BubbleHistoryPoint[];
 }
@@ -240,7 +241,7 @@ const CONFIDENCE_DISPLAY: Record<string, { label: string; color: string }> = {
 // Component
 // ---------------------------------------------------------------------------
 
-const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelocity, indicators, history }) => {
+const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelocity, drawdownRiskScore, indicators, history }) => {
   const featureValues = useMemo(
     () => buildFeatureValues(model, currentScore, scoreVelocity, indicators, history),
     [model, currentScore, scoreVelocity, indicators, history],
@@ -336,6 +337,58 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
           );
         })}
       </div>
+
+      {/* Dual-Score Logic Chain */}
+      {drawdownRiskScore !== undefined && (
+        <div className="bg-slate-800/30 rounded-xl p-4 mb-4">
+          <div className="flex items-center gap-6">
+            {/* Bubble Temperature */}
+            <div className="flex-1 text-center">
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Bubble Temperature</p>
+              <p className="text-2xl font-black text-blue-400">{currentScore.toFixed(0)}</p>
+              <p className="text-[10px] text-slate-600">Market exuberance</p>
+            </div>
+
+            {/* Arrow */}
+            <div className="flex flex-col items-center gap-0.5">
+              <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+              <span className="text-[9px] text-slate-600">+ stress</span>
+            </div>
+
+            {/* Drawdown Risk */}
+            <div className="flex-1 text-center">
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Drawdown Risk</p>
+              <p className={`text-2xl font-black ${drawdownRiskScore > 65 ? 'text-red-400' : drawdownRiskScore > 45 ? 'text-orange-400' : 'text-emerald-400'}`}>
+                {drawdownRiskScore.toFixed(0)}
+              </p>
+              <p className="text-[10px] text-slate-600">Crash probability driver</p>
+            </div>
+
+            {/* Arrow */}
+            <div className="flex flex-col items-center gap-0.5">
+              <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+              </svg>
+              <span className="text-[9px] text-slate-600">= risk</span>
+            </div>
+
+            {/* Drawdown Probability summary */}
+            <div className="flex-1 text-center">
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">P(Drawdown)</p>
+              <p className={`text-2xl font-black ${probs[1].probability > 0.3 ? 'text-red-400' : probs[1].probability > 0.15 ? 'text-orange-400' : 'text-emerald-400'}`}>
+                {(probs[1].probability * 100).toFixed(0)}%
+              </p>
+              <p className="text-[10px] text-slate-600">&gt;20% in {model.forward_window_label}</p>
+            </div>
+          </div>
+          <p className="text-[10px] text-slate-600 mt-2 text-center">
+            Same 7 indicators, different perspective: Bubble Temperature measures exuberance (high VIX score = complacent),
+            Drawdown Risk inverts stress indicators (high VIX = danger). High risk + high temperature = bubble breaking.
+          </p>
+        </div>
+      )}
 
       {/* OOS Performance Metrics */}
       {oosMetrics && (

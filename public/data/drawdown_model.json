@@ -1,6 +1,6 @@
 {
   "model_version": "3.0",
-  "calibration_date": "2026-02-18",
+  "calibration_date": "2026-02-19",
   "data_points": 2799,
   "train_test_split": "70/30",
   "effective_sample_size": 69,
@@ -16,10 +16,12 @@
     "vix_x_credit"
   ],
   "current_features": {
+    "drawdown_risk_score": 59.4143,
     "ind_qqq_deviation_sma_20d": 27.555,
     "ind_vix_level": 29.4,
     "ind_vix_level_change_5d": -11.2,
     "ind_yield_curve": 31.1,
+    "risk_ema_20d": 57.3909,
     "score_ema_20d": 54.7381,
     "score_std_20d": 11.5825,
     "vix_x_credit": 21.9324
