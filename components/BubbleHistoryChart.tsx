@@ -64,6 +64,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
     qqq_price: false,
     spy_price: false,
   });
+  const [showComposite, setShowComposite] = useState(false);
   const [showGSADF, setShowGSADF] = useState(false);
   const [showVelocity, setShowVelocity] = useState(false);
   const [showDrawdown, setShowDrawdown] = useState(isRiskMode);
@@ -183,19 +184,19 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
   // Build tooltip name map
   const nameMap: Record<string, string> = useMemo(() => {
     const m: Record<string, string> = {
-      drawdown_risk_score: 'Risk Score',
-      composite_score: 'Composite',
+      drawdown_risk_score: isRiskMode ? 'Risk Score (predictor)' : 'Risk Score',
+      composite_score: isRiskMode ? 'Bubble Temp' : 'Composite',
       sentiment_score: 'Sentiment',
       liquidity_score: 'Liquidity',
       valuation_score: 'Valuation',
       qqq_price: 'QQQ',
       spy_price: 'SPY',
       score_velocity: 'Velocity',
-      qqq_drawdown: 'QQQ Drawdown',
+      qqq_drawdown: isRiskMode ? 'QQQ Drawdown (actual)' : 'QQQ Drawdown',
     };
     INDICATOR_META.forEach((ind) => { m[ind.key] = ind.label; });
     return m;
-  }, []);
+  }, [isRiskMode]);
 
   const pillClass = (active: boolean, color?: string) =>
     active
@@ -218,6 +219,10 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
               <linearGradient id="compositeGradient" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={isRiskMode ? '#ef4444' : '#3b82f6'} stopOpacity={0.3} />
                 <stop offset="100%" stopColor={isRiskMode ? '#ef4444' : '#3b82f6'} stopOpacity={0} />
+              </linearGradient>
+              <linearGradient id="drawdownGradient" x1="0" y1="1" x2="0" y2="0">
+                <stop offset="0%" stopColor="#f97316" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="#f97316" stopOpacity={0.05} />
               </linearGradient>
             </defs>
 
@@ -328,19 +333,20 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
               isAnimationActive={false}
             />
 
-            {/* In risk mode, also show composite as secondary dashed line */}
-            {isRiskMode && (
+            {/* In risk mode, composite is opt-in via toggle */}
+            {isRiskMode && showComposite && (
               <Line
                 type="monotone"
                 dataKey="composite_score"
                 yAxisId="score"
                 stroke="#3b82f6"
-                strokeWidth={1.5}
+                strokeWidth={1.2}
                 strokeDasharray="6 3"
                 dot={false}
                 activeDot={{ r: 3, fill: '#3b82f6' }}
                 name={nameMap.composite_score}
                 isAnimationActive={false}
+                opacity={0.6}
               />
             )}
 
@@ -432,18 +438,17 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
               />
             )}
 
-            {/* QQQ Drawdown overlay */}
+            {/* QQQ Drawdown overlay — orange to distinguish from red risk score */}
             {showDrawdown && (
               <Area
                 type="monotone"
                 dataKey="qqq_drawdown"
                 yAxisId={anyPriceActive ? 'price' : showDrawdown && !anyPriceActive ? 'drawdown' : 'score'}
-                fill="#ef4444"
-                fillOpacity={0.15}
-                stroke="#ef4444"
-                strokeWidth={1}
+                fill="url(#drawdownGradient)"
+                stroke="#f97316"
+                strokeWidth={1.5}
                 dot={false}
-                activeDot={{ r: 2, fill: '#ef4444' }}
+                activeDot={{ r: 3, fill: '#f97316' }}
                 name={nameMap.qqq_drawdown}
                 connectNulls
                 isAnimationActive={false}
@@ -453,8 +458,28 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
         </ResponsiveContainer>
       </div>
 
+      {/* Legend for risk mode */}
+      {isRiskMode && (
+        <div className="mt-4 flex items-center gap-6 text-xs text-slate-400">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-0.5 bg-red-500 rounded" />
+            <span>Risk Score — <span className="text-slate-300">predictive indicator</span></span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-3 rounded-sm" style={{ background: 'linear-gradient(to top, rgba(249,115,22,0.35), rgba(249,115,22,0.05))' }} />
+            <span>QQQ Drawdown — <span className="text-slate-300">actual outcome</span></span>
+          </div>
+          {showComposite && (
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-0.5 rounded" style={{ background: '#3b82f6', opacity: 0.6 }} />
+              <span>Bubble Temperature</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Toggle controls */}
-      <div className="mt-5 space-y-3">
+      <div className="mt-4 space-y-3">
         {/* Time Range */}
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-slate-500 font-semibold uppercase tracking-wide w-20">Range</span>
@@ -479,6 +504,17 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs text-slate-500 font-semibold uppercase tracking-wide w-20">Scores</span>
           <div className="flex gap-1.5">
+            {isRiskMode && (
+              <button
+                onClick={() => setShowComposite((v) => !v)}
+                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                  showComposite ? pillClass(true) : pillClass(false)
+                }`}
+                style={showComposite ? { backgroundColor: '#3b82f6' } : undefined}
+              >
+                Bubble Temp
+              </button>
+            )}
             {SUB_SCORES.map((s) => (
               <button
                 key={s.key}
@@ -561,7 +597,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
                 className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                   showDrawdown ? pillClass(true) : pillClass(false)
                 }`}
-                style={showDrawdown ? { backgroundColor: '#ef4444' } : undefined}
+                style={showDrawdown ? { backgroundColor: '#f97316' } : undefined}
               >
                 QQQ Drawdown
               </button>
