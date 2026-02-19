@@ -16,14 +16,14 @@
     "vix_x_credit"
   ],
   "current_features": {
-    "drawdown_risk_score": 59.4143,
+    "drawdown_risk_score": 55.8,
     "ind_qqq_deviation_sma_20d": 27.555,
     "ind_vix_level": 29.4,
     "ind_vix_level_change_5d": -11.2,
-    "ind_yield_curve": 31.1,
-    "risk_ema_20d": 57.3909,
-    "score_ema_20d": 54.7381,
-    "score_std_20d": 11.5825,
+    "ind_yield_curve": 72.3,
+    "risk_ema_20d": 57.919,
+    "score_ema_20d": 54.8143,
+    "score_std_20d": 11.5274,
     "vix_x_credit": 21.9324
   },
   "logistic_coefficients": {
@@ -45,24 +45,24 @@
       "base_rate_train": 0.3817,
       "base_rate_test": 0.2136,
       "weights": {
-        "ind_qqq_deviation_sma_20d": -0.743399,
-        "ind_vix_level": -0.643873,
-        "score_ema_20d": 1.081825,
-        "ind_yield_curve": -0.530746,
-        "ind_vix_level_change_5d": 0.236821
+        "ind_qqq_deviation_sma_20d": -0.74339,
+        "ind_vix_level": -0.643874,
+        "score_ema_20d": 1.081823,
+        "ind_yield_curve": -0.530747,
+        "ind_vix_level_change_5d": 0.236823
       },
       "intercept": -0.534246,
       "scaler_mean": {
-        "ind_qqq_deviation_sma_20d": 49.198372,
+        "ind_qqq_deviation_sma_20d": 49.198423,
         "ind_vix_level": 47.295697,
-        "score_ema_20d": 50.723907,
+        "score_ema_20d": 50.723856,
         "ind_yield_curve": 30.95082,
         "ind_vix_level_change_5d": 0.005482
       },
       "scaler_std": {
-        "ind_qqq_deviation_sma_20d": 25.663345,
+        "ind_qqq_deviation_sma_20d": 25.663343,
         "ind_vix_level": 29.427354,
-        "score_ema_20d": 17.262486,
+        "score_ema_20d": 17.262402,
         "ind_yield_curve": 29.88377,
         "ind_vix_level_change_5d": 19.545457
       },
@@ -91,27 +91,27 @@
       "base_rate_train": 0.3038,
       "base_rate_test": 0.1802,
       "weights": {
-        "ind_qqq_deviation_sma_20d": -1.269823,
-        "score_std_20d": 0.514766,
-        "ind_yield_curve": -0.801226,
-        "score_ema_20d": 2.194653,
-        "vix_x_credit": -1.107675,
+        "ind_qqq_deviation_sma_20d": -1.269804,
+        "score_std_20d": 0.514769,
+        "ind_yield_curve": -0.801222,
+        "score_ema_20d": 2.194627,
+        "vix_x_credit": -1.107665,
         "ind_vix_level_change_5d": 0.281802
       },
-      "intercept": -1.036841,
+      "intercept": -1.036842,
       "scaler_mean": {
-        "ind_qqq_deviation_sma_20d": 49.198372,
-        "score_std_20d": 7.026439,
+        "ind_qqq_deviation_sma_20d": 49.198423,
+        "score_std_20d": 7.026436,
         "ind_yield_curve": 30.95082,
-        "score_ema_20d": 50.723907,
+        "score_ema_20d": 50.723856,
         "vix_x_credit": 32.219429,
         "ind_vix_level_change_5d": 0.005482
       },
       "scaler_std": {
-        "ind_qqq_deviation_sma_20d": 25.663345,
+        "ind_qqq_deviation_sma_20d": 25.663343,
         "score_std_20d": 3.097416,
         "ind_yield_curve": 29.88377,
-        "score_ema_20d": 17.262486,
+        "score_ema_20d": 17.262402,
         "vix_x_credit": 28.52448,
         "ind_vix_level_change_5d": 19.545457
       },
