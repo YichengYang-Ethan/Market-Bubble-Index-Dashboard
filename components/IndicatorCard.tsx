@@ -1,12 +1,13 @@
 import React from 'react';
 import { BubbleIndicator, IndicatorMeta } from '../types';
-import { INDICATOR_META } from '../constants';
+import { INDICATOR_META, RISK_INVERSIONS } from '../constants';
 
 interface IndicatorCardProps {
   indicatorKey: string;
   indicator: BubbleIndicator;
   previousScore?: number | null;
   sparklineData: (number | null)[];
+  perspective?: 'bubble' | 'risk';
 }
 
 function getScoreColor(score: number): string {
@@ -42,13 +43,16 @@ function buildSparklinePath(data: (number | null)[]): string {
   return points.join(' ');
 }
 
-const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicatorKey, indicator, previousScore, sparklineData }) => {
+const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicatorKey, indicator, previousScore, sparklineData, perspective = 'bubble' }) => {
   const meta = INDICATOR_META.find((m: IndicatorMeta) => m.key === indicatorKey);
   const color = meta?.color ?? '#64748b';
   const label = meta?.label ?? indicatorKey;
   const weightPercent = Math.round(indicator.weight * 100);
+  const isInverted = perspective === 'risk' && RISK_INVERSIONS.has(indicatorKey);
+  const displayScore = isInverted ? 100 - indicator.score : indicator.score;
+  const displayPrevious = isInverted && previousScore != null ? 100 - previousScore : previousScore;
 
-  const trendDelta = previousScore != null ? indicator.score - previousScore : 0;
+  const trendDelta = displayPrevious != null ? displayScore - displayPrevious : 0;
   let trendArrow: string;
   let trendColor: string;
   if (trendDelta > 0.5) {
@@ -62,7 +66,10 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicatorKey, indicator, 
     trendColor = '#64748b'; // gray
   }
 
-  const sparklinePath = buildSparklinePath(sparklineData);
+  const effectiveSparklineData = isInverted
+    ? sparklineData.map(v => v != null ? 100 - v : null)
+    : sparklineData;
+  const sparklinePath = buildSparklinePath(effectiveSparklineData);
 
   return (
     <div
@@ -71,7 +78,14 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicatorKey, indicator, 
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-semibold text-slate-300">{label}</h4>
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-semibold text-slate-300">{label}</h4>
+          {isInverted && (
+            <span className="text-[9px] font-bold text-red-400 bg-red-500/15 border border-red-500/20 rounded px-1.5 py-0.5 uppercase tracking-wider">
+              Inverted
+            </span>
+          )}
+        </div>
         <span className="text-[10px] font-bold text-slate-500 bg-slate-800 rounded-full px-2 py-0.5">
           {weightPercent}%
         </span>
@@ -79,8 +93,8 @@ const IndicatorCard: React.FC<IndicatorCardProps> = ({ indicatorKey, indicator, 
 
       {/* Score + trend */}
       <div className="flex items-baseline gap-2 mb-3">
-        <span className={`text-3xl font-black ${getScoreTextClass(indicator.score)}`}>
-          {indicator.score.toFixed(0)}
+        <span className={`text-3xl font-black ${getScoreTextClass(displayScore)}`}>
+          {displayScore.toFixed(0)}
         </span>
         <span className="text-lg font-bold" style={{ color: trendColor }}>
           {trendArrow}

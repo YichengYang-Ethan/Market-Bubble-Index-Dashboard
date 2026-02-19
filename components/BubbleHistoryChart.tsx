@@ -23,6 +23,7 @@ interface BubbleHistoryChartProps {
   gsadfResults?: GSADFResults | null;
   markovRegimes?: MarkovRegimes | null;
   qqqDrawdown?: DrawdownPoint[];
+  mode?: 'composite' | 'risk';
 }
 
 const SUB_SCORES = [
@@ -46,7 +47,8 @@ const REGIME_BANDS = [
 
 const MAX_POINTS = 500;
 
-const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceData, gsadfResults, markovRegimes, qqqDrawdown }) => {
+const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceData, gsadfResults, markovRegimes, qqqDrawdown, mode = 'composite' }) => {
+  const isRiskMode = mode === 'risk';
   const [timeRange, setTimeRange] = useState<TimeRange>('ALL');
   const [showSubScores, setShowSubScores] = useState<Record<string, boolean>>({
     sentiment_score: false,
@@ -64,7 +66,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
   });
   const [showGSADF, setShowGSADF] = useState(false);
   const [showVelocity, setShowVelocity] = useState(false);
-  const [showDrawdown, setShowDrawdown] = useState(false);
+  const [showDrawdown, setShowDrawdown] = useState(isRiskMode);
 
   const anyPriceActive = priceOverlays.qqq_price || priceOverlays.spy_price;
 
@@ -181,6 +183,7 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
   // Build tooltip name map
   const nameMap: Record<string, string> = useMemo(() => {
     const m: Record<string, string> = {
+      drawdown_risk_score: 'Risk Score',
       composite_score: 'Composite',
       sentiment_score: 'Sentiment',
       liquidity_score: 'Liquidity',
@@ -202,10 +205,10 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
   return (
     <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl">
       <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-        <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+        <svg className={`w-5 h-5 ${isRiskMode ? 'text-red-400' : 'text-blue-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
         </svg>
-        Bubble History
+        {isRiskMode ? 'Risk Score History' : 'Bubble History'}
       </h3>
 
       <div className="h-96">
@@ -213,8 +216,8 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
           <ComposedChart data={chartData} margin={{ top: 5, right: anyPriceActive ? 10 : -10, left: -10, bottom: 5 }}>
             <defs>
               <linearGradient id="compositeGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+                <stop offset="0%" stopColor={isRiskMode ? '#ef4444' : '#3b82f6'} stopOpacity={0.3} />
+                <stop offset="100%" stopColor={isRiskMode ? '#ef4444' : '#3b82f6'} stopOpacity={0} />
               </linearGradient>
             </defs>
 
@@ -299,31 +302,47 @@ const BubbleHistoryChart: React.FC<BubbleHistoryChartProps> = ({ history, priceD
               strokeWidth={1}
             />
 
-            {/* Hero: composite area fill */}
+            {/* Hero: primary area fill */}
             <Area
               type="monotone"
-              dataKey="composite_score"
+              dataKey={isRiskMode ? 'drawdown_risk_score' : 'composite_score'}
               yAxisId="score"
               fill="url(#compositeGradient)"
               stroke="none"
-              name={nameMap.composite_score}
+              name={nameMap[isRiskMode ? 'drawdown_risk_score' : 'composite_score']}
               dot={false}
               activeDot={false}
               isAnimationActive={false}
             />
 
-            {/* Hero: composite line on top */}
+            {/* Hero: primary line on top */}
             <Line
               type="monotone"
-              dataKey="composite_score"
+              dataKey={isRiskMode ? 'drawdown_risk_score' : 'composite_score'}
               yAxisId="score"
-              stroke="#3b82f6"
+              stroke={isRiskMode ? '#ef4444' : '#3b82f6'}
               strokeWidth={2.5}
               dot={false}
-              activeDot={{ r: 4, fill: '#3b82f6' }}
-              name={nameMap.composite_score}
+              activeDot={{ r: 4, fill: isRiskMode ? '#ef4444' : '#3b82f6' }}
+              name={nameMap[isRiskMode ? 'drawdown_risk_score' : 'composite_score']}
               isAnimationActive={false}
             />
+
+            {/* In risk mode, also show composite as secondary dashed line */}
+            {isRiskMode && (
+              <Line
+                type="monotone"
+                dataKey="composite_score"
+                yAxisId="score"
+                stroke="#3b82f6"
+                strokeWidth={1.5}
+                strokeDasharray="6 3"
+                dot={false}
+                activeDot={{ r: 3, fill: '#3b82f6' }}
+                name={nameMap.composite_score}
+                isAnimationActive={false}
+              />
+            )}
 
             {/* Sub-score lines (dashed, opt-in) */}
             {SUB_SCORES.map((s) =>

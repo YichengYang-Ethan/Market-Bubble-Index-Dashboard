@@ -87,6 +87,37 @@ export const INDICATOR_META: IndicatorMeta[] = [
   },
 ];
 
+/** Indicators that are inverted for the Drawdown Risk perspective */
+export const RISK_INVERSIONS = new Set(['qqq_deviation', 'vix_level', 'yield_curve']);
+
+export type TabId = 'bubble' | 'risk' | 'deviation';
+
+export const TAB_NAV_SECTIONS: Record<TabId, { id: string; label: string }[]> = {
+  bubble: [
+    { id: 'overview', label: 'Overview' },
+    { id: 'indicators', label: 'Indicators' },
+    { id: 'history', label: 'History' },
+    { id: 'backtest', label: 'Backtest' },
+    { id: 'signal-analysis', label: 'Signals' },
+    { id: 'deep-dive', label: 'Deep Dive' },
+    { id: 'methodology', label: 'Methodology' },
+  ],
+  risk: [
+    { id: 'overview', label: 'Overview' },
+    { id: 'probabilities', label: 'Probabilities' },
+    { id: 'indicators', label: 'Indicators' },
+    { id: 'history', label: 'History' },
+    { id: 'regimes', label: 'Regimes' },
+    { id: 'deep-dive', label: 'Deep Dive' },
+    { id: 'methodology', label: 'Methodology' },
+  ],
+  deviation: [
+    { id: 'chart', label: 'Chart' },
+    { id: 'backtest', label: 'Backtest' },
+    { id: 'risk-guide', label: 'Risk Guide' },
+  ],
+};
+
 export const BUBBLE_REGIME_CONFIG = [
   { threshold: 30, key: 'LOW', label: 'Low Risk', color: '#22c55e', bgClass: 'bg-emerald-500/10 border-emerald-500/20', textClass: 'text-emerald-400', description: 'Depressed sentiment. Potential accumulation zone.' },
   { threshold: 50, key: 'MODERATE', label: 'Moderate', color: '#eab308', bgClass: 'bg-yellow-500/10 border-yellow-500/20', textClass: 'text-yellow-400', description: 'Normal market conditions. Balanced risk/reward.' },

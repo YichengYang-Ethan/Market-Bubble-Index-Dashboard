@@ -7,9 +7,10 @@ interface IndicatorGridProps {
   indicators: Record<string, BubbleIndicator>;
   previousDay?: PreviousDay;
   history: BubbleHistoryPoint[];
+  perspective?: 'bubble' | 'risk';
 }
 
-const IndicatorGrid: React.FC<IndicatorGridProps> = ({ indicators, previousDay, history }) => {
+const IndicatorGrid: React.FC<IndicatorGridProps> = ({ indicators, previousDay, history, perspective = 'bubble' }) => {
   const recentHistory = history.slice(-30);
 
   return (
@@ -31,6 +32,7 @@ const IndicatorGrid: React.FC<IndicatorGridProps> = ({ indicators, previousDay, 
             indicator={indicator}
             previousScore={previousScore}
             sparklineData={sparklineData}
+            perspective={perspective}
           />
         );
       })}

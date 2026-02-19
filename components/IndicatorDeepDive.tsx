@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { BubbleHistoryPoint } from '../types';
-import { INDICATOR_META } from '../constants';
+import { INDICATOR_META, RISK_INVERSIONS } from '../constants';
 import IndicatorDetailChart from './IndicatorDetailChart';
 
 interface IndicatorDeepDiveProps {
   history: BubbleHistoryPoint[];
+  perspective?: 'bubble' | 'risk';
 }
 
 function getScoreBadgeClass(score: number): string {
@@ -14,7 +15,7 @@ function getScoreBadgeClass(score: number): string {
   return 'bg-red-500/20 text-red-400';
 }
 
-const IndicatorDeepDive: React.FC<IndicatorDeepDiveProps> = ({ history }) => {
+const IndicatorDeepDive: React.FC<IndicatorDeepDiveProps> = ({ history, perspective = 'bubble' }) => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     INDICATOR_META.forEach((meta, index) => {
@@ -37,7 +38,8 @@ const IndicatorDeepDive: React.FC<IndicatorDeepDiveProps> = ({ history }) => {
       const val = history[i].indicators?.[meta.key];
       if (val != null) { score = val; break; }
     }
-    latestScores[meta.key] = score;
+    const isInverted = perspective === 'risk' && RISK_INVERSIONS.has(meta.key);
+    latestScores[meta.key] = score != null && isInverted ? 100 - score : score;
   }
 
   return (
@@ -54,6 +56,8 @@ const IndicatorDeepDive: React.FC<IndicatorDeepDiveProps> = ({ history }) => {
           const isOpen = openSections[meta.key] ?? false;
           const currentScore = latestScores[meta.key];
 
+          const isInverted = perspective === 'risk' && RISK_INVERSIONS.has(meta.key);
+
           return (
             <div key={meta.key} className="border border-slate-800 rounded-xl overflow-hidden">
               {/* Accordion header */}
@@ -67,6 +71,11 @@ const IndicatorDeepDive: React.FC<IndicatorDeepDiveProps> = ({ history }) => {
                     style={{ backgroundColor: meta.color }}
                   />
                   <span className="text-sm font-semibold text-slate-200">{meta.label}</span>
+                  {isInverted && (
+                    <span className="text-[9px] font-bold text-red-400 bg-red-500/15 border border-red-500/20 rounded px-1.5 py-0.5 uppercase tracking-wider">
+                      Inverted
+                    </span>
+                  )}
                   {currentScore != null && (
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${getScoreBadgeClass(currentScore)}`}>
                       {currentScore.toFixed(0)}
