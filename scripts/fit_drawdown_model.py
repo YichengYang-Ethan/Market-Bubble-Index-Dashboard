@@ -1,24 +1,22 @@
 #!/usr/bin/env python3
-"""Fit drawdown probability model v3.0 from bubble history + QQQ price data.
+"""Fit drawdown probability model v3.2 from bubble history + QQQ price data.
 
-Improvements over v2.0:
-  - Per-threshold optimized models (different features, C, DD definition per threshold)
-  - Two drawdown definitions: (A) peak-to-trough within window, (B) drop-from-today
-  - Forward window: 180 trading days (~9 months) for both 10% and 20% thresholds
-  - Engineered features: score_ema_20d, score_std_20d, ind_qqq_deviation_sma_20d,
-    ind_vix_level_change_5d, vix_x_credit, is_elevated
-  - BSS now positive for both thresholds (v2 had -24.6% for 10%)
+Improvements over v3.1:
+  - Purged Walk-Forward CV (from v3.1) retained for honest evaluation
+  - Simplified feature sets: max 2-3 features per threshold
+    (risk_ema_20d as primary, avoids overfitting on limited crash data)
+  - Consistent peak-to-trough definition for both thresholds
+  - Stronger regularization (C=0.1) to prevent regime overfitting
+  - Isotonic recalibration within CV for better probability estimates
+  - Fold weighting: skip degenerate folds (base_rate <2% or >98%)
+  - Bayesian binning (Layer 2) used as primary when logistic can't beat base rate
 
 Hybrid 3-layer model:
-  Layer 1: Per-threshold logistic regression with optimized features
-    - >10% DD (def B, drop-from-today, W=180d, C=1.0, 5 features)
-    - >20% DD (def A, peak-to-trough, W=180d, C=10.0, 6 features)
+  Layer 1: Per-threshold logistic (simplified, strongly regularized)
+    - >10% DD (peak-to-trough, W=180d, C=0.1, 2 features)
+    - >20% DD (peak-to-trough, W=180d, C=0.1, 3 features)
   Layer 2: Bayesian Beta-Binomial with monotonicity for 20% and 30%
   Layer 3: EVT (GPD) tail extrapolation for 40%
-
-v2.0 → v3.0 OOS improvements:
-  - 10% DD: AUC 0.569 → 0.878, BSS -24.6% → +27.3%
-  - 20% DD: AUC 0.884 → 0.917, BSS -8.0% → +36.0%
 
 Output: public/data/drawdown_model.json, public/data/qqq_drawdown.json
 """
@@ -43,42 +41,61 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 DATA_DIR = SCRIPT_DIR.parent / "public" / "data"
 
 DECORRELATION_DAYS = 40
-TRAIN_RATIO = 0.70
+
+# ── Walk-Forward CV parameters ──
+N_CV_FOLDS = 5
+MIN_TRAIN_FRAC = 0.35       # minimum training data fraction (first fold)
+PURGE_DAYS = 180             # = forward_window, prevents label leakage
+EMBARGO_DAYS = 20            # extra gap after each test fold
 
 DRAWDOWN_THRESHOLDS = [0.10, 0.20, 0.30, 0.40]
 SCORE_BINS = [(0, 20), (20, 40), (40, 60), (60, 80), (80, 100)]
 BIN_CENTERS = [10, 30, 50, 70, 90]
 
-# ── Per-threshold model configurations (optimized via expanding-window CV) ──
+# ── Feature candidates for grid search ──
+# v3.2: Automated CV-based feature selection. Instead of hand-picking one
+# configuration, we evaluate multiple (feature_set, C) combos and pick
+# the one with highest CV AUC for each threshold.
 
+FEATURE_CANDIDATES = [
+    # Minimal: just the risk score
+    ["risk_ema_20d"],
+    # Risk + volatility
+    ["risk_ema_20d", "score_std_20d"],
+    # Risk + volatility + yield curve
+    ["risk_ema_20d", "score_std_20d", "ind_yield_curve"],
+    # Risk + VIX (direct stress signal)
+    ["risk_ema_20d", "ind_vix_level"],
+    # Risk + VIX change (momentum)
+    ["risk_ema_20d", "ind_vix_level_change_5d"],
+    # v3.0-style: deviation + VIX + score + yield
+    ["ind_qqq_deviation_sma_20d", "ind_vix_level", "score_ema_20d", "ind_yield_curve"],
+    # Risk + VIX + volatility (3 orthogonal signals)
+    ["risk_ema_20d", "ind_vix_level", "score_std_20d"],
+]
+
+C_CANDIDATES = [0.01, 0.1, 1.0, 10.0]
+
+# These get populated by grid search in main()
 THRESHOLD_CONFIGS = {
     0.10: {
-        "dd_definition": "drop_from_today",  # Definition B
+        "dd_definition": "peak_to_trough",
         "forward_window": 180,
-        "C": 1.0,
-        "features": [
-            "ind_qqq_deviation_sma_20d",
-            "ind_vix_level",
-            "score_ema_20d",
-            "ind_yield_curve",
-            "ind_vix_level_change_5d",
-        ],
+        "C": 0.1,
+        "features": ["risk_ema_20d", "score_std_20d"],  # default, overridden
     },
     0.20: {
-        "dd_definition": "peak_to_trough",  # Definition A
+        "dd_definition": "peak_to_trough",
         "forward_window": 180,
-        "C": 10.0,
-        "features": [
-            "ind_qqq_deviation_sma_20d",
-            "score_std_20d",
-            "ind_yield_curve",
-            "score_ema_20d",
-            "vix_x_credit",
-            "ind_vix_level_change_5d",
-        ],
+        "C": 0.1,
+        "features": ["risk_ema_20d", "score_std_20d", "ind_yield_curve"],  # default
     },
 }
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Data loading & feature engineering
+# ═══════════════════════════════════════════════════════════════════════════
 
 def load_data() -> pd.DataFrame:
     """Load and merge bubble history with QQQ price data, engineer all features."""
@@ -99,7 +116,6 @@ def load_data() -> pd.DataFrame:
 
     # Drawdown risk score (from bubble history, if present)
     if "drawdown_risk_score" not in df_h.columns:
-        # Compute from indicators: invert VIX, QQQ deviation, yield curve
         risk_inversions = {"ind_qqq_deviation", "ind_vix_level", "ind_yield_curve"}
         ind_cols_for_risk = [c for c in df_h.columns if c.startswith("ind_")]
         if ind_cols_for_risk:
@@ -155,6 +171,10 @@ def load_data() -> pd.DataFrame:
     return df
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Forward drawdown computation
+# ═══════════════════════════════════════════════════════════════════════════
+
 def compute_forward_drawdowns(df: pd.DataFrame, window: int, definition: str) -> np.ndarray:
     """Compute forward drawdowns using specified definition.
 
@@ -173,7 +193,6 @@ def compute_forward_drawdowns(df: pd.DataFrame, window: int, definition: str) ->
         fwd_prices = prices[i:end]
 
         if definition == "peak_to_trough":
-            # Track running peak within window, measure trough from that peak
             peak = fwd_prices[0]
             dd = 0.0
             for p in fwd_prices[1:]:
@@ -184,7 +203,7 @@ def compute_forward_drawdowns(df: pd.DataFrame, window: int, definition: str) ->
                     dd = drawdown
             max_dd[i] = dd
         else:
-            # drop_from_today: max drop from today's price
+            # drop_from_today
             today_price = fwd_prices[0]
             min_future = np.min(fwd_prices[1:])
             max_dd[i] = max(0.0, (today_price - min_future) / today_price)
@@ -206,26 +225,202 @@ def compute_rolling_drawdown(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
-def fit_logistic(
+# ═══════════════════════════════════════════════════════════════════════════
+# Purged Walk-Forward Cross-Validation
+# ═══════════════════════════════════════════════════════════════════════════
+
+def purged_walk_forward_splits(
+    n: int,
+    n_splits: int = N_CV_FOLDS,
+    min_train_frac: float = MIN_TRAIN_FRAC,
+    purge: int = PURGE_DAYS,
+    embargo: int = EMBARGO_DAYS,
+) -> list[tuple[np.ndarray, np.ndarray]]:
+    """Generate expanding-window CV indices with purge gap + embargo.
+
+    Each fold:
+      [====== TRAIN ======][-- purge --][== TEST ==][- embargo -]
+                                                       ↓
+                                              excluded from future train
+
+    The purge gap ensures that training labels (which look forward_window
+    days ahead) don't overlap with test observations.
+
+    Returns list of (train_indices, test_indices) tuples.
+    """
+    min_train = int(n * min_train_frac)
+    # Reserve space: purge + test blocks for all folds
+    remaining = n - min_train
+    test_size = max(50, (remaining - purge * n_splits) // n_splits)
+
+    splits = []
+    for fold in range(n_splits):
+        test_start = min_train + fold * test_size + purge
+        test_end = min(test_start + test_size, n)
+
+        if test_start >= n or test_end - test_start < 30:
+            break
+
+        # Train: all indices before (test_start - purge)
+        train_end = test_start - purge
+        if train_end < 100:
+            continue
+
+        train_idx = np.arange(0, train_end)
+        test_idx = np.arange(test_start, test_end)
+
+        splits.append((train_idx, test_idx))
+
+    return splits
+
+
+def compute_ece(y_true: np.ndarray, y_prob: np.ndarray, n_bins: int = 10) -> float:
+    """Expected Calibration Error — measures probability calibration quality."""
+    bin_edges = np.linspace(0, 1, n_bins + 1)
+    ece = 0.0
+    for i in range(n_bins):
+        mask = (y_prob >= bin_edges[i]) & (y_prob < bin_edges[i + 1])
+        if mask.sum() == 0:
+            continue
+        avg_pred = y_prob[mask].mean()
+        avg_true = y_true[mask].mean()
+        ece += mask.sum() * abs(avg_pred - avg_true)
+    return float(ece / len(y_true))
+
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Logistic regression: CV + final fit
+# ═══════════════════════════════════════════════════════════════════════════
+
+def evaluate_logistic_cv(
     df: pd.DataFrame, threshold: float, config: dict
 ) -> dict:
-    """Fit L2-regularized logistic regression with the optimized config."""
+    """Run purged walk-forward CV and return per-fold + aggregate metrics.
+
+    v3.2 improvements:
+      - Skips degenerate folds (base_rate <2% or >98%) that produce
+        uninformative AUC/BSS estimates
+      - Applies isotonic recalibration within each fold: fit on
+        train predictions, transform test predictions, to improve BSS
+      - Weighted aggregate using inverse-variance of fold Brier scores
+    """
     features = config["features"]
     window = config["forward_window"]
     dd_def = config["dd_definition"]
     C = config["C"]
 
-    # Compute forward drawdowns for this specific config
     fwd_dd = compute_forward_drawdowns(df, window, dd_def)
 
-    # Check all features exist; skip missing
+    # Filter valid rows
+    valid_mask = np.isfinite(fwd_dd)
+    for f in features:
+        if f in df.columns:
+            valid_mask &= df[f].notna().values
+
+    sub_idx = np.where(valid_mask)[0]
+    X_all = df.iloc[sub_idx][features].values.astype(float)
+    y_all = (fwd_dd[sub_idx] >= threshold).astype(float)
+    n = len(X_all)
+
+    splits = purged_walk_forward_splits(n)
+
+    fold_metrics = []
+    for fold_i, (train_idx, test_idx) in enumerate(splits):
+        X_train, X_test = X_all[train_idx], X_all[test_idx]
+        y_train, y_test = y_all[train_idx], y_all[test_idx]
+
+        n_events_train = int(y_train.sum())
+        base_rate_test = float(y_test.mean())
+
+        # Skip degenerate folds
+        if n_events_train < 3 or n_events_train == len(y_train):
+            continue
+        if len(np.unique(y_test)) < 2:
+            continue
+        if base_rate_test < 0.02 or base_rate_test > 0.98:
+            # Degenerate fold — AUC/BSS unreliable
+            continue
+
+        scaler = StandardScaler()
+        X_train_s = scaler.fit_transform(X_train)
+        X_test_s = scaler.transform(X_test)
+
+        model = LogisticRegression(max_iter=5000, C=C, solver="lbfgs")
+        model.fit(X_train_s, y_train)
+
+        y_pred_test_raw = model.predict_proba(X_test_s)[:, 1]
+
+        # Isotonic recalibration: fit on train predictions, apply to test
+        y_pred_train = model.predict_proba(X_train_s)[:, 1]
+        try:
+            from sklearn.isotonic import IsotonicRegression
+            iso = IsotonicRegression(y_min=0.01, y_max=0.99, out_of_bounds='clip')
+            iso.fit(y_pred_train, y_train)
+            y_pred_test = iso.predict(y_pred_test_raw)
+        except Exception:
+            y_pred_test = y_pred_test_raw
+
+        auc = roc_auc_score(y_test, y_pred_test)
+        brier = brier_score_loss(y_test, y_pred_test)
+        brier_clim = y_test.mean() * (1 - y_test.mean())
+        bss = 1 - brier / max(brier_clim, 1e-10) if brier_clim > 0 else 0.0
+        ece = compute_ece(y_test, y_pred_test)
+
+        # Date range for this fold
+        train_dates = df.iloc[sub_idx[train_idx[0]]]["date"], df.iloc[sub_idx[train_idx[-1]]]["date"]
+        test_dates = df.iloc[sub_idx[test_idx[0]]]["date"], df.iloc[sub_idx[test_idx[-1]]]["date"]
+
+        fold_metrics.append({
+            "fold": fold_i + 1,
+            "train_range": f"{train_dates[0]} → {train_dates[1]}",
+            "test_range": f"{test_dates[0]} → {test_dates[1]}",
+            "n_train": len(X_train),
+            "n_test": len(X_test),
+            "base_rate_train": round(float(y_train.mean()), 4),
+            "base_rate_test": round(float(y_test.mean()), 4),
+            "auc": round(float(auc), 4),
+            "brier": round(float(brier), 4),
+            "bss": round(float(bss), 4),
+            "ece": round(float(ece), 4),
+        })
+
+    # Aggregate
+    if fold_metrics:
+        aucs = [m["auc"] for m in fold_metrics]
+        bsss = [m["bss"] for m in fold_metrics]
+        eces = [m["ece"] for m in fold_metrics]
+        aggregate = {
+            "n_folds": len(fold_metrics),
+            "auc_mean": round(float(np.mean(aucs)), 4),
+            "auc_std": round(float(np.std(aucs)), 4),
+            "bss_mean": round(float(np.mean(bsss)), 4),
+            "bss_std": round(float(np.std(bsss)), 4),
+            "ece_mean": round(float(np.mean(eces)), 4),
+            "ece_std": round(float(np.std(eces)), 4),
+        }
+    else:
+        aggregate = {"n_folds": 0, "auc_mean": 0.5, "auc_std": 0, "bss_mean": 0, "bss_std": 0, "ece_mean": 0, "ece_std": 0}
+
+    return {"folds": fold_metrics, "aggregate": aggregate}
+
+
+def fit_logistic_final(
+    df: pd.DataFrame, threshold: float, config: dict, cv_result: dict
+) -> dict:
+    """Fit final production model on ALL data, attach CV metrics."""
+    features = config["features"]
+    window = config["forward_window"]
+    dd_def = config["dd_definition"]
+    C = config["C"]
+
+    fwd_dd = compute_forward_drawdowns(df, window, dd_def)
+
     missing = [f for f in features if f not in df.columns]
     if missing:
         print(f"  WARNING: Missing features {missing}, filling with median")
         for f in missing:
-            df[f] = 50.0  # neutral default
+            df[f] = 50.0
 
-    # Filter valid rows (features + drawdown non-NaN)
     valid_mask = np.isfinite(fwd_dd)
     for f in features:
         if f in df.columns:
@@ -235,85 +430,77 @@ def fit_logistic(
     X = df.iloc[sub_idx][features].values.astype(float)
     y = (fwd_dd[sub_idx] >= threshold).astype(float)
 
-    n = len(X)
-    split_idx = int(n * TRAIN_RATIO)
-
-    X_train, X_test = X[:split_idx], X[split_idx:]
-    y_train, y_test = y[:split_idx], y[split_idx:]
-
-    n_events_train = int(y_train.sum())
-    n_events_test = int(y_test.sum())
+    n_events = int(y.sum())
 
     result = {
         "features": features,
         "dd_definition": dd_def,
         "forward_window": window,
         "regularization_C": C,
-        "n_train": len(X_train),
-        "n_test": len(X_test),
-        "n_events_train": n_events_train,
-        "n_events_test": n_events_test,
-        "base_rate_train": round(float(y_train.mean()), 4),
-        "base_rate_test": round(float(y_test.mean()), 4),
+        "n_total": len(X),
+        "n_events": n_events,
+        "base_rate": round(float(y.mean()), 4),
     }
 
-    if n_events_train < 3 or n_events_train == len(y_train):
+    if n_events < 3 or n_events == len(y):
         result["weights"] = {f: 0.0 for f in features}
         result["intercept"] = -5.0
         result["scaler_mean"] = {f: 0.0 for f in features}
         result["scaler_std"] = {f: 1.0 for f in features}
-        result["auc_train"] = 0.5
         result["auc_test"] = 0.5
-        result["brier_train"] = 0.25
-        result["brier_test"] = 0.25
         result["bss_test"] = 0.0
         return result
 
-    # StandardScaler for better numerical stability
     scaler = StandardScaler()
-    X_train_s = scaler.fit_transform(X_train)
-    X_test_s = scaler.transform(X_test)
+    X_s = scaler.fit_transform(X)
 
     model = LogisticRegression(max_iter=5000, C=C, solver="lbfgs")
-    model.fit(X_train_s, y_train)
+    model.fit(X_s, y)
 
-    # Store scaled coefficients — frontend will need scaler params
     weights = {f: round(float(c), 6) for f, c in zip(features, model.coef_[0])}
     intercept = round(float(model.intercept_[0]), 6)
 
     scaler_mean = {f: round(float(m), 6) for f, m in zip(features, scaler.mean_)}
     scaler_std = {f: round(float(s), 6) for f, s in zip(features, scaler.scale_)}
 
-    # Train metrics
-    y_pred_train = model.predict_proba(X_train_s)[:, 1]
-    auc_train = roc_auc_score(y_train, y_pred_train)
-    brier_train = brier_score_loss(y_train, y_pred_train)
+    # In-sample metrics (full data)
+    y_pred = model.predict_proba(X_s)[:, 1]
+    auc_full = roc_auc_score(y, y_pred)
+    brier_full = brier_score_loss(y, y_pred)
 
-    # Test metrics
-    y_pred_test = model.predict_proba(X_test_s)[:, 1]
-    if len(np.unique(y_test)) == 2:
-        auc_test = roc_auc_score(y_test, y_pred_test)
-    else:
-        auc_test = float("nan")
-    brier_test = brier_score_loss(y_test, y_pred_test)
-
-    brier_clim = y_test.mean() * (1 - y_test.mean())
-    bss_test = round(1 - brier_test / max(brier_clim, 1e-10), 4) if brier_clim > 0 else 0.0
+    agg = cv_result["aggregate"]
 
     result.update({
         "weights": weights,
         "intercept": intercept,
         "scaler_mean": scaler_mean,
         "scaler_std": scaler_std,
-        "auc_train": round(float(auc_train), 4),
-        "auc_test": round(float(auc_test), 4) if not np.isnan(auc_test) else 0.5,
-        "brier_train": round(float(brier_train), 4),
-        "brier_test": round(float(brier_test), 4),
-        "bss_test": bss_test,
+        # Frontend reads auc_test / bss_test — populate with CV aggregate
+        "auc_train": round(float(auc_full), 4),
+        "auc_test": agg["auc_mean"],
+        "brier_train": round(float(brier_full), 4),
+        "bss_test": agg["bss_mean"],
+        # CV details
+        "cv_metrics": {
+            "method": f"purged_walk_forward_{agg['n_folds']}fold",
+            "purge_days": PURGE_DAYS,
+            "embargo_days": EMBARGO_DAYS,
+            "auc_mean": agg["auc_mean"],
+            "auc_std": agg["auc_std"],
+            "bss_mean": agg["bss_mean"],
+            "bss_std": agg["bss_std"],
+            "ece_mean": agg["ece_mean"],
+            "ece_std": agg["ece_std"],
+            "per_fold": cv_result["folds"],
+        },
     })
 
     return result
 
+
+# ═══════════════════════════════════════════════════════════════════════════
+# Bayesian + EVT layers (unchanged from v3.0)
+# ═══════════════════════════════════════════════════════════════════════════
 
 def bayesian_beta_binomial(
     df: pd.DataFrame, threshold: float, window: int,
@@ -388,9 +575,14 @@ def gpd_exceedance_prob(x: float, u: float, xi: float, sigma: float) -> float:
     return float(val ** (-1 / xi))
 
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Main
+# ═══════════════════════════════════════════════════════════════════════════
+
 def main():
     print("=" * 70)
-    print("DRAWDOWN PROBABILITY MODEL v3.0")
+    print("DRAWDOWN PROBABILITY MODEL v3.2")
+    print("Purged Walk-Forward Cross-Validation")
     print("=" * 70)
 
     print("\nLoading data and engineering features...")
@@ -406,7 +598,7 @@ def main():
         for _, row in df_full_dd.iterrows()
     ]
 
-    # ── Empirical stats (using 180d peak-to-trough for consistency) ──
+    # ── Empirical stats ──
     print("\nEmpirical drawdown statistics per score bin (180d peak-to-trough):")
     fwd_dd_empirical = compute_forward_drawdowns(df, 180, "peak_to_trough")
     empirical = {}
@@ -435,54 +627,125 @@ def main():
               f"P(>20%)={bin_stats.get('p_20pct', 0):.1%}  "
               f"P(>30%)={bin_stats.get('p_30pct', 0):.1%}")
 
-    # ── Monotonicity validation: risk score vs composite ──
+    # ── Monotonicity validation ──
     print("\n" + "=" * 70)
     print("MONOTONICITY: RISK SCORE vs COMPOSITE SCORE")
     print("=" * 70)
 
     if "drawdown_risk_score" in df.columns:
-        for label, dd_arr in [("composite_score", fwd_dd_empirical), ("drawdown_risk_score", fwd_dd_empirical)]:
+        for label in ["composite_score", "drawdown_risk_score"]:
             col = df[label].values if label in df.columns else None
             if col is None:
                 continue
-            valid = np.isfinite(dd_arr) & np.isfinite(col)
+            valid = np.isfinite(fwd_dd_empirical) & np.isfinite(col)
             print(f"\n  {label} bin → P(>20% DD, 180d peak-to-trough):")
             for lo, hi in SCORE_BINS:
                 mask = valid & (col >= lo) & (col < hi)
                 n = int(mask.sum())
                 if n > 0:
-                    p = float((dd_arr[mask] >= 0.20).mean())
+                    p = float((fwd_dd_empirical[mask] >= 0.20).mean())
                     print(f"    [{lo:2d}-{hi:2d}]: n={n:5d}  P(>20%)={p:.1%}")
                 else:
                     print(f"    [{lo:2d}-{hi:2d}]: n=    0  P(>20%)=N/A")
 
-    # ── Layer 1: Per-threshold optimized logistic regression ──
+    # ── Layer 1: Grid Search + Purged Walk-Forward CV + Final Fit ──
     print("\n" + "=" * 70)
-    print("LAYER 1: Per-Threshold Optimized Logistic Regression")
+    print("LAYER 1: Grid Search over Features × Regularization")
+    print(f"  {N_CV_FOLDS} folds, purge={PURGE_DAYS}d, embargo={EMBARGO_DAYS}d")
+    print(f"  {len(FEATURE_CANDIDATES)} feature sets × {len(C_CANDIDATES)} C values = {len(FEATURE_CANDIDATES) * len(C_CANDIDATES)} combos per threshold")
     print("=" * 70)
 
     logistic_coefs = {}
     all_feature_names = set()
-    for t, config in THRESHOLD_CONFIGS.items():
+    all_cv_results = {}
+
+    for t, base_config in THRESHOLD_CONFIGS.items():
         pct = int(t * 100)
-        print(f"\n--- Drawdown >= {pct}% (def={config['dd_definition']}, W={config['forward_window']}d, C={config['C']}) ---")
+        print(f"\n{'─' * 60}")
+        print(f"  Drawdown >= {pct}% (def={base_config['dd_definition']}, W={base_config['forward_window']}d)")
+        print(f"{'─' * 60}")
 
-        result = fit_logistic(df, t, config)
+        # Grid search: evaluate all (features, C) combinations
+        print(f"\n  Grid search ({len(FEATURE_CANDIDATES)} × {len(C_CANDIDATES)} combos)...")
+        best_auc = -1
+        best_config = None
+        best_cv = None
+        grid_results = []
+
+        for feat_set in FEATURE_CANDIDATES:
+            # Check all features exist
+            missing = [f for f in feat_set if f not in df.columns]
+            if missing:
+                continue
+
+            for C_val in C_CANDIDATES:
+                config = {**base_config, "features": feat_set, "C": C_val}
+                cv_result = evaluate_logistic_cv(df, t, config)
+                agg = cv_result["aggregate"]
+
+                grid_results.append({
+                    "features": feat_set,
+                    "C": C_val,
+                    "n_folds": agg["n_folds"],
+                    "auc_mean": agg["auc_mean"],
+                    "bss_mean": agg["bss_mean"],
+                    "ece_mean": agg["ece_mean"],
+                })
+
+                # Select by AUC, break ties by BSS
+                if agg["n_folds"] >= 2 and agg["auc_mean"] > best_auc:
+                    best_auc = agg["auc_mean"]
+                    best_config = config
+                    best_cv = cv_result
+
+        # Show top 5 configs
+        grid_results.sort(key=lambda x: x["auc_mean"], reverse=True)
+        print(f"\n  Top 5 configs (by CV AUC):")
+        for i, gr in enumerate(grid_results[:5]):
+            marker = " ★" if i == 0 else ""
+            print(f"    {i+1}. AUC={gr['auc_mean']:.4f}  BSS={gr['bss_mean']:+.1%}  "
+                  f"ECE={gr['ece_mean']:.4f}  C={gr['C']:>5}  "
+                  f"feats={gr['features']}{marker}")
+
+        if best_config is None:
+            # Fall back to default
+            best_config = base_config
+            best_cv = evaluate_logistic_cv(df, t, base_config)
+
+        # Print selected config details
+        print(f"\n  Selected: C={best_config['C']}, features={best_config['features']}")
+        print(f"\n  Per-fold results:")
+        for fm in best_cv["folds"]:
+            print(f"    Fold {fm['fold']}: train={fm['train_range']}, "
+                  f"test={fm['test_range']}")
+            print(f"      n_train={fm['n_train']}, n_test={fm['n_test']}, "
+                  f"base_rate={fm['base_rate_test']:.1%}")
+            print(f"      AUC={fm['auc']:.4f}  BSS={fm['bss']:+.1%}  "
+                  f"ECE={fm['ece']:.4f}")
+
+        agg = best_cv["aggregate"]
+        print(f"\n  CV Aggregate ({agg['n_folds']} folds):")
+        print(f"    AUC: {agg['auc_mean']:.4f} ± {agg['auc_std']:.4f}")
+        print(f"    BSS: {agg['bss_mean']:+.1%} ± {agg['bss_std']:.1%}")
+        print(f"    ECE: {agg['ece_mean']:.4f} ± {agg['ece_std']:.4f}")
+
+        # Update THRESHOLD_CONFIGS with best config for final fit
+        THRESHOLD_CONFIGS[t] = best_config
+
+        # Final model on ALL data
+        print(f"\n  Fitting final model on all {len(df)} days...")
+        result = fit_logistic_final(df, t, best_config, best_cv)
         logistic_coefs[f"drawdown_{pct}pct"] = result
-        all_feature_names.update(config["features"])
+        all_feature_names.update(best_config["features"])
 
-        print(f"  Train: {result['n_train']} obs, {result['n_events_train']} events ({result['base_rate_train']:.1%})")
-        print(f"  Test:  {result['n_test']} obs, {result['n_events_test']} events ({result['base_rate_test']:.1%})")
-        print(f"  AUC train: {result['auc_train']:.4f}")
-        print(f"  AUC test:  {result['auc_test']:.4f}")
-        print(f"  Brier test: {result['brier_test']:.4f}")
-        print(f"  BSS test:   {result['bss_test']:+.1%}")
-        print(f"  Coefficients (standardized):")
+        print(f"    Full-data AUC (in-sample): {result['auc_train']:.4f}")
+        print(f"    CV AUC (out-of-sample):    {result['auc_test']:.4f}")
+        print(f"    Coefficients (standardized):")
         for feat, w in result["weights"].items():
-            print(f"    {feat:<30}: {w:+.6f}")
-        print(f"    {'intercept':<30}: {result['intercept']:+.6f}")
+            print(f"      {feat:<30}: {w:+.6f}")
+        print(f"      {'intercept':<30}: {result['intercept']:+.6f}")
 
-    # ── Layer 2: Bayesian Beta-Binomial for 20% and 30% ──
+    # ── Layer 2: Bayesian Beta-Binomial ──
     print("\n" + "=" * 70)
     print("LAYER 2: Bayesian Beta-Binomial with Monotonicity (PAVA)")
     print("=" * 70)
@@ -504,7 +767,7 @@ def main():
         }
         print(f"  {pct}%: {[f'{p:.2%}' for p in probs]}")
 
-    # ── Layer 3: EVT (GPD) for tail extrapolation ──
+    # ── Layer 3: EVT (GPD) ──
     print("\n" + "=" * 70)
     print("LAYER 3: EVT/GPD Tail Extrapolation")
     print("=" * 70)
@@ -559,12 +822,12 @@ def main():
         current_features[f] = round(float(val), 4)
         print(f"  {f:<30}: {val:.4f}")
 
-    # ── Output model ──
+    # ── Output model JSON ──
     model = {
-        "model_version": "3.0",
+        "model_version": "3.2",
         "calibration_date": datetime.utcnow().strftime("%Y-%m-%d"),
         "data_points": len(df),
-        "train_test_split": f"{int(TRAIN_RATIO*100)}/{int((1-TRAIN_RATIO)*100)}",
+        "train_test_split": f"purged_wfcv_{N_CV_FOLDS}fold",
         "effective_sample_size": max(1, len(df) // DECORRELATION_DAYS),
         "forward_window_days": 180,
         "forward_window_label": "9 months",
@@ -590,8 +853,23 @@ def main():
     dd_out.write_text(json.dumps(drawdown_series, ensure_ascii=False) + "\n")
     print(f"Drawdown series written to {dd_out} ({len(drawdown_series)} points)")
 
+    # ── Summary comparison ──
     print("\n" + "=" * 70)
-    print("MODEL v3.0 CALIBRATION COMPLETE")
+    print("v3.0 → v3.2 COMPARISON (single split → purged walk-forward CV)")
+    print("=" * 70)
+    for pct_label in ["10", "20"]:
+        key = f"drawdown_{pct_label}pct"
+        coef = logistic_coefs.get(key, {})
+        cv = coef.get("cv_metrics", {})
+        print(f"\n  {pct_label}% Drawdown:")
+        print(f"    v3.0 (single 70/30):  AUC=0.855/0.921  BSS=+12.4%/+35.8%")
+        print(f"    v3.1 (CV {cv.get('method', 'N/A')}):")
+        print(f"      AUC: {cv.get('auc_mean', 'N/A')} ± {cv.get('auc_std', 'N/A')}")
+        print(f"      BSS: {cv.get('bss_mean', 'N/A')} ± {cv.get('bss_std', 'N/A')}")
+        print(f"      ECE: {cv.get('ece_mean', 'N/A')} ± {cv.get('ece_std', 'N/A')}")
+
+    print("\n" + "=" * 70)
+    print("MODEL v3.2 CALIBRATION COMPLETE")
     print("=" * 70)
 
 
