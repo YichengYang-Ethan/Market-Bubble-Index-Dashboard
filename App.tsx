@@ -4,6 +4,7 @@ import DeviationChart from './components/DeviationChart';
 import StatsCard from './components/StatsCard';
 import BacktestPanel from './components/BacktestPanel';
 import BubbleGauge from './components/BubbleGauge';
+import DrawdownRiskGauge from './components/DrawdownRiskGauge';
 import BubbleHistoryChart from './components/BubbleHistoryChart';
 import BubbleBacktestPanel from './components/BubbleBacktestPanel';
 import CrashProbabilityPanel from './components/CrashProbabilityPanel';
@@ -304,18 +305,40 @@ const App: React.FC = () => {
               </button>
             </div>
           ) : bubbleData ? (
-            <div className="flex justify-center">
-              <BubbleGauge
-                compositeScore={bubbleData.composite_score}
-                regime={bubbleData.regime}
-                sentimentScore={bubbleData.sentiment_score}
-                liquidityScore={bubbleData.liquidity_score}
-                valuationScore={bubbleData.valuation_score}
-                generatedAt={bubbleData.generated_at}
-                scoreVelocity={bubbleData.score_velocity}
-                confidenceInterval={bubbleData.confidence_interval}
-                dataQuality={bubbleData.data_quality}
-              />
+            <div className="flex flex-col md:flex-row justify-center items-start gap-8 md:gap-16">
+              <div className="flex-1 max-w-sm mx-auto md:mx-0">
+                <h2 className="text-center text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Bubble Temperature</h2>
+                <BubbleGauge
+                  compositeScore={bubbleData.composite_score}
+                  regime={bubbleData.regime}
+                  sentimentScore={bubbleData.sentiment_score}
+                  liquidityScore={bubbleData.liquidity_score}
+                  valuationScore={bubbleData.valuation_score}
+                  generatedAt={bubbleData.generated_at}
+                  scoreVelocity={bubbleData.score_velocity}
+                  confidenceInterval={bubbleData.confidence_interval}
+                  dataQuality={bubbleData.data_quality}
+                />
+              </div>
+              <div className="flex-1 max-w-sm mx-auto md:mx-0">
+                <h2 className="text-center text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Drawdown Risk</h2>
+                <DrawdownRiskGauge
+                  riskScore={(() => {
+                    if (bubbleData.drawdown_risk_score != null) return bubbleData.drawdown_risk_score;
+                    // Client-side fallback: compute from indicators
+                    const INVERSIONS = new Set(['qqq_deviation', 'vix_level', 'yield_curve']);
+                    let score = 0;
+                    for (const [key, ind] of Object.entries(bubbleData.indicators)) {
+                      const val = INVERSIONS.has(key) ? (100 - ind.score) : ind.score;
+                      score += val * ind.weight;
+                    }
+                    return score;
+                  })()}
+                  compositeScore={bubbleData.composite_score}
+                  indicators={bubbleData.indicators}
+                  generatedAt={bubbleData.generated_at}
+                />
+              </div>
             </div>
           ) : null}
         </div>
