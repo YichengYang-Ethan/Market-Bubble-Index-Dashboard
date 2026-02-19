@@ -1,0 +1,1038 @@
+{
+  "dd_10pct": {
+    "threshold": 0.1,
+    "n_samples": 2582,
+    "n_events": 1832,
+    "base_rate": 0.7095,
+    "methods": {
+      "aic_forward": {
+        "name": "AIC Forward Stepwise",
+        "features": [
+          "risk_ema_20d",
+          "vix_x_credit",
+          "ind_qqq_deviation",
+          "score_ema_20d",
+          "score_sma_60d",
+          "ind_credit_spread",
+          "ind_vix_level",
+          "composite_score"
+        ],
+        "n_features": 8,
+        "aic": 2319.22,
+        "bic": 2371.92,
+        "log_likelihood": -1150.61,
+        "mcfadden_r2": 0.2605,
+        "hosmer_lemeshow": {
+          "chi2": 52.5619,
+          "df": 8,
+          "p_value": 0.0
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -14.8733,
+            "ci_lower": -16.5339,
+            "ci_upper": -13.2127,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.3172,
+            "ci_lower": 0.2862,
+            "ci_upper": 0.3481,
+            "p_value": 0.0
+          },
+          "vix_x_credit": {
+            "coef": 0.0108,
+            "ci_lower": -0.0036,
+            "ci_upper": 0.0252,
+            "p_value": 0.1416
+          },
+          "ind_qqq_deviation": {
+            "coef": 0.0485,
+            "ci_lower": 0.0408,
+            "ci_upper": 0.0563,
+            "p_value": 0.0
+          },
+          "score_ema_20d": {
+            "coef": -0.0945,
+            "ci_lower": -0.119,
+            "ci_upper": -0.0699,
+            "p_value": 0.0
+          },
+          "score_sma_60d": {
+            "coef": 0.0416,
+            "ci_lower": 0.0253,
+            "ci_upper": 0.0578,
+            "p_value": 0.0
+          },
+          "ind_credit_spread": {
+            "coef": -0.0246,
+            "ci_lower": -0.0325,
+            "ci_upper": -0.0168,
+            "p_value": 0.0
+          },
+          "ind_vix_level": {
+            "coef": -0.0382,
+            "ci_lower": -0.0509,
+            "ci_upper": -0.0256,
+            "p_value": 0.0
+          },
+          "composite_score": {
+            "coef": 0.0317,
+            "ci_lower": 0.0142,
+            "ci_upper": 0.0492,
+            "p_value": 0.0004
+          }
+        },
+        "cv": {
+          "n_folds": 2,
+          "auc_mean": 0.7373,
+          "auc_std": 0.177,
+          "bss_mean": 0.0454,
+          "bss_std": 0.1061,
+          "ece_mean": 0.165,
+          "ece_std": 0.0765
+        },
+        "vs_baseline": {
+          "delta_auc": 0.0453,
+          "delta_bss": -0.0676
+        }
+      },
+      "bic_forward": {
+        "name": "BIC Forward Stepwise",
+        "features": [
+          "risk_ema_20d",
+          "vix_x_credit",
+          "ind_qqq_deviation",
+          "score_ema_20d",
+          "score_sma_60d",
+          "ind_credit_spread",
+          "ind_vix_level",
+          "composite_score"
+        ],
+        "n_features": 8,
+        "aic": 2319.22,
+        "bic": 2371.92,
+        "log_likelihood": -1150.61,
+        "mcfadden_r2": 0.2605,
+        "hosmer_lemeshow": {
+          "chi2": 52.5619,
+          "df": 8,
+          "p_value": 0.0
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -14.8733,
+            "ci_lower": -16.5339,
+            "ci_upper": -13.2127,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.3172,
+            "ci_lower": 0.2862,
+            "ci_upper": 0.3481,
+            "p_value": 0.0
+          },
+          "vix_x_credit": {
+            "coef": 0.0108,
+            "ci_lower": -0.0036,
+            "ci_upper": 0.0252,
+            "p_value": 0.1416
+          },
+          "ind_qqq_deviation": {
+            "coef": 0.0485,
+            "ci_lower": 0.0408,
+            "ci_upper": 0.0563,
+            "p_value": 0.0
+          },
+          "score_ema_20d": {
+            "coef": -0.0945,
+            "ci_lower": -0.119,
+            "ci_upper": -0.0699,
+            "p_value": 0.0
+          },
+          "score_sma_60d": {
+            "coef": 0.0416,
+            "ci_lower": 0.0253,
+            "ci_upper": 0.0578,
+            "p_value": 0.0
+          },
+          "ind_credit_spread": {
+            "coef": -0.0246,
+            "ci_lower": -0.0325,
+            "ci_upper": -0.0168,
+            "p_value": 0.0
+          },
+          "ind_vix_level": {
+            "coef": -0.0382,
+            "ci_lower": -0.0509,
+            "ci_upper": -0.0256,
+            "p_value": 0.0
+          },
+          "composite_score": {
+            "coef": 0.0317,
+            "ci_lower": 0.0142,
+            "ci_upper": 0.0492,
+            "p_value": 0.0004
+          }
+        },
+        "cv": {
+          "n_folds": 2,
+          "auc_mean": 0.7373,
+          "auc_std": 0.177,
+          "bss_mean": 0.0454,
+          "bss_std": 0.1061,
+          "ece_mean": 0.165,
+          "ece_std": 0.0765
+        },
+        "vs_baseline": {
+          "delta_auc": 0.0453,
+          "delta_bss": -0.0676
+        }
+      },
+      "aic_backward": {
+        "name": "AIC Backward Elimination",
+        "features": [
+          "risk_ema_20d",
+          "score_ema_20d",
+          "score_sma_60d",
+          "composite_score",
+          "score_velocity",
+          "ind_vix_level",
+          "ind_vix_level_change_5d",
+          "ind_qqq_deviation",
+          "ind_credit_spread",
+          "vix_x_credit"
+        ],
+        "n_features": 10,
+        "aic": 2319.96,
+        "bic": 2384.38,
+        "log_likelihood": -1148.98,
+        "mcfadden_r2": 0.2615,
+        "hosmer_lemeshow": {
+          "chi2": 55.0454,
+          "df": 8,
+          "p_value": 0.0
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -14.8489,
+            "ci_lower": -16.5135,
+            "ci_upper": -13.1843,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.3163,
+            "ci_lower": 0.2852,
+            "ci_upper": 0.3473,
+            "p_value": 0.0
+          },
+          "score_ema_20d": {
+            "coef": -0.109,
+            "ci_lower": -0.1467,
+            "ci_upper": -0.0713,
+            "p_value": 0.0
+          },
+          "score_sma_60d": {
+            "coef": 0.0441,
+            "ci_lower": 0.0261,
+            "ci_upper": 0.062,
+            "p_value": 0.0
+          },
+          "composite_score": {
+            "coef": 0.0449,
+            "ci_lower": 0.0175,
+            "ci_upper": 0.0724,
+            "p_value": 0.0013
+          },
+          "score_velocity": {
+            "coef": -0.021,
+            "ci_lower": -0.0458,
+            "ci_upper": 0.0038,
+            "p_value": 0.0976
+          },
+          "ind_vix_level": {
+            "coef": -0.0397,
+            "ci_lower": -0.0527,
+            "ci_upper": -0.0268,
+            "p_value": 0.0
+          },
+          "ind_vix_level_change_5d": {
+            "coef": 0.0073,
+            "ci_lower": -0.0018,
+            "ci_upper": 0.0164,
+            "p_value": 0.1163
+          },
+          "ind_qqq_deviation": {
+            "coef": 0.0489,
+            "ci_lower": 0.0411,
+            "ci_upper": 0.0567,
+            "p_value": 0.0
+          },
+          "ind_credit_spread": {
+            "coef": -0.0242,
+            "ci_lower": -0.032,
+            "ci_upper": -0.0163,
+            "p_value": 0.0
+          },
+          "vix_x_credit": {
+            "coef": 0.0105,
+            "ci_lower": -0.0039,
+            "ci_upper": 0.025,
+            "p_value": 0.1518
+          }
+        },
+        "cv": {
+          "n_folds": 2,
+          "auc_mean": 0.7556,
+          "auc_std": 0.1662,
+          "bss_mean": 0.1003,
+          "bss_std": 0.1214,
+          "ece_mean": 0.1526,
+          "ece_std": 0.0652
+        },
+        "vs_baseline": {
+          "delta_auc": 0.0636,
+          "delta_bss": -0.0127
+        }
+      },
+      "bic_backward": {
+        "name": "BIC Backward Elimination",
+        "features": [
+          "risk_ema_20d",
+          "score_ema_20d",
+          "score_sma_60d",
+          "composite_score",
+          "ind_vix_level",
+          "ind_qqq_deviation",
+          "ind_credit_spread"
+        ],
+        "n_features": 7,
+        "aic": 2319.39,
+        "bic": 2366.24,
+        "log_likelihood": -1151.7,
+        "mcfadden_r2": 0.2598,
+        "hosmer_lemeshow": {
+          "chi2": 42.1907,
+          "df": 8,
+          "p_value": 0.0
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -15.1279,
+            "ci_lower": -16.7581,
+            "ci_upper": -13.4977,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.3158,
+            "ci_lower": 0.2849,
+            "ci_upper": 0.3467,
+            "p_value": 0.0
+          },
+          "score_ema_20d": {
+            "coef": -0.0972,
+            "ci_lower": -0.1215,
+            "ci_upper": -0.0728,
+            "p_value": 0.0
+          },
+          "score_sma_60d": {
+            "coef": 0.0453,
+            "ci_lower": 0.0298,
+            "ci_upper": 0.0608,
+            "p_value": 0.0
+          },
+          "composite_score": {
+            "coef": 0.0319,
+            "ci_lower": 0.0144,
+            "ci_upper": 0.0494,
+            "p_value": 0.0004
+          },
+          "ind_vix_level": {
+            "coef": -0.03,
+            "ci_lower": -0.0363,
+            "ci_upper": -0.0237,
+            "p_value": 0.0
+          },
+          "ind_qqq_deviation": {
+            "coef": 0.048,
+            "ci_lower": 0.0403,
+            "ci_upper": 0.0558,
+            "p_value": 0.0
+          },
+          "ind_credit_spread": {
+            "coef": -0.0204,
+            "ci_lower": -0.0258,
+            "ci_upper": -0.015,
+            "p_value": 0.0
+          }
+        },
+        "cv": {
+          "n_folds": 2,
+          "auc_mean": 0.7523,
+          "auc_std": 0.1586,
+          "bss_mean": 0.0398,
+          "bss_std": 0.1261,
+          "ece_mean": 0.1949,
+          "ece_std": 0.049
+        },
+        "vs_baseline": {
+          "delta_auc": 0.0603,
+          "delta_bss": -0.0732
+        }
+      },
+      "aic_exhaustive": {
+        "name": "AIC Exhaustive (size 1-5)",
+        "features": [
+          "risk_ema_20d",
+          "vix_x_credit",
+          "ind_qqq_deviation",
+          "score_ema_20d",
+          "score_sma_60d"
+        ],
+        "n_features": 5,
+        "aic": 2368.58,
+        "bic": 2403.71,
+        "log_likelihood": -1178.29,
+        "mcfadden_r2": 0.2427,
+        "hosmer_lemeshow": {
+          "chi2": 14.8892,
+          "df": 8,
+          "p_value": 0.0613
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -15.0321,
+            "ci_lower": -16.6532,
+            "ci_upper": -13.411,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.297,
+            "ci_lower": 0.2676,
+            "ci_upper": 0.3264,
+            "p_value": 0.0
+          },
+          "vix_x_credit": {
+            "coef": -0.031,
+            "ci_lower": -0.0362,
+            "ci_upper": -0.0258,
+            "p_value": 0.0
+          },
+          "ind_qqq_deviation": {
+            "coef": 0.0487,
+            "ci_lower": 0.0413,
+            "ci_upper": 0.056,
+            "p_value": 0.0
+          },
+          "score_ema_20d": {
+            "coef": -0.0825,
+            "ci_lower": -0.1013,
+            "ci_upper": -0.0637,
+            "p_value": 0.0
+          },
+          "score_sma_60d": {
+            "coef": 0.0476,
+            "ci_lower": 0.033,
+            "ci_upper": 0.0622,
+            "p_value": 0.0
+          }
+        },
+        "cv": {
+          "n_folds": 2,
+          "auc_mean": 0.7304,
+          "auc_std": 0.1967,
+          "bss_mean": 0.0793,
+          "bss_std": 0.2361,
+          "ece_mean": 0.1629,
+          "ece_std": 0.0175
+        },
+        "vs_baseline": {
+          "delta_auc": 0.0384,
+          "delta_bss": -0.0337
+        }
+      },
+      "bic_exhaustive": {
+        "name": "BIC Exhaustive (size 1-5)",
+        "features": [
+          "risk_ema_20d",
+          "vix_x_credit",
+          "ind_qqq_deviation",
+          "score_ema_20d",
+          "score_sma_60d"
+        ],
+        "n_features": 5,
+        "aic": 2368.58,
+        "bic": 2403.71,
+        "log_likelihood": -1178.29,
+        "mcfadden_r2": 0.2427,
+        "hosmer_lemeshow": {
+          "chi2": 14.8892,
+          "df": 8,
+          "p_value": 0.0613
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -15.0321,
+            "ci_lower": -16.6532,
+            "ci_upper": -13.411,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.297,
+            "ci_lower": 0.2676,
+            "ci_upper": 0.3264,
+            "p_value": 0.0
+          },
+          "vix_x_credit": {
+            "coef": -0.031,
+            "ci_lower": -0.0362,
+            "ci_upper": -0.0258,
+            "p_value": 0.0
+          },
+          "ind_qqq_deviation": {
+            "coef": 0.0487,
+            "ci_lower": 0.0413,
+            "ci_upper": 0.056,
+            "p_value": 0.0
+          },
+          "score_ema_20d": {
+            "coef": -0.0825,
+            "ci_lower": -0.1013,
+            "ci_upper": -0.0637,
+            "p_value": 0.0
+          },
+          "score_sma_60d": {
+            "coef": 0.0476,
+            "ci_lower": 0.033,
+            "ci_upper": 0.0622,
+            "p_value": 0.0
+          }
+        },
+        "cv": {
+          "n_folds": 2,
+          "auc_mean": 0.7304,
+          "auc_std": 0.1967,
+          "bss_mean": 0.0793,
+          "bss_std": 0.2361,
+          "ece_mean": 0.1629,
+          "ece_std": 0.0175
+        },
+        "vs_baseline": {
+          "delta_auc": 0.0384,
+          "delta_bss": -0.0337
+        }
+      }
+    }
+  },
+  "dd_20pct": {
+    "threshold": 0.2,
+    "n_samples": 2582,
+    "n_events": 744,
+    "base_rate": 0.2881,
+    "methods": {
+      "aic_forward": {
+        "name": "AIC Forward Stepwise",
+        "features": [
+          "risk_ema_20d",
+          "vix_x_credit",
+          "is_elevated",
+          "score_std_20d",
+          "ind_vix_level",
+          "ind_credit_spread",
+          "score_velocity",
+          "ind_qqq_deviation",
+          "ind_qqq_deviation_sma_20d"
+        ],
+        "n_features": 9,
+        "aic": 2214.4,
+        "bic": 2272.96,
+        "log_likelihood": -1097.2,
+        "mcfadden_r2": 0.2923,
+        "hosmer_lemeshow": {
+          "chi2": 20.0836,
+          "df": 8,
+          "p_value": 0.01
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -13.1563,
+            "ci_lower": -14.486,
+            "ci_upper": -11.8267,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.1877,
+            "ci_lower": 0.1658,
+            "ci_upper": 0.2096,
+            "p_value": 0.0
+          },
+          "vix_x_credit": {
+            "coef": -0.0778,
+            "ci_lower": -0.0929,
+            "ci_upper": -0.0627,
+            "p_value": 0.0
+          },
+          "is_elevated": {
+            "coef": 1.3023,
+            "ci_lower": 0.9708,
+            "ci_upper": 1.6337,
+            "p_value": 0.0
+          },
+          "score_std_20d": {
+            "coef": 0.1437,
+            "ci_lower": 0.1089,
+            "ci_upper": 0.1784,
+            "p_value": 0.0
+          },
+          "ind_vix_level": {
+            "coef": 0.03,
+            "ci_lower": 0.018,
+            "ci_upper": 0.042,
+            "p_value": 0.0
+          },
+          "ind_credit_spread": {
+            "coef": 0.0113,
+            "ci_lower": 0.0042,
+            "ci_upper": 0.0184,
+            "p_value": 0.0018
+          },
+          "score_velocity": {
+            "coef": 0.0002,
+            "ci_lower": -0.013,
+            "ci_upper": 0.0134,
+            "p_value": 0.9751
+          },
+          "ind_qqq_deviation": {
+            "coef": 0.0211,
+            "ci_lower": 0.0115,
+            "ci_upper": 0.0307,
+            "p_value": 0.0
+          },
+          "ind_qqq_deviation_sma_20d": {
+            "coef": -0.0181,
+            "ci_lower": -0.0276,
+            "ci_upper": -0.0087,
+            "p_value": 0.0002
+          }
+        },
+        "cv": {
+          "n_folds": 3,
+          "auc_mean": 0.7654,
+          "auc_std": 0.1912,
+          "bss_mean": -0.6676,
+          "bss_std": 0.9595,
+          "ece_mean": 0.2199,
+          "ece_std": 0.261
+        },
+        "vs_baseline": {
+          "delta_auc": 0.1154,
+          "delta_bss": 0.1594
+        }
+      },
+      "bic_forward": {
+        "name": "BIC Forward Stepwise",
+        "features": [
+          "risk_ema_20d",
+          "vix_x_credit",
+          "is_elevated",
+          "score_std_20d",
+          "ind_vix_level",
+          "ind_credit_spread"
+        ],
+        "n_features": 6,
+        "aic": 2232.83,
+        "bic": 2273.83,
+        "log_likelihood": -1109.42,
+        "mcfadden_r2": 0.2845,
+        "hosmer_lemeshow": {
+          "chi2": 15.2938,
+          "df": 8,
+          "p_value": 0.0537
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -12.9675,
+            "ci_lower": -14.1614,
+            "ci_upper": -11.7735,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.183,
+            "ci_lower": 0.163,
+            "ci_upper": 0.203,
+            "p_value": 0.0
+          },
+          "vix_x_credit": {
+            "coef": -0.0831,
+            "ci_lower": -0.0978,
+            "ci_upper": -0.0685,
+            "p_value": 0.0
+          },
+          "is_elevated": {
+            "coef": 1.4163,
+            "ci_lower": 1.1196,
+            "ci_upper": 1.7129,
+            "p_value": 0.0
+          },
+          "score_std_20d": {
+            "coef": 0.1291,
+            "ci_lower": 0.0955,
+            "ci_upper": 0.1626,
+            "p_value": 0.0
+          },
+          "ind_vix_level": {
+            "coef": 0.0386,
+            "ci_lower": 0.0274,
+            "ci_upper": 0.0498,
+            "p_value": 0.0
+          },
+          "ind_credit_spread": {
+            "coef": 0.0121,
+            "ci_lower": 0.0052,
+            "ci_upper": 0.019,
+            "p_value": 0.0006
+          }
+        },
+        "cv": {
+          "n_folds": 3,
+          "auc_mean": 0.6504,
+          "auc_std": 0.1019,
+          "bss_mean": -1.2841,
+          "bss_std": 1.8872,
+          "ece_mean": 0.3489,
+          "ece_std": 0.3134
+        },
+        "vs_baseline": {
+          "delta_auc": 0.0004,
+          "delta_bss": -0.4571
+        }
+      },
+      "aic_backward": {
+        "name": "AIC Backward Elimination",
+        "features": [
+          "risk_ema_20d",
+          "score_std_20d",
+          "ind_vix_level",
+          "ind_qqq_deviation",
+          "ind_qqq_deviation_sma_20d",
+          "ind_credit_spread",
+          "is_elevated",
+          "vix_x_credit"
+        ],
+        "n_features": 8,
+        "aic": 2212.4,
+        "bic": 2265.1,
+        "log_likelihood": -1097.2,
+        "mcfadden_r2": 0.2923,
+        "hosmer_lemeshow": {
+          "chi2": 20.2134,
+          "df": 8,
+          "p_value": 0.0096
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -13.1547,
+            "ci_lower": -14.4804,
+            "ci_upper": -11.8291,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.1877,
+            "ci_lower": 0.166,
+            "ci_upper": 0.2093,
+            "p_value": 0.0
+          },
+          "score_std_20d": {
+            "coef": 0.1438,
+            "ci_lower": 0.1094,
+            "ci_upper": 0.1781,
+            "p_value": 0.0
+          },
+          "ind_vix_level": {
+            "coef": 0.03,
+            "ci_lower": 0.0181,
+            "ci_upper": 0.042,
+            "p_value": 0.0
+          },
+          "ind_qqq_deviation": {
+            "coef": 0.0211,
+            "ci_lower": 0.0124,
+            "ci_upper": 0.0299,
+            "p_value": 0.0
+          },
+          "ind_qqq_deviation_sma_20d": {
+            "coef": -0.0182,
+            "ci_lower": -0.0262,
+            "ci_upper": -0.0102,
+            "p_value": 0.0
+          },
+          "ind_credit_spread": {
+            "coef": 0.0113,
+            "ci_lower": 0.0043,
+            "ci_upper": 0.0184,
+            "p_value": 0.0017
+          },
+          "is_elevated": {
+            "coef": 1.3029,
+            "ci_lower": 0.9742,
+            "ci_upper": 1.6317,
+            "p_value": 0.0
+          },
+          "vix_x_credit": {
+            "coef": -0.0778,
+            "ci_lower": -0.0929,
+            "ci_upper": -0.0627,
+            "p_value": 0.0
+          }
+        },
+        "cv": {
+          "n_folds": 3,
+          "auc_mean": 0.7635,
+          "auc_std": 0.1898,
+          "bss_mean": -0.6584,
+          "bss_std": 0.9688,
+          "ece_mean": 0.2418,
+          "ece_std": 0.2453
+        },
+        "vs_baseline": {
+          "delta_auc": 0.1135,
+          "delta_bss": 0.1686
+        }
+      },
+      "bic_backward": {
+        "name": "BIC Backward Elimination",
+        "features": [
+          "risk_ema_20d",
+          "score_std_20d",
+          "ind_vix_level",
+          "ind_qqq_deviation",
+          "ind_qqq_deviation_sma_20d",
+          "ind_credit_spread",
+          "is_elevated",
+          "vix_x_credit"
+        ],
+        "n_features": 8,
+        "aic": 2212.4,
+        "bic": 2265.1,
+        "log_likelihood": -1097.2,
+        "mcfadden_r2": 0.2923,
+        "hosmer_lemeshow": {
+          "chi2": 20.2134,
+          "df": 8,
+          "p_value": 0.0096
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -13.1547,
+            "ci_lower": -14.4804,
+            "ci_upper": -11.8291,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.1877,
+            "ci_lower": 0.166,
+            "ci_upper": 0.2093,
+            "p_value": 0.0
+          },
+          "score_std_20d": {
+            "coef": 0.1438,
+            "ci_lower": 0.1094,
+            "ci_upper": 0.1781,
+            "p_value": 0.0
+          },
+          "ind_vix_level": {
+            "coef": 0.03,
+            "ci_lower": 0.0181,
+            "ci_upper": 0.042,
+            "p_value": 0.0
+          },
+          "ind_qqq_deviation": {
+            "coef": 0.0211,
+            "ci_lower": 0.0124,
+            "ci_upper": 0.0299,
+            "p_value": 0.0
+          },
+          "ind_qqq_deviation_sma_20d": {
+            "coef": -0.0182,
+            "ci_lower": -0.0262,
+            "ci_upper": -0.0102,
+            "p_value": 0.0
+          },
+          "ind_credit_spread": {
+            "coef": 0.0113,
+            "ci_lower": 0.0043,
+            "ci_upper": 0.0184,
+            "p_value": 0.0017
+          },
+          "is_elevated": {
+            "coef": 1.3029,
+            "ci_lower": 0.9742,
+            "ci_upper": 1.6317,
+            "p_value": 0.0
+          },
+          "vix_x_credit": {
+            "coef": -0.0778,
+            "ci_lower": -0.0929,
+            "ci_upper": -0.0627,
+            "p_value": 0.0
+          }
+        },
+        "cv": {
+          "n_folds": 3,
+          "auc_mean": 0.7635,
+          "auc_std": 0.1898,
+          "bss_mean": -0.6584,
+          "bss_std": 0.9688,
+          "ece_mean": 0.2418,
+          "ece_std": 0.2453
+        },
+        "vs_baseline": {
+          "delta_auc": 0.1135,
+          "delta_bss": 0.1686
+        }
+      },
+      "aic_exhaustive": {
+        "name": "AIC Exhaustive (size 1-5)",
+        "features": [
+          "risk_ema_20d",
+          "score_std_20d",
+          "vix_x_credit",
+          "score_ema_20d",
+          "composite_score"
+        ],
+        "n_features": 5,
+        "aic": 2268.08,
+        "bic": 2303.22,
+        "log_likelihood": -1128.04,
+        "mcfadden_r2": 0.2724,
+        "hosmer_lemeshow": {
+          "chi2": 20.9817,
+          "df": 8,
+          "p_value": 0.0072
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -12.3844,
+            "ci_lower": -13.4838,
+            "ci_upper": -11.2851,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.1749,
+            "ci_lower": 0.1582,
+            "ci_upper": 0.1916,
+            "p_value": 0.0
+          },
+          "score_std_20d": {
+            "coef": 0.1231,
+            "ci_lower": 0.0904,
+            "ci_upper": 0.1559,
+            "p_value": 0.0
+          },
+          "vix_x_credit": {
+            "coef": -0.0445,
+            "ci_lower": -0.0509,
+            "ci_upper": -0.0382,
+            "p_value": 0.0
+          },
+          "score_ema_20d": {
+            "coef": -0.0362,
+            "ci_lower": -0.0501,
+            "ci_upper": -0.0223,
+            "p_value": 0.0
+          },
+          "composite_score": {
+            "coef": 0.0714,
+            "ci_lower": 0.0566,
+            "ci_upper": 0.0861,
+            "p_value": 0.0
+          }
+        },
+        "cv": {
+          "n_folds": 3,
+          "auc_mean": 0.5827,
+          "auc_std": 0.0725,
+          "bss_mean": -1.106,
+          "bss_std": 1.5717,
+          "ece_mean": 0.3433,
+          "ece_std": 0.2979
+        },
+        "vs_baseline": {
+          "delta_auc": -0.0673,
+          "delta_bss": -0.279
+        }
+      },
+      "bic_exhaustive": {
+        "name": "BIC Exhaustive (size 1-5)",
+        "features": [
+          "risk_ema_20d",
+          "score_std_20d",
+          "vix_x_credit",
+          "score_ema_20d",
+          "composite_score"
+        ],
+        "n_features": 5,
+        "aic": 2268.08,
+        "bic": 2303.22,
+        "log_likelihood": -1128.04,
+        "mcfadden_r2": 0.2724,
+        "hosmer_lemeshow": {
+          "chi2": 20.9817,
+          "df": 8,
+          "p_value": 0.0072
+        },
+        "profile_ci": {
+          "const": {
+            "coef": -12.3844,
+            "ci_lower": -13.4838,
+            "ci_upper": -11.2851,
+            "p_value": 0.0
+          },
+          "risk_ema_20d": {
+            "coef": 0.1749,
+            "ci_lower": 0.1582,
+            "ci_upper": 0.1916,
+            "p_value": 0.0
+          },
+          "score_std_20d": {
+            "coef": 0.1231,
+            "ci_lower": 0.0904,
+            "ci_upper": 0.1559,
+            "p_value": 0.0
+          },
+          "vix_x_credit": {
+            "coef": -0.0445,
+            "ci_lower": -0.0509,
+            "ci_upper": -0.0382,
+            "p_value": 0.0
+          },
+          "score_ema_20d": {
+            "coef": -0.0362,
+            "ci_lower": -0.0501,
+            "ci_upper": -0.0223,
+            "p_value": 0.0
+          },
+          "composite_score": {
+            "coef": 0.0714,
+            "ci_lower": 0.0566,
+            "ci_upper": 0.0861,
+            "p_value": 0.0
+          }
+        },
+        "cv": {
+          "n_folds": 3,
+          "auc_mean": 0.5827,
+          "auc_std": 0.0725,
+          "bss_mean": -1.106,
+          "bss_std": 1.5717,
+          "ece_mean": 0.3433,
+          "ece_std": 0.2979
+        },
+        "vs_baseline": {
+          "delta_auc": -0.0673,
+          "delta_bss": -0.279
+        }
+      }
+    }
+  }
+}

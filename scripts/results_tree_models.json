@@ -1,0 +1,103 @@
+{
+  "dd_10pct": [
+    {
+      "model": "Logistic",
+      "params": {
+        "C": 0.1,
+        "features": [
+          "risk_ema_20d",
+          "score_std_20d"
+        ]
+      },
+      "n_folds": 2,
+      "auc_mean": 0.5798,
+      "auc_std": 0.1216,
+      "bss_mean": -0.0089,
+      "bss_std": 0.0508,
+      "ece_mean": 0.097,
+      "ece_std": 0.0114
+    },
+    {
+      "model": "XGBoost",
+      "params": {
+        "max_depth": 2,
+        "n_estimators": 200,
+        "learning_rate": 0.01,
+        "min_child_weight": 5
+      },
+      "n_folds": 2,
+      "auc_mean": 0.6714,
+      "auc_std": 0.1357,
+      "bss_mean": -0.2399,
+      "bss_std": 0.1795,
+      "ece_mean": 0.252,
+      "ece_std": 0.033
+    },
+    {
+      "model": "RandomForest",
+      "params": {
+        "n_estimators": 100,
+        "max_depth": 3,
+        "min_samples_leaf": 10
+      },
+      "n_folds": 2,
+      "auc_mean": 0.6845,
+      "auc_std": 0.0497,
+      "bss_mean": -0.1348,
+      "bss_std": 0.167,
+      "ece_mean": 0.1845,
+      "ece_std": 0.0765
+    }
+  ],
+  "dd_20pct": [
+    {
+      "model": "Logistic",
+      "params": {
+        "C": 0.1,
+        "features": [
+          "risk_ema_20d",
+          "score_std_20d",
+          "ind_yield_curve"
+        ]
+      },
+      "n_folds": 3,
+      "auc_mean": 0.4667,
+      "auc_std": 0.1208,
+      "bss_mean": -1.4729,
+      "bss_std": 1.7658,
+      "ece_mean": 0.3874,
+      "ece_std": 0.306
+    },
+    {
+      "model": "XGBoost",
+      "params": {
+        "max_depth": 2,
+        "n_estimators": 200,
+        "learning_rate": 0.01,
+        "min_child_weight": 20
+      },
+      "n_folds": 3,
+      "auc_mean": 0.539,
+      "auc_std": 0.0378,
+      "bss_mean": -1.5044,
+      "bss_std": 1.7379,
+      "ece_mean": 0.4369,
+      "ece_std": 0.2614
+    },
+    {
+      "model": "RandomForest",
+      "params": {
+        "n_estimators": 200,
+        "max_depth": null,
+        "min_samples_leaf": 50
+      },
+      "n_folds": 3,
+      "auc_mean": 0.5792,
+      "auc_std": 0.0621,
+      "bss_mean": -1.4651,
+      "bss_std": 1.7607,
+      "ece_mean": 0.4224,
+      "ece_std": 0.2637
+    }
+  ]
+}

@@ -1,0 +1,376 @@
+{
+  "description": "Ensemble and stacking model comparison for drawdown prediction",
+  "cv_method": "purged_walk_forward_5fold",
+  "purge_days": 180,
+  "embargo_days": 20,
+  "features_used": [
+    "risk_ema_20d",
+    "score_std_20d",
+    "ind_yield_curve",
+    "ind_vix_level",
+    "ind_vix_level_change_5d",
+    "ind_qqq_deviation_sma_20d",
+    "score_ema_20d",
+    "is_elevated",
+    "composite_score",
+    "score_velocity"
+  ],
+  "results": {
+    "drawdown_10pct": [
+      {
+        "model": "SVM_C1",
+        "n_folds": 2,
+        "auc_mean": 0.8247,
+        "auc_std": 0.0371,
+        "brier_mean": 0.2793,
+        "bss_mean": -0.2829,
+        "bss_std": 0.422,
+        "ece_mean": 0.2756,
+        "ece_std": 0.1649
+      },
+      {
+        "model": "KNN_20",
+        "n_folds": 2,
+        "auc_mean": 0.7811,
+        "auc_std": 0.0947,
+        "brier_mean": 0.2642,
+        "bss_mean": -0.2217,
+        "bss_std": 0.2354,
+        "ece_mean": 0.2555,
+        "ece_std": 0.15
+      },
+      {
+        "model": "KNN_10",
+        "n_folds": 2,
+        "auc_mean": 0.7414,
+        "auc_std": 0.102,
+        "brier_mean": 0.2979,
+        "bss_mean": -0.3805,
+        "bss_std": 0.2091,
+        "ece_mean": 0.2913,
+        "ece_std": 0.1487
+      },
+      {
+        "model": "SVM_C10",
+        "n_folds": 2,
+        "auc_mean": 0.7094,
+        "auc_std": 0.056,
+        "brier_mean": 0.2708,
+        "bss_mean": -0.263,
+        "bss_std": 0.0332,
+        "ece_mean": 0.2864,
+        "ece_std": 0.0686
+      },
+      {
+        "model": "KNN_5",
+        "n_folds": 2,
+        "auc_mean": 0.6995,
+        "auc_std": 0.1106,
+        "brier_mean": 0.3361,
+        "bss_mean": -0.5635,
+        "bss_std": 0.1189,
+        "ece_mean": 0.32,
+        "ece_std": 0.1329
+      },
+      {
+        "model": "Logistic_C1",
+        "n_folds": 2,
+        "auc_mean": 0.6694,
+        "auc_std": 0.2552,
+        "brier_mean": 0.1996,
+        "bss_mean": 0.0855,
+        "bss_std": 0.3425,
+        "ece_mean": 0.167,
+        "ece_std": 0.0161
+      },
+      {
+        "model": "SVM_C0.1",
+        "n_folds": 2,
+        "auc_mean": 0.6522,
+        "auc_std": 0.1725,
+        "brier_mean": 0.2919,
+        "bss_mean": -0.3363,
+        "bss_std": 0.5294,
+        "ece_mean": 0.2791,
+        "ece_std": 0.1563
+      },
+      {
+        "model": "Stacking(Logistic_C0.1+XGBoost+RF)",
+        "n_folds": 2,
+        "auc_mean": 0.5817,
+        "auc_std": 0.379,
+        "brier_mean": 0.2083,
+        "bss_mean": 0.0138,
+        "bss_std": 0.2689,
+        "ece_mean": 0.2585,
+        "ece_std": 0.0025
+      },
+      {
+        "model": "Logistic_C0.1",
+        "n_folds": 2,
+        "auc_mean": 0.5438,
+        "auc_std": 0.3806,
+        "brier_mean": 0.2265,
+        "bss_mean": -0.0365,
+        "bss_std": 0.4214,
+        "ece_mean": 0.2528,
+        "ece_std": 0.0659
+      },
+      {
+        "model": "SimpleAvg(Logistic_C0.1+XGBoost+RF+SVM_C1+KNN_10)",
+        "n_folds": 2,
+        "auc_mean": 0.4896,
+        "auc_std": 0.2972,
+        "brier_mean": 0.2605,
+        "bss_mean": -0.1974,
+        "bss_std": 0.3729,
+        "ece_mean": 0.2068,
+        "ece_std": 0.091
+      },
+      {
+        "model": "RF",
+        "n_folds": 2,
+        "auc_mean": 0.4404,
+        "auc_std": 0.4017,
+        "brier_mean": 0.2656,
+        "bss_mean": -0.2179,
+        "bss_std": 0.4378,
+        "ece_mean": 0.2791,
+        "ece_std": 0.1779
+      },
+      {
+        "model": "SimpleAvg(Logistic_C0.1+XGBoost+RF)",
+        "n_folds": 2,
+        "auc_mean": 0.4395,
+        "auc_std": 0.3795,
+        "brier_mean": 0.2839,
+        "bss_mean": -0.2991,
+        "bss_std": 0.526,
+        "ece_mean": 0.3237,
+        "ece_std": 0.2283
+      },
+      {
+        "model": "WeightedEns(Logistic_C0.1+XGBoost+RF+SVM_C1+KNN_10)",
+        "n_folds": 2,
+        "auc_mean": 0.4344,
+        "auc_std": 0.3168,
+        "brier_mean": 0.2958,
+        "bss_mean": -0.3578,
+        "bss_std": 0.4595,
+        "ece_mean": 0.2979,
+        "ece_std": 0.2014
+      },
+      {
+        "model": "Stacking(Logistic_C0.1+XGBoost+RF+SVM_C1+KNN_10)",
+        "n_folds": 2,
+        "auc_mean": 0.4309,
+        "auc_std": 0.201,
+        "brier_mean": 0.2452,
+        "bss_mean": -0.1496,
+        "bss_std": 0.0875,
+        "ece_mean": 0.1996,
+        "ece_std": 0.0491
+      },
+      {
+        "model": "WeightedEns(Logistic_C0.1+XGBoost+RF)",
+        "n_folds": 2,
+        "auc_mean": 0.4156,
+        "auc_std": 0.3373,
+        "brier_mean": 0.3384,
+        "bss_mean": -0.5465,
+        "bss_std": 0.6631,
+        "ece_mean": 0.3431,
+        "ece_std": 0.2547
+      },
+      {
+        "model": "XGBoost",
+        "n_folds": 2,
+        "auc_mean": 0.3912,
+        "auc_std": 0.2996,
+        "brier_mean": 0.3976,
+        "bss_mean": -0.8178,
+        "bss_std": 0.7637,
+        "ece_mean": 0.376,
+        "ece_std": 0.2676
+      }
+    ],
+    "drawdown_20pct": [
+      {
+        "model": "Logistic_C1",
+        "n_folds": 3,
+        "auc_mean": 0.9836,
+        "auc_std": 0.0124,
+        "brier_mean": 0.2119,
+        "bss_mean": -0.6911,
+        "bss_std": 1.0743,
+        "ece_mean": 0.271,
+        "ece_std": 0.2429
+      },
+      {
+        "model": "Logistic_C0.1",
+        "n_folds": 3,
+        "auc_mean": 0.9729,
+        "auc_std": 0.025,
+        "brier_mean": 0.1932,
+        "bss_mean": -0.5807,
+        "bss_std": 0.8939,
+        "ece_mean": 0.2587,
+        "ece_std": 0.2206
+      },
+      {
+        "model": "SVM_C1",
+        "n_folds": 3,
+        "auc_mean": 0.8004,
+        "auc_std": 0.1229,
+        "brier_mean": 0.2244,
+        "bss_mean": -0.7911,
+        "bss_std": 1.1328,
+        "ece_mean": 0.2432,
+        "ece_std": 0.2719
+      },
+      {
+        "model": "WeightedEns(Logistic_C0.1+XGBoost+RF+SVM_C1+KNN_10)",
+        "n_folds": 3,
+        "auc_mean": 0.7886,
+        "auc_std": 0.0788,
+        "brier_mean": 0.2345,
+        "bss_mean": -0.8668,
+        "bss_std": 1.1923,
+        "ece_mean": 0.2491,
+        "ece_std": 0.2904
+      },
+      {
+        "model": "SimpleAvg(Logistic_C0.1+XGBoost+RF+SVM_C1+KNN_10)",
+        "n_folds": 3,
+        "auc_mean": 0.7788,
+        "auc_std": 0.1364,
+        "brier_mean": 0.2163,
+        "bss_mean": -0.7414,
+        "bss_std": 1.0593,
+        "ece_mean": 0.2427,
+        "ece_std": 0.2682
+      },
+      {
+        "model": "SVM_C0.1",
+        "n_folds": 3,
+        "auc_mean": 0.7676,
+        "auc_std": 0.1619,
+        "brier_mean": 0.1887,
+        "bss_mean": -0.5121,
+        "bss_std": 0.9546,
+        "ece_mean": 0.2393,
+        "ece_std": 0.214
+      },
+      {
+        "model": "WeightedEns(Logistic_C0.1+XGBoost+RF)",
+        "n_folds": 3,
+        "auc_mean": 0.7611,
+        "auc_std": 0.1231,
+        "brier_mean": 0.2537,
+        "bss_mean": -0.9916,
+        "bss_std": 1.3512,
+        "ece_mean": 0.2646,
+        "ece_std": 0.305
+      },
+      {
+        "model": "SimpleAvg(Logistic_C0.1+XGBoost+RF)",
+        "n_folds": 3,
+        "auc_mean": 0.7533,
+        "auc_std": 0.1632,
+        "brier_mean": 0.2243,
+        "bss_mean": -0.7909,
+        "bss_std": 1.1299,
+        "ece_mean": 0.2478,
+        "ece_std": 0.2756
+      },
+      {
+        "model": "XGBoost",
+        "n_folds": 3,
+        "auc_mean": 0.7171,
+        "auc_std": 0.1585,
+        "brier_mean": 0.2764,
+        "bss_mean": -1.1463,
+        "bss_std": 1.524,
+        "ece_mean": 0.2908,
+        "ece_std": 0.316
+      },
+      {
+        "model": "RF",
+        "n_folds": 3,
+        "auc_mean": 0.6521,
+        "auc_std": 0.1902,
+        "brier_mean": 0.2155,
+        "bss_mean": -0.7422,
+        "bss_std": 1.0369,
+        "ece_mean": 0.2405,
+        "ece_std": 0.2591
+      },
+      {
+        "model": "SVM_C10",
+        "n_folds": 3,
+        "auc_mean": 0.6032,
+        "auc_std": 0.2657,
+        "brier_mean": 0.2039,
+        "bss_mean": -0.6943,
+        "bss_std": 0.8817,
+        "ece_mean": 0.2286,
+        "ece_std": 0.2251
+      },
+      {
+        "model": "KNN_10",
+        "n_folds": 3,
+        "auc_mean": 0.5904,
+        "auc_std": 0.1467,
+        "brier_mean": 0.2031,
+        "bss_mean": -0.6955,
+        "bss_std": 0.8606,
+        "ece_mean": 0.2422,
+        "ece_std": 0.2312
+      },
+      {
+        "model": "KNN_5",
+        "n_folds": 3,
+        "auc_mean": 0.5843,
+        "auc_std": 0.1394,
+        "brier_mean": 0.2177,
+        "bss_mean": -0.7911,
+        "bss_std": 0.9804,
+        "ece_mean": 0.2482,
+        "ece_std": 0.2424
+      },
+      {
+        "model": "KNN_20",
+        "n_folds": 3,
+        "auc_mean": 0.5395,
+        "auc_std": 0.1725,
+        "brier_mean": 0.2107,
+        "bss_mean": -0.7466,
+        "bss_std": 0.9215,
+        "ece_mean": 0.2485,
+        "ece_std": 0.236
+      },
+      {
+        "model": "Stacking(Logistic_C0.1+XGBoost+RF+SVM_C1+KNN_10)",
+        "n_folds": 3,
+        "auc_mean": 0.3349,
+        "auc_std": 0.0869,
+        "brier_mean": 0.2637,
+        "bss_mean": -1.2264,
+        "bss_std": 1.1096,
+        "ece_mean": 0.3249,
+        "ece_std": 0.2411
+      },
+      {
+        "model": "Stacking(Logistic_C0.1+XGBoost+RF)",
+        "n_folds": 3,
+        "auc_mean": 0.1991,
+        "auc_std": 0.1831,
+        "brier_mean": 0.2407,
+        "bss_mean": -1.0731,
+        "bss_std": 0.9316,
+        "ece_mean": 0.3101,
+        "ece_std": 0.226
+      }
+    ]
+  }
+}
