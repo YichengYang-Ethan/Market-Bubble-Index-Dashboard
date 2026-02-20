@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-19T21:59:00.815420+00:00",
+  "generated_at": "2026-02-20T21:51:09.359993+00:00",
   "method": "GSADF (Phillips-Shi-Yu 2015)",
   "min_window": 63,
   "results": [
@@ -209,7 +209,7 @@
     },
     {
       "date": "2014-09-19",
-      "test_statistic": -0.6706,
+      "test_statistic": -0.6707,
       "critical_value": -0.0441,
       "is_bubble": false
     },
@@ -227,13 +227,13 @@
     },
     {
       "date": "2014-10-10",
-      "test_statistic": -1.0115,
+      "test_statistic": -1.0118,
       "critical_value": -0.0455,
       "is_bubble": false
     },
     {
       "date": "2014-10-17",
-      "test_statistic": -0.523,
+      "test_statistic": -0.5233,
       "critical_value": -0.046,
       "is_bubble": false
     },
@@ -263,25 +263,25 @@
     },
     {
       "date": "2014-11-21",
-      "test_statistic": -0.5547,
+      "test_statistic": -0.5549,
       "critical_value": -0.048,
       "is_bubble": false
     },
     {
       "date": "2014-12-01",
-      "test_statistic": -0.6555,
+      "test_statistic": -0.6557,
       "critical_value": -0.0484,
       "is_bubble": false
     },
     {
       "date": "2014-12-08",
-      "test_statistic": -0.6047,
+      "test_statistic": -0.6048,
       "critical_value": -0.0487,
       "is_bubble": false
     },
     {
       "date": "2014-12-15",
-      "test_statistic": -0.9994,
+      "test_statistic": -0.9995,
       "critical_value": -0.0491,
       "is_bubble": false
     },
@@ -341,7 +341,7 @@
     },
     {
       "date": "2015-02-27",
-      "test_statistic": -0.9543,
+      "test_statistic": -0.9544,
       "critical_value": -0.052,
       "is_bubble": false
     },
@@ -359,7 +359,7 @@
     },
     {
       "date": "2015-03-20",
-      "test_statistic": -0.9832,
+      "test_statistic": -0.9833,
       "critical_value": -0.0527,
       "is_bubble": false
     },
@@ -401,7 +401,7 @@
     },
     {
       "date": "2015-05-11",
-      "test_statistic": -1.1479,
+      "test_statistic": -1.148,
       "critical_value": -0.0542,
       "is_bubble": false
     },
@@ -437,7 +437,7 @@
     },
     {
       "date": "2015-06-23",
-      "test_statistic": -1.1437,
+      "test_statistic": -1.1438,
       "critical_value": -0.0553,
       "is_bubble": false
     },
@@ -2117,7 +2117,7 @@
     },
     {
       "date": "2021-01-13",
-      "test_statistic": 0.0251,
+      "test_statistic": 0.0253,
       "critical_value": -0.0688,
       "is_bubble": true
     },
@@ -2225,7 +2225,7 @@
     },
     {
       "date": "2021-05-24",
-      "test_statistic": 0.3012,
+      "test_statistic": 0.3011,
       "critical_value": -0.0691,
       "is_bubble": true
     },
@@ -2273,7 +2273,7 @@
     },
     {
       "date": "2021-07-21",
-      "test_statistic": 0.3888,
+      "test_statistic": 0.3887,
       "critical_value": -0.0692,
       "is_bubble": true
     },
@@ -2405,7 +2405,7 @@
     },
     {
       "date": "2021-12-27",
-      "test_statistic": 0.5305,
+      "test_statistic": 0.5304,
       "critical_value": -0.0695,
       "is_bubble": true
     },
@@ -2591,7 +2591,7 @@
     },
     {
       "date": "2022-08-09",
-      "test_statistic": -0.5275,
+      "test_statistic": -0.5276,
       "critical_value": -0.0699,
       "is_bubble": false
     },
@@ -2849,7 +2849,7 @@
     },
     {
       "date": "2023-06-16",
-      "test_statistic": -0.0872,
+      "test_statistic": -0.0869,
       "critical_value": -0.0703,
       "is_bubble": false
     },
@@ -2861,37 +2861,37 @@
     },
     {
       "date": "2023-07-03",
-      "test_statistic": -0.1743,
+      "test_statistic": -0.174,
       "critical_value": -0.0704,
       "is_bubble": false
     },
     {
       "date": "2023-07-11",
-      "test_statistic": -0.3667,
+      "test_statistic": -0.3665,
       "critical_value": -0.0704,
       "is_bubble": false
     },
     {
       "date": "2023-07-18",
-      "test_statistic": 0.1021,
+      "test_statistic": 0.1023,
       "critical_value": -0.0704,
       "is_bubble": true
     },
     {
       "date": "2023-07-25",
-      "test_statistic": 0.0337,
+      "test_statistic": 0.0339,
       "critical_value": -0.0704,
       "is_bubble": true
     },
     {
       "date": "2023-08-01",
-      "test_statistic": -0.0222,
+      "test_statistic": -0.022,
       "critical_value": -0.0704,
       "is_bubble": true
     },
     {
       "date": "2023-08-08",
-      "test_statistic": -0.4471,
+      "test_statistic": -0.4469,
       "critical_value": -0.0704,
       "is_bubble": false
     },
@@ -2981,7 +2981,7 @@
     },
     {
       "date": "2023-11-22",
-      "test_statistic": -0.5878,
+      "test_statistic": -0.5877,
       "critical_value": -0.0706,
       "is_bubble": false
     },
@@ -3179,7 +3179,7 @@
     },
     {
       "date": "2024-07-23",
-      "test_statistic": 0.1355,
+      "test_statistic": 0.1356,
       "critical_value": -0.0709,
       "is_bubble": true
     },
@@ -3215,7 +3215,7 @@
     },
     {
       "date": "2024-09-04",
-      "test_statistic": -0.1228,
+      "test_statistic": -0.1227,
       "critical_value": -0.0709,
       "is_bubble": false
     },
@@ -3257,7 +3257,7 @@
     },
     {
       "date": "2024-10-23",
-      "test_statistic": 0.0912,
+      "test_statistic": 0.0911,
       "critical_value": -0.071,
       "is_bubble": true
     },
@@ -3275,7 +3275,7 @@
     },
     {
       "date": "2024-11-13",
-      "test_statistic": 0.2422,
+      "test_statistic": 0.2423,
       "critical_value": -0.071,
       "is_bubble": true
     },
@@ -3293,13 +3293,13 @@
     },
     {
       "date": "2024-12-05",
-      "test_statistic": 0.2762,
+      "test_statistic": 0.2763,
       "critical_value": -0.071,
       "is_bubble": true
     },
     {
       "date": "2024-12-12",
-      "test_statistic": 0.2152,
+      "test_statistic": 0.2153,
       "critical_value": -0.071,
       "is_bubble": true
     },
@@ -3545,7 +3545,7 @@
     },
     {
       "date": "2025-10-09",
-      "test_statistic": 0.0978,
+      "test_statistic": 0.0979,
       "critical_value": -0.0713,
       "is_bubble": true
     },
@@ -3605,7 +3605,7 @@
     },
     {
       "date": "2025-12-19",
-      "test_statistic": 0.0218,
+      "test_statistic": 0.0219,
       "critical_value": -0.0714,
       "is_bubble": true
     },
