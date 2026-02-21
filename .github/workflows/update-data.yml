@@ -2,8 +2,8 @@ name: Update Market Data
 
 on:
   schedule:
-    - cron: '30 21 * * 1-5'  # 9:30 PM UTC (after US market close), weekdays only
-  workflow_dispatch:          # Allow manual trigger
+    - cron: '30 21 * * *'  # 9:30 PM UTC daily (after US market close)
+  workflow_dispatch:        # Allow manual trigger
 
 permissions:
   contents: write
@@ -42,6 +42,9 @@ jobs:
           python scripts/gsadf_test.py
           python scripts/markov_regime.py
           python scripts/fit_drawdown_model.py
+
+      - name: Verify data freshness
+        run: python scripts/verify_data_freshness.py
 
       - name: Commit updated data
         run: |
