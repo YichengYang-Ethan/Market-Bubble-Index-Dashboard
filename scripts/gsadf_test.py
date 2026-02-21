@@ -88,8 +88,12 @@ def main():
     print(f"Running GSADF test on {n} SPY observations...")
     print(f"  Min window: {min_window}, end step: {end_step}")
 
+    end_points = list(range(min_window, n, end_step))
+    if (n - 1) not in end_points:
+        end_points.append(n - 1)
+
     results = []
-    for end_idx in range(min_window, n, end_step):
+    for end_idx in end_points:
         sup_stat = run_sadf_for_endpoint(log_prices, end_idx, min_window, start_step=10)
         cv = gsadf_critical_value(end_idx - min_window + 1)
         is_bubble = bool(sup_stat > cv) if not math.isnan(sup_stat) else False

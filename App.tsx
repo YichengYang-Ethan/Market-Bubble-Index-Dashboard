@@ -125,7 +125,12 @@ const App: React.FC = () => {
     const result = await fetchRealData(ticker);
     setAllData(result.data);
     setIsDemo(result.isDemo);
-    setLastUpdate(new Date());
+    if (result.generatedAt) {
+      const parsed = new Date(result.generatedAt);
+      setLastUpdate(Number.isNaN(parsed.getTime()) ? new Date() : parsed);
+    } else {
+      setLastUpdate(new Date());
+    }
     setBacktestSignals([]);
     setHistoricalSignals(detectHistoricalSignals(result.data));
     setDeviationLoading(false);
@@ -154,6 +159,8 @@ const App: React.FC = () => {
       setMarkovRegimes(markov);
       setDrawdownModel(ddModel);
       setQqqDrawdown(ddSeries);
+      const parsed = new Date(indexData.generated_at);
+      setLastUpdate(Number.isNaN(parsed.getTime()) ? new Date() : parsed);
     } catch (e) {
       setBubbleError(e instanceof Error ? e.message : 'Failed to load bubble data');
     } finally {

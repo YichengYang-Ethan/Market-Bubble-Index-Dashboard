@@ -96,6 +96,23 @@ def main() -> int:
             except (ValueError, TypeError):
                 pass
 
+    # Check GSADF timeline is aligned with SPY timeline (allow at most 1-day lag)
+    gsadf = DATA_DIR / "gsadf_results.json"
+    spy = DATA_DIR / "spy.json"
+    if gsadf.exists() and spy.exists():
+        try:
+            gsadf_data = json.loads(gsadf.read_text())
+            spy_data = json.loads(spy.read_text())
+            gsadf_last = gsadf_data.get("results", [])[-1].get("date") if gsadf_data.get("results") else None
+            spy_last = spy_data.get("data", [])[-1].get("date") if spy_data.get("data") else None
+            if gsadf_last and spy_last:
+                gsadf_dt = datetime.strptime(gsadf_last, "%Y-%m-%d").date()
+                spy_dt = datetime.strptime(spy_last, "%Y-%m-%d").date()
+                if (spy_dt - gsadf_dt).days > 1:
+                    failed.append(f"gsadf_results: last result date {gsadf_last} lags SPY {spy_last}")
+        except Exception:
+            failed.append("gsadf_results: failed to validate timeline alignment")
+
     if failed:
         for msg in failed:
             print(f"ERROR: {msg}", file=sys.stderr)
