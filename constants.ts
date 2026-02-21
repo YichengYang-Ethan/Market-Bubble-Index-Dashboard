@@ -12,7 +12,7 @@ export const TICKER_LABELS: Record<TickerSymbol, string> = {
 
 export const DEVIATION_CONFIG = {
   SMA_PERIOD: 200,
-  REFRESH_INTERVAL_MS: 300_000, // 5 minutes
+  REFRESH_INTERVAL_MS: 30 * 60 * 1000, // 30 min (data updates daily)
   RISK_LEVELS: {
     LOW: 20,
     MODERATE: 50,

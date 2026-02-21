@@ -15,7 +15,7 @@ interface TickerDataFile {
 export const fetchRealData = async (ticker: string = 'QQQ'): Promise<{ data: DataPoint[]; isDemo: boolean; generatedAt?: string }> => {
   try {
     const base = '/Market-Bubble-Index-Dashboard/';
-    const res = await fetch(`${base}data/${ticker.toLowerCase()}.json`);
+    const res = await fetch(`${base}data/${ticker.toLowerCase()}.json`, { cache: 'no-store' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json: TickerDataFile = await res.json();
     if (!json.data || json.data.length === 0) throw new Error('Empty data');

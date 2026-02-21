@@ -19,7 +19,8 @@ import type { TabId } from './constants';
 
 type TimeRange = '1Y' | '2Y' | 'ALL';
 
-const REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+// Daily data refresh: poll every 30 min (aligns with backend update once/day)
+const REFRESH_INTERVAL_MS = 30 * 60 * 1000;
 
 function getInitialTicker(): TickerSymbol {
   try {
@@ -183,9 +184,18 @@ const App: React.FC = () => {
     }
   }, [allData, timeRange]);
 
-  // Load bubble data once on mount
+  // Load bubble data on mount, poll every 30 min, and refresh when tab becomes visible
   useEffect(() => {
     loadBubbleData();
+    const interval = setInterval(loadBubbleData, REFRESH_INTERVAL_MS);
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') loadBubbleData();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, [loadBubbleData]);
 
   // Load deviation data on mount and ticker change
