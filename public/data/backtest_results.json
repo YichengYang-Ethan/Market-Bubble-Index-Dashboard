@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-02-21T07:22:30.841467+00:00",
+  "generated_at": "2026-02-21T21:48:08.349988+00:00",
   "autocorrelation": {
     "lag_1": 0.9646,
     "lag_5": 0.87,
-    "lag_10": 0.7757,
+    "lag_10": 0.7756,
     "lag_20": 0.6306
   },
   "buy_signal_threshold": 30,
@@ -58,9 +58,9 @@
       },
       "5d": {
         "count": 652,
-        "mean_return": 0.2328,
+        "mean_return": 0.2329,
         "median_return": 0.2404,
-        "std": 1.1879,
+        "std": 1.188,
         "hit_rate": 60.0,
         "t_statistic": 5.005
       },
