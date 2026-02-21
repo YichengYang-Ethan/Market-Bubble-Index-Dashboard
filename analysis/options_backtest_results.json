@@ -1,0 +1,226 @@
+{
+  "C: Aggressive (risk<45 put, >55 call)": {
+    "total_pnl": 2286.94,
+    "win_rate": 73.3,
+    "profit_factor": 1.35,
+    "sharpe_ratio": 0.47,
+    "max_drawdown": -834.12,
+    "total_trades": 326,
+    "put_trades": 36,
+    "call_trades": 290,
+    "put_pnl": 518.63,
+    "call_pnl": 1768.31,
+    "avg_days_held": 8.1,
+    "close_reasons": {
+      "profit_target": 217,
+      "roll_dte": 61,
+      "stop_loss": 46,
+      "assignment_risk": 1,
+      "end_of_data": 1
+    }
+  },
+  "K: Loose stop=1000%": {
+    "total_pnl": 1355.56,
+    "win_rate": 75.1,
+    "profit_factor": 1.3,
+    "sharpe_ratio": 0.36,
+    "max_drawdown": -945.78,
+    "total_trades": 209,
+    "put_trades": 6,
+    "call_trades": 203,
+    "put_pnl": 301.63,
+    "call_pnl": 1053.94,
+    "avg_days_held": 8.6,
+    "close_reasons": {
+      "profit_target": 141,
+      "roll_dte": 66,
+      "end_of_data": 2
+    }
+  },
+  "I: Long DTE=45": {
+    "total_pnl": 1203.93,
+    "win_rate": 77.2,
+    "profit_factor": 1.22,
+    "sharpe_ratio": 0.24,
+    "max_drawdown": -1018.15,
+    "total_trades": 206,
+    "put_trades": 5,
+    "call_trades": 201,
+    "put_pnl": 423.13,
+    "call_pnl": 780.79,
+    "avg_days_held": 9.9,
+    "close_reasons": {
+      "profit_target": 153,
+      "stop_loss": 37,
+      "roll_dte": 14,
+      "end_of_data": 2
+    }
+  },
+  "J: Tight stop=100%": {
+    "total_pnl": 1159.58,
+    "win_rate": 68.9,
+    "profit_factor": 1.27,
+    "sharpe_ratio": 0.36,
+    "max_drawdown": -556.31,
+    "total_trades": 209,
+    "put_trades": 6,
+    "call_trades": 203,
+    "put_pnl": 301.63,
+    "call_pnl": 857.96,
+    "avg_days_held": 6.5,
+    "close_reasons": {
+      "profit_target": 132,
+      "stop_loss": 55,
+      "roll_dte": 20,
+      "end_of_data": 2
+    }
+  },
+  "B: Conservative (risk<30 put, >70 call)": {
+    "total_pnl": 1046.48,
+    "win_rate": 79.2,
+    "profit_factor": 3.01,
+    "sharpe_ratio": 0.61,
+    "max_drawdown": -288.07,
+    "total_trades": 53,
+    "put_trades": 0,
+    "call_trades": 53,
+    "put_pnl": 0.0,
+    "call_pnl": 1046.48,
+    "avg_days_held": 7.8,
+    "close_reasons": {
+      "stop_loss": 5,
+      "roll_dte": 11,
+      "profit_target": 37
+    }
+  },
+  "L: Tuned combo": {
+    "total_pnl": 1042.05,
+    "win_rate": 85.0,
+    "profit_factor": 3.12,
+    "sharpe_ratio": 0.84,
+    "max_drawdown": -164.05,
+    "total_trades": 60,
+    "put_trades": 0,
+    "call_trades": 60,
+    "put_pnl": 0.0,
+    "call_pnl": 1042.05,
+    "avg_days_held": 7.6,
+    "close_reasons": {
+      "stop_loss": 5,
+      "profit_target": 47,
+      "roll_dte": 8
+    }
+  },
+  "A: Default (risk<40 put, >60 call)": {
+    "total_pnl": 908.88,
+    "win_rate": 74.2,
+    "profit_factor": 1.19,
+    "sharpe_ratio": 0.25,
+    "max_drawdown": -832.35,
+    "total_trades": 209,
+    "put_trades": 6,
+    "call_trades": 203,
+    "put_pnl": 301.63,
+    "call_pnl": 607.25,
+    "avg_days_held": 7.7,
+    "close_reasons": {
+      "profit_target": 140,
+      "stop_loss": 33,
+      "roll_dte": 34,
+      "end_of_data": 2
+    }
+  },
+  "G: Tight delta=0.30 (closer ATM)": {
+    "total_pnl": 785.26,
+    "win_rate": 72.1,
+    "profit_factor": 1.12,
+    "sharpe_ratio": 0.16,
+    "max_drawdown": -1161.69,
+    "total_trades": 222,
+    "put_trades": 6,
+    "call_trades": 216,
+    "put_pnl": 482.48,
+    "call_pnl": 302.77,
+    "avg_days_held": 8.1,
+    "close_reasons": {
+      "profit_target": 138,
+      "roll_dte": 47,
+      "stop_loss": 35,
+      "end_of_data": 2
+    }
+  },
+  "E: Call-only (risk>60, never sell put)": {
+    "total_pnl": 607.25,
+    "win_rate": 73.9,
+    "profit_factor": 1.13,
+    "sharpe_ratio": 0.17,
+    "max_drawdown": -832.35,
+    "total_trades": 203,
+    "put_trades": 0,
+    "call_trades": 203,
+    "put_pnl": 0.0,
+    "call_pnl": 607.25,
+    "avg_days_held": 7.6,
+    "close_reasons": {
+      "profit_target": 135,
+      "stop_loss": 33,
+      "roll_dte": 33,
+      "end_of_data": 2
+    }
+  },
+  "F: Wide delta=0.15 (more OTM)": {
+    "total_pnl": 545.63,
+    "win_rate": 78.4,
+    "profit_factor": 1.21,
+    "sharpe_ratio": 0.27,
+    "max_drawdown": -341.24,
+    "total_trades": 176,
+    "put_trades": 6,
+    "call_trades": 170,
+    "put_pnl": 138.8,
+    "call_pnl": 406.83,
+    "avg_days_held": 6.4,
+    "close_reasons": {
+      "profit_target": 129,
+      "roll_dte": 16,
+      "stop_loss": 29,
+      "end_of_data": 2
+    }
+  },
+  "D: Put-only (risk<40, never sell call)": {
+    "total_pnl": 301.63,
+    "win_rate": 83.3,
+    "profit_factor": 11.88,
+    "sharpe_ratio": 0.43,
+    "max_drawdown": -27.73,
+    "total_trades": 6,
+    "put_trades": 6,
+    "call_trades": 0,
+    "put_pnl": 301.63,
+    "call_pnl": 0.0,
+    "avg_days_held": 9.5,
+    "close_reasons": {
+      "roll_dte": 1,
+      "profit_target": 5
+    }
+  },
+  "H: Short DTE=21": {
+    "total_pnl": -166.97,
+    "win_rate": 57.1,
+    "profit_factor": 0.91,
+    "sharpe_ratio": -0.17,
+    "max_drawdown": -470.58,
+    "total_trades": 203,
+    "put_trades": 6,
+    "call_trades": 197,
+    "put_pnl": 9.19,
+    "call_pnl": -176.16,
+    "avg_days_held": 1.0,
+    "close_reasons": {
+      "profit_target": 15,
+      "roll_dte": 186,
+      "stop_loss": 1,
+      "end_of_data": 1
+    }
+  }
+}

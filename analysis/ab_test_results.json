@@ -1,0 +1,164 @@
+{
+  "test_date": "2026-02-21 09:21:08.662046",
+  "cv_method": "purged_walk_forward_5fold",
+  "purge_days": 180,
+  "embargo_days": 20,
+  "results": {
+    "10% DD": [
+      {
+        "label": "A: Baseline v3.3",
+        "features": [
+          "risk_ema_20d",
+          "ind_qqq_deviation",
+          "ind_credit_spread",
+          "ind_yield_curve",
+          "ind_vix_level",
+          "vix_x_credit",
+          "ind_vix_level_change_5d",
+          "score_velocity"
+        ],
+        "n_features": 8,
+        "n_folds": 2,
+        "auc_mean": 0.8154,
+        "auc_std": 0.0756,
+        "bss_mean": 0.0931,
+        "bss_std": 0.0867,
+        "ece_mean": 0.1507,
+        "pooled_auc": 0.7087,
+        "pooled_bss": 0.0908,
+        "pooled_n": 366,
+        "monotonicity": 0.5
+      },
+      {
+        "label": "B: Enhanced (all new)",
+        "features": [
+          "risk_ema_20d",
+          "ind_qqq_deviation",
+          "ind_credit_spread",
+          "ind_yield_curve",
+          "ind_vix_level",
+          "vix_x_credit",
+          "ind_vix_level_change_5d",
+          "score_velocity",
+          "bull_duration_pct",
+          "regime_duration",
+          "credit_delta_5d",
+          "credit_delta_20d",
+          "risk_composite_spread",
+          "score_skew_20d",
+          "qqq_vol_20d",
+          "qqq_momentum_60d",
+          "vix_credit_diverge",
+          "vix_ts_pct"
+        ],
+        "n_features": 18,
+        "n_folds": 2,
+        "auc_mean": 0.535,
+        "auc_std": 0.1046,
+        "bss_mean": -0.4664,
+        "bss_std": 0.0028,
+        "ece_mean": 0.2508,
+        "pooled_auc": 0.4902,
+        "pooled_bss": -0.462,
+        "pooled_n": 366,
+        "monotonicity": 0.5
+      },
+      {
+        "label": "C: Targeted (top 3 new)",
+        "features": [
+          "risk_ema_20d",
+          "ind_qqq_deviation",
+          "ind_credit_spread",
+          "ind_yield_curve",
+          "ind_vix_level",
+          "vix_x_credit",
+          "ind_vix_level_change_5d",
+          "score_velocity",
+          "bull_duration_pct",
+          "qqq_vol_20d",
+          "credit_delta_5d"
+        ],
+        "n_features": 11,
+        "n_folds": 2,
+        "auc_mean": 0.7364,
+        "auc_std": 0.1405,
+        "bss_mean": 0.1387,
+        "bss_std": 0.1338,
+        "ece_mean": 0.123,
+        "pooled_auc": 0.7197,
+        "pooled_bss": 0.1334,
+        "pooled_n": 366,
+        "monotonicity": 0.5
+      }
+    ],
+    "20% DD": [
+      {
+        "label": "A: Baseline v3.3",
+        "features": [
+          "risk_ema_20d",
+          "score_std_20d"
+        ],
+        "n_features": 2,
+        "n_folds": 3,
+        "auc_mean": 0.5716,
+        "auc_std": 0.0681,
+        "bss_mean": -1.2664,
+        "bss_std": 1.7367,
+        "ece_mean": 0.3654,
+        "pooled_auc": 0.3086,
+        "pooled_bss": -0.5965,
+        "pooled_n": 549,
+        "monotonicity": 1.0
+      },
+      {
+        "label": "B: Enhanced (all new)",
+        "features": [
+          "risk_ema_20d",
+          "score_std_20d",
+          "bull_duration_pct",
+          "regime_duration",
+          "credit_delta_5d",
+          "credit_delta_20d",
+          "risk_composite_spread",
+          "score_skew_20d",
+          "qqq_vol_20d",
+          "qqq_momentum_60d",
+          "vix_credit_diverge",
+          "vix_ts_pct"
+        ],
+        "n_features": 12,
+        "n_folds": 3,
+        "auc_mean": 0.4492,
+        "auc_std": 0.041,
+        "bss_mean": -1.4741,
+        "bss_std": 1.5886,
+        "ece_mean": 0.4251,
+        "pooled_auc": 0.2748,
+        "pooled_bss": -0.7528,
+        "pooled_n": 549,
+        "monotonicity": 0.5
+      },
+      {
+        "label": "C: Targeted (top 3 new)",
+        "features": [
+          "risk_ema_20d",
+          "score_std_20d",
+          "bull_duration_pct",
+          "qqq_vol_20d",
+          "risk_composite_spread"
+        ],
+        "n_features": 5,
+        "n_folds": 3,
+        "auc_mean": 0.4974,
+        "auc_std": 0.085,
+        "bss_mean": -1.3453,
+        "bss_std": 1.6847,
+        "ece_mean": 0.4012,
+        "pooled_auc": 0.3118,
+        "pooled_bss": -0.6673,
+        "pooled_n": 549,
+        "monotonicity": 0.5
+      }
+    ]
+  }
+}
