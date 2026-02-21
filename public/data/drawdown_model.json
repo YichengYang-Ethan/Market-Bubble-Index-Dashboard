@@ -49,48 +49,48 @@
       "n_events": 2040,
       "base_rate": 0.7307,
       "weights": {
-        "risk_ema_20d": 1.458541,
-        "ind_qqq_deviation": 0.616739,
-        "ind_credit_spread": -0.579331,
-        "ind_yield_curve": -0.19431,
-        "ind_vix_level": -0.471388,
-        "vix_x_credit": -0.299068,
-        "ind_vix_level_change_5d": 0.11072,
-        "score_velocity": 0.118538
+        "risk_ema_20d": 1.45857,
+        "ind_qqq_deviation": 0.616725,
+        "ind_credit_spread": -0.579338,
+        "ind_yield_curve": -0.194275,
+        "ind_vix_level": -0.471358,
+        "vix_x_credit": -0.299062,
+        "ind_vix_level_change_5d": 0.110769,
+        "score_velocity": 0.118599
       },
-      "intercept": 1.343256,
+      "intercept": 1.3432,
       "scaler_mean": {
         "risk_ema_20d": 56.969909,
-        "ind_qqq_deviation": 51.269663,
-        "ind_credit_spread": 67.765688,
+        "ind_qqq_deviation": 51.269628,
+        "ind_credit_spread": 67.765437,
         "ind_yield_curve": 37.435709,
         "ind_vix_level": 49.679728,
-        "vix_x_credit": 37.336053,
+        "vix_x_credit": 37.3359,
         "ind_vix_level_change_5d": 0.055337,
-        "score_velocity": 0.057142
+        "score_velocity": 0.057128
       },
       "scaler_std": {
         "risk_ema_20d": 7.703082,
-        "ind_qqq_deviation": 27.905001,
-        "ind_credit_spread": 31.428805,
+        "ind_qqq_deviation": 27.905014,
+        "ind_credit_spread": 31.42881,
         "ind_yield_curve": 31.105462,
         "ind_vix_level": 28.854718,
-        "vix_x_credit": 28.827614,
+        "vix_x_credit": 28.827511,
         "ind_vix_level_change_5d": 18.925445,
-        "score_velocity": 9.543936
+        "score_velocity": 9.543928
       },
       "auc_train": 0.7869,
       "auc_test": 0.8154,
       "brier_train": 0.1558,
-      "bss_test": 0.0932,
+      "bss_test": 0.0931,
       "cv_metrics": {
         "method": "purged_walk_forward_2fold",
         "purge_days": 180,
         "embargo_days": 20,
         "auc_mean": 0.8154,
         "auc_std": 0.0756,
-        "bss_mean": 0.0932,
-        "bss_std": 0.0866,
+        "bss_mean": 0.0931,
+        "bss_std": 0.0867,
         "ece_mean": 0.1507,
         "ece_std": 0.0275,
         "per_fold": [
@@ -104,7 +104,7 @@
             "base_rate_test": 0.7104,
             "auc": 0.7398,
             "brier": 0.2044,
-            "bss": 0.0066,
+            "bss": 0.0064,
             "ece": 0.1231
           },
           {
@@ -241,7 +241,7 @@
     }
   },
   "evt_parameters": {
-    "gpd_shape_xi": -0.348,
+    "gpd_shape_xi": -0.3479,
     "gpd_scale_sigma": 0.1043,
     "threshold_u": 0.1,
     "n_exceedances": 2040,
