@@ -1,6 +1,6 @@
 {
   "model_version": "3.3",
-  "calibration_date": "2026-02-20",
+  "calibration_date": "2026-02-21",
   "data_points": 2801,
   "train_test_split": "purged_wfcv_5fold",
   "effective_sample_size": 70,
@@ -18,15 +18,15 @@
     "vix_x_credit"
   ],
   "current_features": {
-    "drawdown_risk_score": 63.2,
+    "drawdown_risk_score": 62.2,
     "ind_credit_spread": 76.3,
     "ind_qqq_deviation": 12.4,
     "ind_vix_level": 32.7,
     "ind_vix_level_change_5d": 10.6,
-    "ind_yield_curve": 31.1,
-    "risk_ema_20d": 58.3428,
-    "score_std_20d": 11.93,
-    "score_velocity": 2.92,
+    "ind_yield_curve": 70.5,
+    "risk_ema_20d": 58.2475,
+    "score_std_20d": 11.7812,
+    "score_velocity": 7.27,
     "vix_x_credit": 24.9501
   },
   "logistic_coefficients": {
@@ -49,48 +49,48 @@
       "n_events": 2040,
       "base_rate": 0.7307,
       "weights": {
-        "risk_ema_20d": 1.458557,
-        "ind_qqq_deviation": 0.616737,
-        "ind_credit_spread": -0.579349,
-        "ind_yield_curve": -0.194294,
+        "risk_ema_20d": 1.458541,
+        "ind_qqq_deviation": 0.616739,
+        "ind_credit_spread": -0.579331,
+        "ind_yield_curve": -0.19431,
         "ind_vix_level": -0.471388,
-        "vix_x_credit": -0.298948,
-        "ind_vix_level_change_5d": 0.110771,
-        "score_velocity": 0.118578
+        "vix_x_credit": -0.299068,
+        "ind_vix_level_change_5d": 0.11072,
+        "score_velocity": 0.118538
       },
-      "intercept": 1.343222,
+      "intercept": 1.343256,
       "scaler_mean": {
         "risk_ema_20d": 56.969909,
-        "ind_qqq_deviation": 51.269735,
-        "ind_credit_spread": 67.765831,
+        "ind_qqq_deviation": 51.269663,
+        "ind_credit_spread": 67.765688,
         "ind_yield_curve": 37.435709,
         "ind_vix_level": 49.679728,
-        "vix_x_credit": 37.336152,
+        "vix_x_credit": 37.336053,
         "ind_vix_level_change_5d": 0.055337,
-        "score_velocity": 0.057138
+        "score_velocity": 0.057142
       },
       "scaler_std": {
-        "risk_ema_20d": 7.703036,
-        "ind_qqq_deviation": 27.905034,
-        "ind_credit_spread": 31.428676,
+        "risk_ema_20d": 7.703082,
+        "ind_qqq_deviation": 27.905001,
+        "ind_credit_spread": 31.428805,
         "ind_yield_curve": 31.105462,
         "ind_vix_level": 28.854718,
-        "vix_x_credit": 28.82758,
+        "vix_x_credit": 28.827614,
         "ind_vix_level_change_5d": 18.925445,
-        "score_velocity": 9.543979
+        "score_velocity": 9.543936
       },
       "auc_train": 0.7869,
       "auc_test": 0.8154,
       "brier_train": 0.1558,
-      "bss_test": 0.0931,
+      "bss_test": 0.0932,
       "cv_metrics": {
         "method": "purged_walk_forward_2fold",
         "purge_days": 180,
         "embargo_days": 20,
         "auc_mean": 0.8154,
         "auc_std": 0.0756,
-        "bss_mean": 0.0931,
-        "bss_std": 0.0867,
+        "bss_mean": 0.0932,
+        "bss_std": 0.0866,
         "ece_mean": 0.1507,
         "ece_std": 0.0275,
         "per_fold": [
@@ -104,7 +104,7 @@
             "base_rate_test": 0.7104,
             "auc": 0.7398,
             "brier": 0.2044,
-            "bss": 0.0064,
+            "bss": 0.0066,
             "ece": 0.1231
           },
           {
@@ -137,16 +137,16 @@
       "base_rate": 0.2665,
       "weights": {
         "risk_ema_20d": 1.164588,
-        "score_std_20d": 0.474127
+        "score_std_20d": 0.47412
       },
-      "intercept": -1.322043,
+      "intercept": -1.322041,
       "scaler_mean": {
         "risk_ema_20d": 56.969909,
-        "score_std_20d": 6.862634
+        "score_std_20d": 6.862619
       },
       "scaler_std": {
-        "risk_ema_20d": 7.703036,
-        "score_std_20d": 3.016633
+        "risk_ema_20d": 7.703082,
+        "score_std_20d": 3.016566
       },
       "auc_train": 0.8012,
       "auc_test": 0.5716,
@@ -241,7 +241,7 @@
     }
   },
   "evt_parameters": {
-    "gpd_shape_xi": -0.3479,
+    "gpd_shape_xi": -0.348,
     "gpd_scale_sigma": 0.1043,
     "threshold_u": 0.1,
     "n_exceedances": 2040,
