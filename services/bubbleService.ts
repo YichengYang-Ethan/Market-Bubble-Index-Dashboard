@@ -4,21 +4,25 @@ const BASE = '/Market-Bubble-Index-Dashboard/';
 
 const NO_CACHE = { cache: 'no-store' as RequestCache };
 
+function cacheBust(): string {
+  return `?_=${Date.now()}`;
+}
+
 export const fetchBubbleIndex = async (): Promise<BubbleIndexData> => {
-  const res = await fetch(`${BASE}data/bubble_index.json`, NO_CACHE);
+  const res = await fetch(`${BASE}data/bubble_index.json${cacheBust()}`, NO_CACHE);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 };
 
 export const fetchBubbleHistory = async (): Promise<BubbleHistoryData> => {
-  const res = await fetch(`${BASE}data/bubble_history.json`, NO_CACHE);
+  const res = await fetch(`${BASE}data/bubble_history.json${cacheBust()}`, NO_CACHE);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 };
 
 export const fetchTickerPrice = async (ticker: string): Promise<DataPoint[]> => {
   try {
-    const res = await fetch(`${BASE}data/${ticker.toLowerCase()}.json`, NO_CACHE);
+    const res = await fetch(`${BASE}data/${ticker.toLowerCase()}.json${cacheBust()}`, NO_CACHE);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
     return json.data ?? [];
@@ -29,7 +33,7 @@ export const fetchTickerPrice = async (ticker: string): Promise<DataPoint[]> => 
 
 export const fetchBacktestResults = async (): Promise<BacktestResults | null> => {
   try {
-    const res = await fetch(`${BASE}data/backtest_results.json`, NO_CACHE);
+    const res = await fetch(`${BASE}data/backtest_results.json${cacheBust()}`, NO_CACHE);
     if (!res.ok) return null;
     return res.json();
   } catch { return null; }
@@ -37,7 +41,7 @@ export const fetchBacktestResults = async (): Promise<BacktestResults | null> =>
 
 export const fetchGSADFResults = async (): Promise<GSADFResults | null> => {
   try {
-    const res = await fetch(`${BASE}data/gsadf_results.json`, NO_CACHE);
+    const res = await fetch(`${BASE}data/gsadf_results.json${cacheBust()}`, NO_CACHE);
     if (!res.ok) return null;
     return res.json();
   } catch { return null; }
@@ -45,7 +49,7 @@ export const fetchGSADFResults = async (): Promise<GSADFResults | null> => {
 
 export const fetchMarkovRegimes = async (): Promise<MarkovRegimes | null> => {
   try {
-    const res = await fetch(`${BASE}data/markov_regimes.json`, NO_CACHE);
+    const res = await fetch(`${BASE}data/markov_regimes.json${cacheBust()}`, NO_CACHE);
     if (!res.ok) return null;
     return res.json();
   } catch { return null; }
@@ -107,7 +111,7 @@ export interface DrawdownModelData {
 
 export const fetchDrawdownModel = async (): Promise<DrawdownModelData | null> => {
   try {
-    const res = await fetch(`${BASE}data/drawdown_model.json`, NO_CACHE);
+    const res = await fetch(`${BASE}data/drawdown_model.json${cacheBust()}`, NO_CACHE);
     if (!res.ok) return null;
     return res.json();
   } catch { return null; }
@@ -120,7 +124,7 @@ export interface DrawdownPoint {
 
 export const fetchQQQDrawdown = async (): Promise<DrawdownPoint[]> => {
   try {
-    const res = await fetch(`${BASE}data/qqq_drawdown.json`, NO_CACHE);
+    const res = await fetch(`${BASE}data/qqq_drawdown.json${cacheBust()}`, NO_CACHE);
     if (!res.ok) return [];
     return res.json();
   } catch { return []; }
