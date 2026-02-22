@@ -1,6 +1,6 @@
 {
   "model_version": "3.3",
-  "calibration_date": "2026-02-21",
+  "calibration_date": "2026-02-22",
   "data_points": 2801,
   "train_test_split": "purged_wfcv_5fold",
   "effective_sample_size": 70,
@@ -49,35 +49,35 @@
       "n_events": 2040,
       "base_rate": 0.7307,
       "weights": {
-        "risk_ema_20d": 1.458571,
-        "ind_qqq_deviation": 0.616712,
-        "ind_credit_spread": -0.579314,
-        "ind_yield_curve": -0.19425,
-        "ind_vix_level": -0.47137,
-        "vix_x_credit": -0.29902,
-        "ind_vix_level_change_5d": 0.110773,
-        "score_velocity": 0.118583
+        "risk_ema_20d": 1.458552,
+        "ind_qqq_deviation": 0.616784,
+        "ind_credit_spread": -0.579277,
+        "ind_yield_curve": -0.194297,
+        "ind_vix_level": -0.471301,
+        "vix_x_credit": -0.299086,
+        "ind_vix_level_change_5d": 0.110767,
+        "score_velocity": 0.118593
       },
-      "intercept": 1.343212,
+      "intercept": 1.343228,
       "scaler_mean": {
         "risk_ema_20d": 56.969909,
-        "ind_qqq_deviation": 51.269771,
-        "ind_credit_spread": 67.765544,
+        "ind_qqq_deviation": 51.269699,
+        "ind_credit_spread": 67.765688,
         "ind_yield_curve": 37.435709,
         "ind_vix_level": 49.679728,
-        "vix_x_credit": 37.335936,
+        "vix_x_credit": 37.336053,
         "ind_vix_level_change_5d": 0.055337,
-        "score_velocity": 0.057131
+        "score_velocity": 0.057138
       },
       "scaler_std": {
         "risk_ema_20d": 7.703082,
-        "ind_qqq_deviation": 27.905021,
-        "ind_credit_spread": 31.428689,
+        "ind_qqq_deviation": 27.905057,
+        "ind_credit_spread": 31.428805,
         "ind_yield_curve": 31.105462,
         "ind_vix_level": 28.854718,
-        "vix_x_credit": 28.827457,
+        "vix_x_credit": 28.827614,
         "ind_vix_level_change_5d": 18.925445,
-        "score_velocity": 9.543983
+        "score_velocity": 9.543989
       },
       "auc_train": 0.7869,
       "auc_test": 0.8154,
@@ -137,12 +137,12 @@
       "base_rate": 0.2665,
       "weights": {
         "risk_ema_20d": 1.164591,
-        "score_std_20d": 0.474129
+        "score_std_20d": 0.474149
       },
-      "intercept": -1.322045,
+      "intercept": -1.322049,
       "scaler_mean": {
         "risk_ema_20d": 56.969909,
-        "score_std_20d": 6.862634
+        "score_std_20d": 6.862647
       },
       "scaler_std": {
         "risk_ema_20d": 7.703082,
