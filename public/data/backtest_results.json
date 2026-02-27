@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-02-26T21:55:28.647065+00:00",
+  "generated_at": "2026-02-27T21:52:46.770918+00:00",
   "autocorrelation": {
-    "lag_1": 0.9646,
-    "lag_5": 0.8701,
-    "lag_10": 0.7754,
-    "lag_20": 0.6292
+    "lag_1": 0.9645,
+    "lag_5": 0.87,
+    "lag_10": 0.7755,
+    "lag_20": 0.629
   },
   "buy_signal_threshold": 30,
   "sell_signal_threshold": 70,
@@ -58,9 +58,9 @@
       },
       "5d": {
         "count": 652,
-        "mean_return": 0.2329,
+        "mean_return": 0.2328,
         "median_return": 0.2404,
-        "std": 1.188,
+        "std": 1.1879,
         "hit_rate": 60.0,
         "t_statistic": 5.005
       },
