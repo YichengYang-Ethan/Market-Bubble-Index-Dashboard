@@ -1,22 +1,75 @@
-# Drawdown Probability Model v3.0 — Strategy Research Report
+# Drawdown Probability Model — Strategy Research Report
 
 ## Executive Summary
 
-The Market Bubble Index drawdown probability model was upgraded through three versions:
+The Market Bubble Index drawdown probability model was developed through four versions:
 
-| Version | Forward Window | Features | Key Metric (>20% DD) |
-|---------|---------------|----------|---------------------|
-| v1.0 | 63 days | composite_score only | AUC ~0.518 |
-| v2.0 | 126 days | 6 shared features | AUC 0.884, BSS -8.0% |
-| **v3.0** | **180 days** | **Per-threshold optimized** | **AUC 0.921, BSS +35.8%** |
+| Version | Evaluation | 10% AUC | 10% BSS | 20% AUC | Key Change |
+|---------|-----------|---------|---------|---------|------------|
+| v1.0 | Single split | ~0.518 | — | — | composite_score only, 63d window |
+| v2.0 | Single split | 0.569 | -24.6% | 0.884 | 6 shared features, 126d window |
+| v3.0 | Single 70/30 split | 0.855 | +12.4% | 0.921 | Per-threshold optimization, 180d window |
+| v3.1 | Purged WF-CV | 0.455 | -251% | 0.719 | Honest evaluation exposed overfitting |
+| v3.2 | Purged WF-CV + grid | 0.692 | +11.3% | 0.650 | Automated feature/C selection (28 combos) |
+| **v3.3** | **Purged WF-CV + stability** | **0.802** | **+8.5%** | **0.552** | **Lasso with bootstrap-stable features** |
 
-v3.0 key improvements over v2.0:
-1. **Forward window**: 126 days → **180 days** (~9 months)
-2. **Per-threshold optimization**: Each threshold gets its own features, drawdown definition, and regularization
-3. **Engineered features**: Smoothed indicators (SMA, EMA), score volatility, interactions, 5-day momentum
-4. **Two drawdown definitions**: "drop-from-today" (def B) for 10%, "peak-to-trough" (def A) for 20%
-5. **StandardScaler**: Feature normalization for numerical stability
-6. **Positive BSS**: Both thresholds now beat the climatological baseline (v2 had BSS -24.6% for 10%)
+### v3.3 Key Design Decisions
+
+1. **Stability selection**: Bootstrap-based Lasso on 100 random 50% subsamples, retain features selected >60% of the time
+2. **Purged walk-forward CV**: 5 folds, 180-day purge gap, 20-day embargo — prevents information leakage
+3. **Isotonic recalibration**: Within-fold calibration for probability estimates
+4. **Bayesian Layer 2**: Score-conditioned Beta-Binomial posteriors with PAVA monotonicity for 20%+ thresholds
+5. **EVT/GPD Layer 3**: Generalized Pareto Distribution for extreme tail (40%+) probabilities
+
+### v3.3 Stability-Selected Features (10% DD Model)
+
+| Feature | Selection Rate | Description |
+|---------|---------------|-------------|
+| `risk_ema_20d` | 100% | 20-day EMA of drawdown risk score |
+| `ind_qqq_deviation` | 100% | QQQ deviation from 200-day SMA |
+| `ind_credit_spread` | 100% | Credit spread indicator (HYG/IEF) |
+| `ind_yield_curve` | 99% | Yield curve indicator (10Y-2Y) |
+| `ind_vix_level` | 96% | VIX percentile rank |
+| `vix_x_credit` | 95% | VIX × credit spread interaction |
+| `ind_vix_level_change_5d` | 82% | 5-day VIX momentum |
+| `score_velocity` | 82% | Rate of change of composite score |
+
+### Multi-Model Comparison (v3.3)
+
+| Model Family | Best 10% AUC | Best 10% BSS | Verdict |
+|-------------|-------------|-------------|---------|
+| **Penalized Logistic (Lasso/Ridge/EN)** | **0.802** | **+8.5%** | **Winner — only positive BSS** |
+| Random Forest | 0.685 | -13.5% | Good ranking, poor calibration |
+| XGBoost | 0.671 | -24.0% | Overfits on limited crash events |
+| SVM (RBF) | 0.825 | -28.3% | Best AUC but terrible probabilities |
+| KNN | 0.781 | -22.2% | Cannot calibrate probabilities |
+| MLP | 0.617 | -34.8% | Dataset too small for neural nets |
+
+**Why logistic regression wins**: With ~2,800 trading days and only 2–3 major drawdown events, the effective independent sample is ~15 observations after 180-day purge. Complex models overfit these few crashes. Logistic regression's linear decision boundary acts as implicit regularization.
+
+### Bayesian Layer 2 Calibration (20% DD)
+
+| Risk Score Bin | P(>20% DD) | Sample Size |
+|----------------|------------|-------------|
+| 20–40 | 0.0% | 35 |
+| 40–60 | 14.9% | 1,778 |
+| 60–80 | 48.6% | 965 |
+| 80–100 | 83.3% | 12 |
+
+### Reproducible Comparison Scripts
+
+| Script | Method |
+|--------|--------|
+| `scripts/compare_penalized_linear.py` | Lasso, Ridge, ElasticNet (56 combos) |
+| `scripts/compare_tree_models.py` | XGBoost, Random Forest |
+| `scripts/compare_nn_models.py` | MLP (6 architectures) |
+| `scripts/compare_ensemble_models.py` | Averaging, stacking, SVM, KNN |
+| `scripts/compare_aic_bic.py` | AIC/BIC stepwise, exhaustive search |
+| `scripts/compare_stability_selection.py` | Bootstrap Lasso, RFE, regularization path |
+
+---
+
+## v3.0 Research Details (Original Report)
 
 ---
 
