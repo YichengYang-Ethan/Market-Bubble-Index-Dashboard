@@ -508,8 +508,8 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
               <p className="text-[11px] text-yellow-400 font-semibold mb-1">Model Limitations</p>
               <p className="text-[10px] text-slate-400 leading-relaxed">
                 Negative BSS means the logistic regression alone is worse than always predicting the base rate.
-                The displayed probabilities use <span className="text-white font-semibold">Bayesian-dominated blends</span>: 50/50 logistic+Bayesian for 10% DD (logistic has decent AUC={oosMetrics.c10?.auc_test?.toFixed(3) ?? '?'} but poor calibration),
-                100% Bayesian for 20-30% DD (logistic adds noise, not signal).
+                The displayed probabilities use <span className="text-white font-semibold">100% Bayesian Beta-Binomial</span> for all thresholds (10-30% DD).
+                Logistic regression is retained for diagnostics only (weight=0).
                 The primary signal comes from the Risk Score&apos;s empirical relationship with drawdowns, not the logistic model.
                 With ~{model.effective_sample_size ?? 50} effective independent observations, point-prediction models have limited statistical power.
               </p>
@@ -551,7 +551,7 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
           <span className="text-white font-semibold">Hybrid 3-layer model v{modelVersion}</span>:
           {isV4 ? (
             <> Extended history (1999+, incl. dot-com &amp; GFC), penalized logistic regression
-            with stability-selected features, Bayesian Beta-Binomial + PAVA (20-30%),
+            with stability-selected features, Bayesian Beta-Binomial + PAVA (10-30%),
             EVT/GPD tail extrapolation (40%), bootstrap 90% confidence intervals.
             Forward window: <span className="text-white">{model.forward_window_days} trading days</span> (~{model.forward_window_label}).</>
           ) : isV3 ? (
