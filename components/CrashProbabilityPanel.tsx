@@ -156,26 +156,32 @@ function computeDrawdownProbabilities(
 ): DrawdownProb[] {
   const { logistic_coefficients: logCoefs, bayesian_lookup: bayesian, evt_parameters: evt } = model;
 
-  // --- Layer 1: Logistic for 10% ---
+  // --- Layer 1+2: Blend for 10% (logistic + Bayesian) ---
+  const riskScore = featureValues.drawdown_risk_score ?? featureValues.composite_score ?? 0;
+  const blendWeights10 = model.blend_weights?.['10pct'] ?? { logistic: 0.5, bayesian: 0.5 };
+
   const c10 = logCoefs['drawdown_10pct'];
-  let p10 = 0;
+  let p10_logistic = 0;
   if (c10?.weights && c10?.intercept !== undefined) {
-    p10 = applyLogistic(c10, featureValues);
+    p10_logistic = applyLogistic(c10, featureValues);
   } else if (c10) {
     // v1.0 fallback
     const score = featureValues.composite_score ?? 0;
     const vel = featureValues.score_velocity ?? 0;
-    p10 = sigmoid(
+    p10_logistic = sigmoid(
       (c10.a_score_with_velocity ?? 0) * score +
       (c10.a_velocity ?? 0) * vel +
       (c10.b_with_velocity ?? 0)
     );
   }
+  const b10 = bayesian['drawdown_10pct'];
+  const p10_bayesian = b10
+    ? interpolateLookup(riskScore, b10.bin_centers, b10.probabilities)
+    : p10_logistic;
+  const p10 = blendWeights10.logistic * p10_logistic + blendWeights10.bayesian * p10_bayesian;
 
-  // --- Layer 1 + 2: Blend for 20% (85% Bayesian / 15% Logistic) ---
-  // Bayesian binning uses drawdown_risk_score (monotonic with P(DD))
-  const riskScore = featureValues.drawdown_risk_score ?? featureValues.composite_score ?? 0;
-  const blendWeights = model.blend_weights?.['20pct'] ?? { logistic: 0.15, bayesian: 0.85 };
+  // --- Layer 1 + 2: Blend for 20% (Bayesian-dominated) ---
+  const blendWeights = model.blend_weights?.['20pct'] ?? { logistic: 0.0, bayesian: 1.0 };
 
   const c20 = logCoefs['drawdown_20pct'];
   let p20_logistic = 0;
@@ -441,15 +447,15 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
         </div>
       )}
 
-      {/* OOS Performance Metrics */}
+      {/* OOS Performance Metrics — Logistic component only */}
       {oosMetrics && (
         <div className="bg-slate-800/30 rounded-xl p-4 mb-4">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            Out-of-Sample Performance ({(() => {
+            Logistic Component OOS ({(() => {
               const folds10 = model.actual_folds_used?.['drawdown_10pct'];
               const folds20 = model.actual_folds_used?.['drawdown_20pct'];
               if (folds10 != null || folds20 != null) {
-                return `${folds10 ?? '?'}/${folds20 ?? '?'} actual folds, purge=${model.purge_days ?? '?'}d`;
+                return `${folds10 ?? '?'}/${folds20 ?? '?'} folds, purge=${model.purge_days ?? '?'}d`;
               }
               return model.train_test_split ?? '70/30 split';
             })()})
@@ -480,6 +486,19 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
               </p>
             </div>
           </div>
+          {/* Honest interpretation */}
+          {((oosMetrics.c10?.bss_test ?? 0) < 0 || (oosMetrics.c20?.bss_test ?? 0) < 0) && (
+            <div className="mt-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+              <p className="text-[11px] text-yellow-400 font-semibold mb-1">Model Limitations</p>
+              <p className="text-[10px] text-slate-400 leading-relaxed">
+                Negative BSS means the logistic regression alone is worse than always predicting the base rate.
+                The displayed probabilities use <span className="text-white font-semibold">Bayesian-dominated blends</span>: 50/50 logistic+Bayesian for 10% DD (logistic has decent AUC={oosMetrics.c10?.auc_test?.toFixed(3) ?? '?'} but poor calibration),
+                100% Bayesian for 20-30% DD (logistic adds noise, not signal).
+                The primary signal comes from the Risk Score&apos;s empirical relationship with drawdowns, not the logistic model.
+                With ~{model.effective_sample_size ?? 50} effective independent observations, point-prediction models have limited statistical power.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -515,9 +534,10 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
         <p className="text-sm text-slate-400">
           <span className="text-white font-semibold">Hybrid 3-layer model v{modelVersion}</span>:
           {isV3 ? (
-            <> Per-threshold optimized L2-logistic regression with StandardScaler
-            (10%: drop-from-today, 5 features; 20%: peak-to-trough, 6 features),
-            Bayesian Beta-Binomial + PAVA monotonicity (20-30%), EVT/GPD tail extrapolation (40%).
+            <> Bayesian-dominated blend: 50/50 logistic+Bayesian for 10% DD,
+            100% Bayesian Beta-Binomial + PAVA monotonicity for 20-30% DD (binned by Risk Score),
+            EVT/GPD tail extrapolation for 40% DD.
+            Logistic component uses per-threshold penalized regression with StandardScaler.
             Forward window: <span className="text-white">{model.forward_window_days} trading days</span> (~{model.forward_window_label}).</>
           ) : isV2Plus ? (
             <> Multi-feature L2-regularized logistic regression ({model.feature_names?.length ?? 6} features) for 10-20% thresholds,

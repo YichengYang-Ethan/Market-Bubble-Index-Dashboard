@@ -875,12 +875,13 @@ def main():
         "empirical_stats": empirical,
         "unconditional_base_rates": unconditional_base_rates,
         "blend_weights": {
-            "20pct": {"logistic": 0.15, "bayesian": 0.85},
+            "10pct": {"logistic": 0.5, "bayesian": 0.5},
+            "20pct": {"logistic": 0.0, "bayesian": 1.0},
             "30pct": {"logistic": 0.0, "bayesian": 1.0},
         },
         "confidence_tiers": {
-            "10pct": "moderate-high",
-            "20pct": "moderate-high",
+            "10pct": "moderate",
+            "20pct": "moderate",
             "30pct": "model_dependent",
             "40pct": "extrapolated",
         },

@@ -111,6 +111,7 @@ export interface DrawdownModelData {
   empirical_stats: Record<string, Record<string, number>>;
   unconditional_base_rates?: Record<string, number>;
   blend_weights?: Record<string, { logistic: number; bayesian: number }>;
+  effective_sample_size?: number;
   confidence_tiers: Record<string, string>;
 }
 
