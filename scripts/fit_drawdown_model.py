@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
-"""Fit drawdown probability model v4.0 from bubble history + QQQ price data.
+"""Fit drawdown probability model v4.1 from bubble history + QQQ price data.
+
+v4.1 fixes over v4.0:
+  - Bug fix: 10% DD now included in Bayesian Beta-Binomial layer
+    (was missing → fell back to logistic AUC=0.5 noise)
+  - Bug fix: Bootstrap CI now uses per-bin priors matching main Bayesian
+    (was using single flat prior → CI inconsistent with point estimate)
+  - Blend weights: all thresholds 100% Bayesian (logistic AUC≤0.5 on 1999+ data)
+  - Shared BAYESIAN_PRIORS dict eliminates prior duplication
 
 v4.0 improvements over v3.3:
   - Extended historical data: 1999-present (~6800 days) vs 2014-present (~2800 days)
@@ -18,7 +26,7 @@ Hybrid 3-layer model:
   Layer 1: Per-threshold penalized logistic (stability-selected features)
     - >10% DD: Lasso, 8 stable features, C auto-tuned
     - >20% DD: L2, 2 stable features, C auto-tuned
-  Layer 2: Bayesian Beta-Binomial with monotonicity for 20% and 30%
+  Layer 2: Bayesian Beta-Binomial with monotonicity for 10%, 20%, and 30%
   Layer 3: EVT (GPD) tail extrapolation for 40%
 
 Output: public/data/drawdown_model.json, public/data/qqq_drawdown.json
@@ -66,6 +74,17 @@ EMBARGO_DAYS = 20            # extra gap after each test fold
 DRAWDOWN_THRESHOLDS = [0.10, 0.20, 0.30, 0.40]
 SCORE_BINS = [(0, 20), (20, 40), (40, 60), (60, 80), (80, 100)]
 BIN_CENTERS = [10, 30, 50, 70, 90]
+
+# ── Shared Bayesian priors (used by both bayesian_beta_binomial and bootstrap CI) ──
+# Per-bin alpha/beta for Beta-Binomial posterior at each drawdown threshold.
+# 10% DD: common event → flatter priors (higher alpha, lower beta)
+# 20% DD: moderate event → informative priors
+# 30% DD: rare event → stronger shrinkage toward low probability
+BAYESIAN_PRIORS = {
+    0.10: {"alphas": [2, 3, 5, 7, 10], "betas": [30, 20, 12, 6, 3]},
+    0.20: {"alphas": [1, 2, 3, 4, 6],  "betas": [60, 40, 25, 12, 6]},
+    0.30: {"alphas": [0.5, 1, 1.5, 2.5, 4], "betas": [120, 80, 50, 25, 12]},
+}
 
 # ── Per-threshold configurations (v3.3) ──
 # Selected via multi-agent comparison of Lasso/Ridge/ElasticNet, AIC/BIC stepwise,
@@ -648,8 +667,8 @@ def gpd_exceedance_prob(x: float, u: float, xi: float, sigma: float) -> float:
 
 def main():
     print("=" * 70)
-    print("DRAWDOWN PROBABILITY MODEL v4.0")
-    print("Extended history (1999+) + Firth regression + Bootstrap CI")
+    print("DRAWDOWN PROBABILITY MODEL v4.1")
+    print("Fix: 10% Bayesian + per-bin bootstrap CI + 100% Bayesian blend")
     print("=" * 70)
     if USE_FIRTH:
         print("  Firth penalized logistic: ENABLED")
@@ -783,18 +802,15 @@ def main():
 
     # ── Layer 2: Bayesian Beta-Binomial ──
     print("\n" + "=" * 70)
-    print("LAYER 2: Bayesian Beta-Binomial with Monotonicity (PAVA)")
+    print("LAYER 2: Bayesian Beta-Binomial with Monotonicity (PAVA) — 10%/20%/30%")
     print("=" * 70)
 
     bayesian_lookup = {}
-    for t in [0.20, 0.30]:
+    for t in [0.10, 0.20, 0.30]:
         pct = int(t * 100)
-        if t == 0.20:
-            prior_alphas = [1, 2, 3, 4, 6]
-            prior_betas = [60, 40, 25, 12, 6]
-        else:
-            prior_alphas = [0.5, 1, 1.5, 2.5, 4]
-            prior_betas = [120, 80, 50, 25, 12]
+        priors = BAYESIAN_PRIORS[t]
+        prior_alphas = priors["alphas"]
+        prior_betas = priors["betas"]
 
         probs = bayesian_beta_binomial(df, t, 180, prior_alphas, prior_betas)
         bayesian_lookup[f"drawdown_{pct}pct"] = {
@@ -913,20 +929,17 @@ def main():
                 dd_star = data_star[:, 1]
 
                 # Recompute Bayesian bin counts on resampled data
+                # Use per-bin priors matching bayesian_beta_binomial()
+                priors = BAYESIAN_PRIORS[t]
                 bin_probs = []
-                for lo, hi in SCORE_BINS:
+                for bin_idx, (lo, hi) in enumerate(SCORE_BINS):
                     mask = (scores_star >= lo) & (scores_star < hi)
                     n_obs = max(1, int(mask.sum()) // DECORRELATION_DAYS)
                     n_events = int((dd_star[mask] >= t).sum() / max(1, DECORRELATION_DAYS // 2))
                     n_events = min(n_events, n_obs)
-                    # Use same priors as main model
-                    if t == 0.10:
-                        alpha_prior, beta_prior = 2, 20
-                    elif t == 0.20:
-                        alpha_prior, beta_prior = 1, 40
-                    else:
-                        alpha_prior, beta_prior = 0.5, 80
-                    prob = (alpha_prior + n_events) / (alpha_prior + beta_prior + n_obs)
+                    alpha_post = priors["alphas"][bin_idx] + n_events
+                    beta_post = priors["betas"][bin_idx] + n_obs - n_events
+                    prob = alpha_post / (alpha_post + beta_post)
                     bin_probs.append(prob)
 
                 # PAVA monotonicity
@@ -967,19 +980,17 @@ def main():
                 scores_star = scores_valid[idx]
                 dd_star = dd_valid[idx]
 
+                # Use per-bin priors matching bayesian_beta_binomial()
+                priors = BAYESIAN_PRIORS[t]
                 bin_probs = []
-                for lo, hi in SCORE_BINS:
+                for bin_idx, (lo, hi) in enumerate(SCORE_BINS):
                     mask = (scores_star >= lo) & (scores_star < hi)
                     n_obs = max(1, int(mask.sum()) // DECORRELATION_DAYS)
                     n_events = int((dd_star[mask] >= t).sum() / max(1, DECORRELATION_DAYS // 2))
                     n_events = min(n_events, n_obs)
-                    if t == 0.10:
-                        alpha_prior, beta_prior = 2, 20
-                    elif t == 0.20:
-                        alpha_prior, beta_prior = 1, 40
-                    else:
-                        alpha_prior, beta_prior = 0.5, 80
-                    prob = (alpha_prior + n_events) / (alpha_prior + beta_prior + n_obs)
+                    alpha_post = priors["alphas"][bin_idx] + n_events
+                    beta_post = priors["betas"][bin_idx] + n_obs - n_events
+                    prob = alpha_post / (alpha_post + beta_post)
                     bin_probs.append(prob)
 
                 bin_probs = pava_monotone(bin_probs)
@@ -997,7 +1008,7 @@ def main():
 
     # ── Output model JSON ──
     model = {
-        "model_version": "4.0",
+        "model_version": "4.1",
         "calibration_date": datetime.utcnow().strftime("%Y-%m-%d"),
         "data_points": len(df),
         "train_test_split": f"purged_wfcv_{N_CV_FOLDS}fold",
@@ -1017,7 +1028,7 @@ def main():
         "unconditional_base_rates": unconditional_base_rates,
         "probability_ci": probability_ci,
         "blend_weights": {
-            "10pct": {"logistic": 0.5, "bayesian": 0.5},
+            "10pct": {"logistic": 0.0, "bayesian": 1.0},
             "20pct": {"logistic": 0.0, "bayesian": 1.0},
             "30pct": {"logistic": 0.0, "bayesian": 1.0},
         },
@@ -1039,7 +1050,7 @@ def main():
 
     # ── Summary comparison ──
     print("\n" + "=" * 70)
-    print("v3.3 → v4.0 COMPARISON (extended data + Firth + bootstrap CI)")
+    print("v4.0 → v4.1 CHANGES (10% Bayesian + per-bin CI + 100% Bayesian)")
     print("=" * 70)
     v33_baselines = {
         "10": {"auc": 0.835, "bss": "+18.8%", "ece": "N/A"},
@@ -1063,7 +1074,7 @@ def main():
             print(f"    {k}: [{v['lower']:.1%}, {v['upper']:.1%}]")
 
     print("\n" + "=" * 70)
-    print("MODEL v4.0 CALIBRATION COMPLETE")
+    print("MODEL v4.1 CALIBRATION COMPLETE")
     print("=" * 70)
 
 
