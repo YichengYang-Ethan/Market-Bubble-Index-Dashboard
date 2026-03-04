@@ -70,8 +70,8 @@ const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, senti
   const velocityInfo = scoreVelocity != null ? getVelocityArrow(scoreVelocity) : null;
 
   return (
-    <div className="bg-slate-800/30 rounded-2xl p-6">
-      <div className="flex flex-col items-center relative">
+    <div className="bg-slate-800/30 rounded-2xl p-6 h-full flex flex-col">
+      <div className="flex flex-col items-center relative flex-1">
         {/* Data quality badge */}
         {dataQuality && (
           <div className={`absolute top-0 right-0 px-2 py-1 rounded-lg text-xs font-bold ${
@@ -142,7 +142,7 @@ const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, senti
         </span>
 
         {/* Sub-scores */}
-        <div className="grid grid-cols-3 gap-4 mt-6 w-full max-w-xs mx-auto">
+        <div className="grid grid-cols-3 gap-4 mt-auto pt-6 w-full max-w-xs mx-auto">
           <div className="bg-slate-800/50 rounded-lg p-3 text-center">
             <p className="text-xs text-slate-500 font-semibold uppercase mb-1">Sentiment</p>
             <p className="text-xl font-bold" style={{ color: sentimentScore != null ? getScoreColor(sentimentScore) : '#64748b' }}>
