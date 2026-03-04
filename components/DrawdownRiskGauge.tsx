@@ -45,7 +45,7 @@ const DrawdownRiskGauge: React.FC<DrawdownRiskGaugeProps> = ({ riskScore, compos
   });
 
   return (
-    <div>
+    <div className="bg-slate-800/30 rounded-2xl p-6">
       <div className="flex flex-col items-center relative">
         {/* Circular gauge */}
         <div className="relative w-64 h-64 mb-4">
@@ -88,7 +88,7 @@ const DrawdownRiskGauge: React.FC<DrawdownRiskGaugeProps> = ({ riskScore, compos
         </span>
 
         {/* Inverted indicators */}
-        <div className="grid grid-cols-3 gap-4 mt-6 w-full">
+        <div className="grid grid-cols-3 gap-4 mt-6 w-full max-w-xs mx-auto">
           {invertedIndicators.map(({ label, score }) => (
             <div key={label} className="bg-slate-800/50 rounded-lg p-3 text-center">
               <p className="text-xs text-slate-500 font-semibold uppercase mb-1">{label}</p>

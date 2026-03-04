@@ -346,9 +346,9 @@ const App: React.FC = () => {
                   </button>
                 </div>
               ) : bubbleData ? (
-                <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-                  {/* Primary: Risk Score gauge (large) */}
-                  <div className="max-w-sm">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+                  {/* Primary: Risk Score gauge */}
+                  <div>
                     <DrawdownRiskGauge
                       riskScore={bubbleData.drawdown_risk_score ?? 50}
                       compositeScore={bubbleData.composite_score}
@@ -356,8 +356,8 @@ const App: React.FC = () => {
                       generatedAt={bubbleData.generated_at}
                     />
                   </div>
-                  {/* Secondary: Euphoria Index gauge (smaller) */}
-                  <div className="max-w-xs">
+                  {/* Secondary: Euphoria Index gauge */}
+                  <div>
                     <BubbleGauge
                       compositeScore={bubbleData.composite_score}
                       regime={bubbleData.regime}
