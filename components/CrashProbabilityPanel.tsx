@@ -463,60 +463,70 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
         </div>
       )}
 
-      {/* OOS Performance Metrics — Logistic component only */}
-      {oosMetrics && (
-        <div className="bg-slate-800/30 rounded-xl p-4 mb-4">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            Logistic Component OOS ({(() => {
-              const folds10 = model.actual_folds_used?.['drawdown_10pct'];
-              const folds20 = model.actual_folds_used?.['drawdown_20pct'];
-              if (folds10 != null || folds20 != null) {
-                return `${folds10 ?? '?'}/${folds20 ?? '?'} folds, purge=${model.purge_days ?? '?'}d`;
-              }
-              return model.train_test_split ?? '70/30 split';
-            })()})
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <span className="text-slate-500 text-xs">AUC (10% DD)</span>
-              <p className={`font-semibold ${(oosMetrics.c10?.auc_test ?? 0) > 0.7 ? 'text-emerald-400' : (oosMetrics.c10?.auc_test ?? 0) > 0.6 ? 'text-yellow-400' : 'text-red-400'}`}>
-                {oosMetrics.c10?.auc_test?.toFixed(3) ?? 'N/A'}
-              </p>
-            </div>
-            <div>
-              <span className="text-slate-500 text-xs">BSS (10% DD)</span>
-              <p className={`font-semibold ${(oosMetrics.c10?.bss_test ?? 0) > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                {oosMetrics.c10?.bss_test !== undefined ? `${oosMetrics.c10.bss_test > 0 ? '+' : ''}${(oosMetrics.c10.bss_test * 100).toFixed(1)}%` : 'N/A'}
-              </p>
-            </div>
-            <div>
-              <span className="text-slate-500 text-xs">AUC (20% DD)</span>
-              <p className={`font-semibold ${(oosMetrics.c20?.auc_test ?? 0) > 0.7 ? 'text-emerald-400' : (oosMetrics.c20?.auc_test ?? 0) > 0.6 ? 'text-yellow-400' : 'text-red-400'}`}>
-                {oosMetrics.c20?.auc_test?.toFixed(3) ?? 'N/A'}
-              </p>
-            </div>
-            <div>
-              <span className="text-slate-500 text-xs">BSS (20% DD)</span>
-              <p className={`font-semibold ${(oosMetrics.c20?.bss_test ?? 0) > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                {oosMetrics.c20?.bss_test !== undefined ? `${oosMetrics.c20.bss_test > 0 ? '+' : ''}${(oosMetrics.c20.bss_test * 100).toFixed(1)}%` : 'N/A'}
-              </p>
-            </div>
+      {/* Model methodology note — logistic diagnostics collapsed */}
+      {oosMetrics && (() => {
+        const allBayesian = Object.values(model.blend_weights ?? {}).every(
+          (w: any) => (w.logistic ?? 0) === 0
+        );
+        return allBayesian ? (
+          <div className="bg-slate-800/30 rounded-xl p-4 mb-4">
+            <p className="text-xs text-slate-400 leading-relaxed">
+              <span className="text-emerald-400 font-semibold">100% Bayesian Beta-Binomial</span> for all thresholds (10-30% DD),
+              calibrated on extended history (1999+) with ~{model.effective_sample_size ?? '?'} effective independent samples.
+              Logistic regression tested but not used (AUC≤0.5 on extended data).
+              Primary signal: Risk Score&apos;s empirical relationship with drawdowns per score bin + PAVA monotonicity.
+            </p>
           </div>
-          {/* Honest interpretation */}
-          {((oosMetrics.c10?.bss_test ?? 0) < 0 || (oosMetrics.c20?.bss_test ?? 0) < 0) && (
-            <div className="mt-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
-              <p className="text-[11px] text-yellow-400 font-semibold mb-1">Model Limitations</p>
-              <p className="text-[10px] text-slate-400 leading-relaxed">
-                Negative BSS means the logistic regression alone is worse than always predicting the base rate.
-                The displayed probabilities use <span className="text-white font-semibold">100% Bayesian Beta-Binomial</span> for all thresholds (10-30% DD).
-                Logistic regression is retained for diagnostics only (weight=0).
-                The primary signal comes from the Risk Score&apos;s empirical relationship with drawdowns, not the logistic model.
-                With ~{model.effective_sample_size ?? 50} effective independent observations, point-prediction models have limited statistical power.
-              </p>
+        ) : (
+          <div className="bg-slate-800/30 rounded-xl p-4 mb-4">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              Logistic Component OOS ({(() => {
+                const folds10 = model.actual_folds_used?.['drawdown_10pct'];
+                const folds20 = model.actual_folds_used?.['drawdown_20pct'];
+                if (folds10 != null || folds20 != null) {
+                  return `${folds10 ?? '?'}/${folds20 ?? '?'} folds, purge=${model.purge_days ?? '?'}d`;
+                }
+                return model.train_test_split ?? '70/30 split';
+              })()})
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              <div>
+                <span className="text-slate-500 text-xs">AUC (10% DD)</span>
+                <p className={`font-semibold ${(oosMetrics.c10?.auc_test ?? 0) > 0.7 ? 'text-emerald-400' : (oosMetrics.c10?.auc_test ?? 0) > 0.6 ? 'text-yellow-400' : 'text-red-400'}`}>
+                  {oosMetrics.c10?.auc_test?.toFixed(3) ?? 'N/A'}
+                </p>
+              </div>
+              <div>
+                <span className="text-slate-500 text-xs">BSS (10% DD)</span>
+                <p className={`font-semibold ${(oosMetrics.c10?.bss_test ?? 0) > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {oosMetrics.c10?.bss_test !== undefined ? `${oosMetrics.c10.bss_test > 0 ? '+' : ''}${(oosMetrics.c10.bss_test * 100).toFixed(1)}%` : 'N/A'}
+                </p>
+              </div>
+              <div>
+                <span className="text-slate-500 text-xs">AUC (20% DD)</span>
+                <p className={`font-semibold ${(oosMetrics.c20?.auc_test ?? 0) > 0.7 ? 'text-emerald-400' : (oosMetrics.c20?.auc_test ?? 0) > 0.6 ? 'text-yellow-400' : 'text-red-400'}`}>
+                  {oosMetrics.c20?.auc_test?.toFixed(3) ?? 'N/A'}
+                </p>
+              </div>
+              <div>
+                <span className="text-slate-500 text-xs">BSS (20% DD)</span>
+                <p className={`font-semibold ${(oosMetrics.c20?.bss_test ?? 0) > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                  {oosMetrics.c20?.bss_test !== undefined ? `${oosMetrics.c20.bss_test > 0 ? '+' : ''}${(oosMetrics.c20.bss_test * 100).toFixed(1)}%` : 'N/A'}
+                </p>
+              </div>
             </div>
-          )}
-        </div>
-      )}
+            {((oosMetrics.c10?.bss_test ?? 0) < 0 || (oosMetrics.c20?.bss_test ?? 0) < 0) && (
+              <div className="mt-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3">
+                <p className="text-[11px] text-yellow-400 font-semibold mb-1">Model Limitations</p>
+                <p className="text-[10px] text-slate-400 leading-relaxed">
+                  Negative BSS means the logistic regression alone is worse than always predicting the base rate.
+                  The primary signal comes from the Risk Score&apos;s empirical relationship with drawdowns, not the logistic model.
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Empirical context */}
       {empirical && (
