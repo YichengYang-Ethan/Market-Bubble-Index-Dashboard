@@ -115,7 +115,7 @@ const BubbleGauge: React.FC<BubbleGaugeProps> = ({ compositeScore, regime, senti
                 </span>
               )}
             </div>
-            <span className="text-xs text-slate-500 font-bold uppercase">Composite</span>
+            <span className="text-xs text-slate-500 font-bold uppercase">Euphoria Index</span>
             {confidenceInterval && (
               <span className="text-xs text-slate-500 mt-0.5">
                 [{confidenceInterval.lower.toFixed(1)} - {confidenceInterval.upper.toFixed(1)}]

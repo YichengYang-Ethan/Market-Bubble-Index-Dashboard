@@ -59,6 +59,7 @@ export interface BubbleIndexData {
   liquidity_score: number | null;
   valuation_score?: number | null;
   regime: string;
+  risk_regime?: string;
   indicators: Record<string, BubbleIndicator>;
   previous_day?: PreviousDay;
   score_velocity?: number;
@@ -85,6 +86,7 @@ export interface BubbleHistoryPoint {
   liquidity_score: number | null;
   valuation_score?: number | null;
   regime: string;
+  risk_regime?: string | null;
   indicators?: Record<string, number | null>;
   score_velocity?: number;
   score_acceleration?: number;

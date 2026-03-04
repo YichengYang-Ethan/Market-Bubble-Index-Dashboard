@@ -37,6 +37,17 @@ type StrategyMode = 'hysteresis' | 'velocity';
 
 const RISK_FREE_RATE = 0.045;
 
+/** Standard normal CDF approximation (Abramowitz & Stegun) */
+function normalCDF(x: number): number {
+  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+  const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x) / Math.SQRT2;
+  const t = 1 / (1 + p * x);
+  const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return 0.5 * (1 + sign * y);
+}
+
 // ---------------------------------------------------------------------------
 // Core engine
 // ---------------------------------------------------------------------------
@@ -94,6 +105,7 @@ function runHysteresisBacktest(
   entryThreshold: number,
   exitThreshold: number,
   initialInvestment: number,
+  transactionCostBps: number = 10,
 ): BacktestResult | null {
   const priceMap = new Map<string, number>();
   for (const p of priceData) priceMap.set(p.date, p.price);
@@ -122,16 +134,18 @@ function runHysteresisBacktest(
     bhValues.push(pt.price);
     totalExposure += invested ? 1 : 0;
 
+    const costFrac = transactionCostBps / 10000;
     if (invested && pt.score >= exitThreshold) {
-      // Exit: sell all, move to cash
-      cash = shares * pt.price;
+      // Exit: sell all, move to cash (deduct transaction cost)
+      cash = shares * pt.price * (1 - costFrac);
       shares = 0;
       invested = false;
       trades++;
       tradeLog.push({ date: pt.date, action: 'EXIT', score: pt.score, price: pt.price });
     } else if (!invested && pt.score <= entryThreshold) {
-      // Enter: buy with all cash
-      shares = cash / pt.price;
+      // Enter: buy with all cash (deduct transaction cost)
+      const investable = cash * (1 - costFrac);
+      shares = investable / pt.price;
       cash = 0;
       invested = true;
       trades++;
@@ -175,6 +189,7 @@ function runVelocityBacktest(
   scoreFloor: number,
   reducedAllocation: number,
   initialInvestment: number,
+  transactionCostBps: number = 10,
 ): BacktestResult | null {
   const priceMap = new Map<string, number>();
   for (const p of priceData) priceMap.set(p.date, p.price);
@@ -214,9 +229,12 @@ function runVelocityBacktest(
     const targetAlloc = shouldReduce ? reducedAllocation : 1.0;
 
     if (Math.abs(targetAlloc - currentAlloc) > 0.01) {
-      const targetEquity = portfolioValue * targetAlloc;
+      const costFrac = transactionCostBps / 10000;
+      const costDeduction = portfolioValue * Math.abs(targetAlloc - currentAlloc) * costFrac;
+      const afterCost = portfolioValue - costDeduction;
+      const targetEquity = afterCost * targetAlloc;
       shares = targetEquity / pt.price;
-      cash = portfolioValue - targetEquity;
+      cash = afterCost - targetEquity;
       currentAlloc = targetAlloc;
       trades++;
       tradeLog.push({
@@ -267,12 +285,37 @@ const BubbleBacktestPanel: React.FC<Props> = ({ history, priceData, ticker }) =>
   const [scoreFloor, setScoreFloor] = useState(50);
   const [reducedAlloc, setReducedAlloc] = useState(0.30);
 
+  // Transaction cost (shared)
+  const [transactionCostBps, setTransactionCostBps] = useState(10);
+
   const result = useMemo(() => {
     if (mode === 'hysteresis') {
-      return runHysteresisBacktest(history, priceData, entryThreshold, exitThreshold, initialInvestment);
+      return runHysteresisBacktest(history, priceData, entryThreshold, exitThreshold, initialInvestment, transactionCostBps);
     }
-    return runVelocityBacktest(history, priceData, velocityThreshold, scoreFloor, reducedAlloc, initialInvestment);
-  }, [history, priceData, mode, initialInvestment, entryThreshold, exitThreshold, velocityThreshold, scoreFloor, reducedAlloc]);
+    return runVelocityBacktest(history, priceData, velocityThreshold, scoreFloor, reducedAlloc, initialInvestment, transactionCostBps);
+  }, [history, priceData, mode, initialInvestment, entryThreshold, exitThreshold, velocityThreshold, scoreFloor, reducedAlloc, transactionCostBps]);
+
+  // Sharpe ratio significance test
+  const sharpeSignificance = useMemo(() => {
+    if (!result) return null;
+    const { strategy: strat, buyHold: bh } = result;
+    const sharpeDiff = strat.sharpe - bh.sharpe;
+    // Approximate SE of Sharpe difference: SE ≈ sqrt((1 + 0.5*S1^2)/N + (1 + 0.5*S2^2)/N)
+    // where N is number of years of data
+    const priceMap = new Map<string, number>();
+    for (const p of priceData) priceMap.set(p.date, p.price);
+    const merged = history.filter(h => priceMap.has(h.date));
+    const nDays = merged.length;
+    const nYears = Math.max(1, nDays / 252);
+    const se = Math.sqrt(
+      (1 + 0.5 * strat.sharpe ** 2) / nYears +
+      (1 + 0.5 * bh.sharpe ** 2) / nYears
+    );
+    const zStat = se > 0 ? sharpeDiff / se : 0;
+    // Two-tailed p-value using normal approximation
+    const pValue = 2 * (1 - normalCDF(Math.abs(zStat)));
+    return { sharpeDiff, se, zStat, pValue, significant: pValue < 0.05 };
+  }, [result, history, priceData]);
 
   if (!result) return null;
 
@@ -439,6 +482,22 @@ const BubbleBacktestPanel: React.FC<Props> = ({ history, priceData, ticker }) =>
             className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
           />
         </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            Transaction Cost: <span className="text-yellow-400">{transactionCostBps} bps</span>
+          </label>
+          <input
+            type="range"
+            min={0}
+            max={50}
+            step={5}
+            value={transactionCostBps}
+            onChange={e => setTransactionCostBps(Number(e.target.value))}
+            className="w-full accent-yellow-500"
+          />
+          <p className="text-[10px] text-slate-600 mt-1">Cost per trade (each side). 10 bps = 0.10%</p>
+        </div>
       </div>
 
       {/* Side-by-side Comparison Table */}
@@ -485,6 +544,28 @@ const BubbleBacktestPanel: React.FC<Props> = ({ history, priceData, ticker }) =>
           </table>
         </div>
       </div>
+
+      {/* Sharpe Significance Test */}
+      {sharpeSignificance && (
+        <div className={`rounded-xl p-3 mb-6 flex items-center gap-3 ${
+          sharpeSignificance.significant
+            ? 'bg-emerald-500/10 border border-emerald-500/20'
+            : 'bg-yellow-500/10 border border-yellow-500/20'
+        }`}>
+          <span className="text-lg">{sharpeSignificance.significant ? '' : '\u26A0\uFE0F'}</span>
+          <div>
+            <p className={`text-sm font-semibold ${sharpeSignificance.significant ? 'text-emerald-400' : 'text-yellow-400'}`}>
+              Sharpe Difference: {sharpeSignificance.sharpeDiff > 0 ? '+' : ''}{sharpeSignificance.sharpeDiff.toFixed(3)}
+              {' '}(SE={sharpeSignificance.se.toFixed(3)}, p={sharpeSignificance.pValue.toFixed(3)})
+            </p>
+            <p className="text-[10px] text-slate-500">
+              {sharpeSignificance.significant
+                ? 'Statistically significant at 95% confidence.'
+                : 'Not statistically significant at 95% confidence. The Sharpe difference could be due to chance.'}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Key stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -544,7 +625,7 @@ const BubbleBacktestPanel: React.FC<Props> = ({ history, priceData, ticker }) =>
           )}
         </p>
         <p className="text-[10px] text-slate-600">
-          Default thresholds were optimized via grid search over 10 years of historical data. Past performance does not guarantee future results.
+          Default thresholds were optimized via grid search over 10 years of historical data. Transaction costs ({transactionCostBps} bps per trade) are deducted on each signal flip. Past performance does not guarantee future results.
         </p>
       </div>
     </div>

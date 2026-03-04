@@ -119,9 +119,9 @@ export const TAB_NAV_SECTIONS: Record<TabId, { id: string; label: string }[]> = 
 };
 
 export const BUBBLE_REGIME_CONFIG = [
-  { threshold: 30, key: 'LOW', label: 'Low Risk', color: '#22c55e', bgClass: 'bg-emerald-500/10 border-emerald-500/20', textClass: 'text-emerald-400', description: 'Depressed sentiment. Potential accumulation zone.' },
-  { threshold: 50, key: 'MODERATE', label: 'Moderate', color: '#eab308', bgClass: 'bg-yellow-500/10 border-yellow-500/20', textClass: 'text-yellow-400', description: 'Normal market conditions. Balanced risk/reward.' },
-  { threshold: 70, key: 'ELEVATED', label: 'Elevated', color: '#f97316', bgClass: 'bg-orange-500/10 border-orange-500/20', textClass: 'text-orange-400', description: 'Rising euphoria. Tighten risk management.' },
-  { threshold: 85, key: 'HIGH', label: 'High Risk', color: '#ef4444', bgClass: 'bg-red-500/10 border-red-500/20', textClass: 'text-red-400', description: 'Frothy conditions. Consider reducing exposure.' },
-  { threshold: 100, key: 'EXTREME', label: 'Extreme', color: '#dc2626', bgClass: 'bg-red-600/10 border-red-600/20', textClass: 'text-red-300', description: 'Bubble territory. High correction probability.' },
+  { threshold: 30, key: 'LOW', label: 'Low Euphoria', color: '#22c55e', bgClass: 'bg-emerald-500/10 border-emerald-500/20', textClass: 'text-emerald-400', description: 'Depressed sentiment. Low exuberance — does NOT directly imply low crash risk. Check Risk Score.' },
+  { threshold: 50, key: 'MODERATE', label: 'Moderate', color: '#eab308', bgClass: 'bg-yellow-500/10 border-yellow-500/20', textClass: 'text-yellow-400', description: 'Normal market exuberance. Euphoria Index measures market mood, not crash probability.' },
+  { threshold: 70, key: 'ELEVATED', label: 'Elevated', color: '#f97316', bgClass: 'bg-orange-500/10 border-orange-500/20', textClass: 'text-orange-400', description: 'Rising euphoria. Speculative excess building, but crash risk depends on the Risk Score.' },
+  { threshold: 85, key: 'HIGH', label: 'High Euphoria', color: '#ef4444', bgClass: 'bg-red-500/10 border-red-500/20', textClass: 'text-red-400', description: 'Frothy conditions. Extreme exuberance — consult Risk Score for actual crash probability.' },
+  { threshold: 100, key: 'EXTREME', label: 'Extreme', color: '#dc2626', bgClass: 'bg-red-600/10 border-red-600/20', textClass: 'text-red-300', description: 'Peak euphoria. Maximum speculative excess — see Risk Score and Drawdown Probabilities for risk assessment.' },
 ] as const;

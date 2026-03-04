@@ -120,6 +120,23 @@ def get_regime(score: float) -> str:
     return "EXTREME"
 
 
+def get_risk_regime(risk_score: float) -> str:
+    """Map drawdown risk score to a risk regime label.
+
+    Uses the same thresholds as get_regime() but labels reflect crash risk
+    rather than euphoria level.
+    """
+    if risk_score < 30:
+        return "LOW_RISK"
+    if risk_score < 50:
+        return "MODERATE_RISK"
+    if risk_score < 70:
+        return "ELEVATED_RISK"
+    if risk_score < 85:
+        return "HIGH_RISK"
+    return "CRITICAL_RISK"
+
+
 # ---------------------------------------------------------------------------
 # Percentile ranking helpers
 # ---------------------------------------------------------------------------
@@ -309,26 +326,42 @@ def build_bubble_index():
     combined = pd.DataFrame(indicator_series)
     combined = combined.dropna(how="all")
 
-    # --- PCA Orthogonalization (#2) ---
-    corr_matrix = combined.corr()
+    # --- Iterative Orthogonalization ---
+    # Loop: find highest-correlated pair → regress out → repeat until all |r| < 0.7
+    # Max 10 iterations to guarantee convergence.
+    ORTHO_THRESHOLD = 0.7
+    MAX_ORTHO_ITER = 10
     orthogonalized = combined.copy()
-    processed = set()
-    for i, col1 in enumerate(combined.columns):
-        for col2 in combined.columns[i+1:]:
-            if abs(corr_matrix.loc[col1, col2]) > 0.7 and col2 not in processed:
-                # Regress col2 on col1, keep residuals
-                mask = combined[[col1, col2]].dropna().index
-                if len(mask) > 50:
-                    x = combined.loc[mask, col1].values
-                    y = combined.loc[mask, col2].values
-                    coeffs = np.polyfit(x, y, 1)
-                    residuals = y - np.polyval(coeffs, x)
-                    # Scale residuals back to 0-100
-                    r_min, r_max = residuals.min(), residuals.max()
-                    if r_max > r_min:
-                        scaled = (residuals - r_min) / (r_max - r_min) * 100
-                        orthogonalized.loc[mask, col2] = scaled
-                    processed.add(col2)
+    for iteration in range(MAX_ORTHO_ITER):
+        corr_matrix = orthogonalized.corr()
+        # Find pair with highest absolute correlation (above threshold)
+        max_corr = 0.0
+        best_pair = None
+        cols = list(corr_matrix.columns)
+        for i, col1 in enumerate(cols):
+            for col2 in cols[i+1:]:
+                r = abs(corr_matrix.loc[col1, col2])
+                if r > max_corr:
+                    max_corr = r
+                    best_pair = (col1, col2)
+        if max_corr <= ORTHO_THRESHOLD:
+            print(f"  Orthogonalization converged after {iteration} iterations (max |r|={max_corr:.3f})")
+            break
+        col1, col2 = best_pair
+        # Regress col2 on col1, keep residuals (col2 gets orthogonalized)
+        mask = orthogonalized[[col1, col2]].dropna().index
+        if len(mask) > 50:
+            x = orthogonalized.loc[mask, col1].values
+            y = orthogonalized.loc[mask, col2].values
+            coeffs = np.polyfit(x, y, 1)
+            residuals = y - np.polyval(coeffs, x)
+            r_min, r_max = residuals.min(), residuals.max()
+            if r_max > r_min:
+                scaled = (residuals - r_min) / (r_max - r_min) * 100
+                orthogonalized.loc[mask, col2] = scaled
+            print(f"  Iter {iteration}: decorrelated {col1} x {col2} (|r|={max_corr:.3f})")
+    else:
+        print(f"  WARNING: Orthogonalization did not converge after {MAX_ORTHO_ITER} iterations (max |r|={max_corr:.3f})")
     combined = orthogonalized
 
     # Re-normalize weights for available indicators only
@@ -422,6 +455,7 @@ def build_bubble_index():
         "liquidity_score": round(snap_liq, 1) if not np.isnan(snap_liq) else None,
         "valuation_score": round(snap_val, 1) if not np.isnan(snap_val) else None,
         "regime": get_regime(snap_comp),
+        "risk_regime": get_risk_regime(snap_risk),
         "score_velocity": round(vel, 2),
         "score_acceleration": round(acc, 2),
         "indicators": snapshot_indicators,
@@ -513,6 +547,7 @@ def build_bubble_index():
             "liquidity_score": round(l_val, 1) if l_val is not None else None,
             "valuation_score": round(v_val, 1) if v_val is not None else None,
             "regime": get_regime(c_val),
+            "risk_regime": get_risk_regime(r_val) if r_val is not None else None,
             "score_velocity": round(vel_i, 2) if vel_i is not None else None,
             "score_acceleration": round(acc_i, 2) if acc_i is not None else None,
             "indicators": day_indicators,

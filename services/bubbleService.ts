@@ -61,6 +61,9 @@ export interface DrawdownModelData {
   forward_window_days: number;
   forward_window_label: string;
   train_test_split?: string;
+  actual_folds_used?: Record<string, number>;
+  purge_days?: number;
+  embargo_days?: number;
   feature_names?: string[];
   current_features?: Record<string, number>;
   logistic_coefficients: Record<string, {
@@ -106,6 +109,8 @@ export interface DrawdownModelData {
     cross_ratios: Record<string, number>;
   };
   empirical_stats: Record<string, Record<string, number>>;
+  unconditional_base_rates?: Record<string, number>;
+  blend_weights?: Record<string, { logistic: number; bayesian: number }>;
   confidence_tiers: Record<string, string>;
 }
 

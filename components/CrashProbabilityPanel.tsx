@@ -40,8 +40,12 @@ function buildFeatureValues(
   indicators?: Record<string, BubbleIndicator>,
   history?: BubbleHistoryPoint[],
 ): Record<string, number> {
+  // drawdown_risk_score is passed from the parent or fallback to model's precomputed value
+  const drawdownRisk = model.current_features?.drawdown_risk_score ?? currentScore;
+
   const values: Record<string, number> = {
     composite_score: currentScore,
+    drawdown_risk_score: drawdownRisk,
     score_velocity: scoreVelocity,
   };
 
@@ -78,6 +82,15 @@ function buildFeatureValues(
     // score_sma_60d: 60-day SMA of composite score
     const sum60 = recent60.reduce((acc, h) => acc + h.composite_score, 0);
     values.score_sma_60d = sum60 / recent60.length;
+
+    // risk_ema_20d: EMA of drawdown risk score
+    const riskScores20 = recent20.map(h => h.drawdown_risk_score ?? 50);
+    let riskEma = riskScores20[0];
+    for (let i = 1; i < riskScores20.length; i++) {
+      riskEma = alpha * riskScores20[i] + (1 - alpha) * riskEma;
+    }
+    values.risk_ema_20d = riskEma;
+    values.drawdown_risk_score = riskScores20[riskScores20.length - 1];
 
     // ind_qqq_deviation_sma_20d: 20-day SMA of QQQ deviation indicator
     const devScores = recent20.map(h => h.indicators?.qqq_deviation ?? 50);
@@ -159,7 +172,11 @@ function computeDrawdownProbabilities(
     );
   }
 
-  // --- Layer 1 + 2: Blend for 20% ---
+  // --- Layer 1 + 2: Blend for 20% (85% Bayesian / 15% Logistic) ---
+  // Bayesian binning uses drawdown_risk_score (monotonic with P(DD))
+  const riskScore = featureValues.drawdown_risk_score ?? featureValues.composite_score ?? 0;
+  const blendWeights = model.blend_weights?.['20pct'] ?? { logistic: 0.15, bayesian: 0.85 };
+
   const c20 = logCoefs['drawdown_20pct'];
   let p20_logistic = 0;
   if (c20?.weights && c20?.intercept !== undefined) {
@@ -175,14 +192,14 @@ function computeDrawdownProbabilities(
   }
   const b20 = bayesian['drawdown_20pct'];
   const p20_bayesian = b20
-    ? interpolateLookup(featureValues.composite_score ?? 0, b20.bin_centers, b20.probabilities)
+    ? interpolateLookup(riskScore, b20.bin_centers, b20.probabilities)
     : p20_logistic;
-  const p20 = 0.5 * p20_logistic + 0.5 * p20_bayesian;
+  const p20 = blendWeights.logistic * p20_logistic + blendWeights.bayesian * p20_bayesian;
 
-  // --- Layer 2: Bayesian for 30% ---
+  // --- Layer 2: Pure Bayesian for 30% (100% Bayesian) ---
   const b30 = bayesian['drawdown_30pct'];
   const p30 = b30
-    ? interpolateLookup(featureValues.composite_score ?? 0, b30.bin_centers, b30.probabilities)
+    ? interpolateLookup(riskScore, b30.bin_centers, b30.probabilities)
     : 0;
 
   // --- Layer 3: EVT extrapolation for 40% ---
@@ -299,6 +316,11 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
         {probs.map((p) => {
           const pct = (p.probability * 100);
           const conf = CONFIDENCE_DISPLAY[p.confidence] ?? CONFIDENCE_DISPLAY.low;
+          const baseRateKey = `${p.threshold}pct`;
+          const baseRate = model.unconditional_base_rates?.[baseRateKey];
+          const baseRatePct = baseRate != null ? baseRate * 100 : null;
+          // Model lift: how much the conditional probability exceeds the unconditional
+          const lift = baseRatePct != null ? pct - baseRatePct : null;
           return (
             <div key={p.threshold} className={`border rounded-xl p-4 ${p.bgColor}`}>
               <div className="flex items-center justify-between mb-2">
@@ -311,6 +333,16 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
                 <div className="relative w-20 h-20">
                   <svg className="w-20 h-20 transform -rotate-90" viewBox="0 0 80 80">
                     <circle cx="40" cy="40" r="34" fill="transparent" stroke="#1e293b" strokeWidth="6" />
+                    {/* Base rate reference arc (gray) */}
+                    {baseRatePct != null && (
+                      <circle
+                        cx="40" cy="40" r="34" fill="transparent"
+                        stroke="#475569"
+                        strokeWidth="2"
+                        strokeDasharray={`${baseRatePct * 2.136} 213.6`}
+                        opacity={0.5}
+                      />
+                    )}
                     <circle
                       cx="40" cy="40" r="34" fill="transparent"
                       stroke={p.color}
@@ -326,13 +358,32 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
                 </div>
               </div>
 
-              {/* Bar */}
-              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+              {/* Bar with base rate marker */}
+              <div className="relative h-1.5 bg-slate-800 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all"
                   style={{ width: `${Math.min(pct, 100)}%`, backgroundColor: p.color }}
                 />
+                {baseRatePct != null && (
+                  <div
+                    className="absolute top-0 h-full w-0.5 bg-slate-400"
+                    style={{ left: `${Math.min(baseRatePct, 100)}%` }}
+                    title={`Base rate: ${baseRatePct.toFixed(1)}%`}
+                  />
+                )}
               </div>
+
+              {/* Base rate annotation */}
+              {baseRatePct != null && (
+                <div className="flex items-center justify-between mt-1.5">
+                  <span className="text-[9px] text-slate-500">Base: {baseRatePct.toFixed(1)}%</span>
+                  {lift != null && (
+                    <span className={`text-[9px] font-semibold ${lift > 0 ? 'text-red-400' : lift < -2 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                      {lift > 0 ? '+' : ''}{lift.toFixed(1)}pp
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
@@ -394,7 +445,14 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
       {oosMetrics && (
         <div className="bg-slate-800/30 rounded-xl p-4 mb-4">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-            Out-of-Sample Performance ({model.train_test_split ?? '70/30'} split)
+            Out-of-Sample Performance ({(() => {
+              const folds10 = model.actual_folds_used?.['drawdown_10pct'];
+              const folds20 = model.actual_folds_used?.['drawdown_20pct'];
+              if (folds10 != null || folds20 != null) {
+                return `${folds10 ?? '?'}/${folds20 ?? '?'} actual folds, purge=${model.purge_days ?? '?'}d`;
+              }
+              return model.train_test_split ?? '70/30 split';
+            })()})
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>

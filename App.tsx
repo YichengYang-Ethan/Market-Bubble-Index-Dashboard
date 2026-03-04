@@ -259,7 +259,7 @@ const App: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-slate-950">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-slate-400 font-medium">Loading Market Bubble Index...</p>
+          <p className="text-slate-400 font-medium">Loading Market Risk Dashboard...</p>
         </div>
       </div>
     );
@@ -281,7 +281,7 @@ const App: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
               </div>
-              <span className="text-base font-bold text-white tracking-tight hidden lg:inline">Market Bubble Index</span>
+              <span className="text-base font-bold text-white tracking-tight hidden lg:inline">Market Risk Dashboard</span>
             </div>
 
             {/* Tab Selector */}
@@ -326,10 +326,11 @@ const App: React.FC = () => {
           >
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-8">
-                <h1 className="text-4xl font-black text-white mb-3">Bubble Temperature</h1>
+                <h1 className="text-4xl font-black text-white mb-3">Euphoria Index</h1>
                 <p className="text-lg text-slate-400 max-w-3xl mx-auto">
                   How euphoric is the market? A composite measure across <span className="text-white font-semibold">7 indicators</span> including
                   QQQ deviation, VIX, sector breadth, credit spreads, put/call ratio, yield curve, and CAPE valuation.
+                  <span className="text-slate-500 text-sm block mt-1">Note: This measures market exuberance, not crash probability. See the Risk Score for crash risk assessment.</span>
                 </p>
               </div>
 
@@ -345,8 +346,18 @@ const App: React.FC = () => {
                   </button>
                 </div>
               ) : bubbleData ? (
-                <div className="flex justify-center">
+                <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+                  {/* Primary: Risk Score gauge (large) */}
                   <div className="max-w-sm">
+                    <DrawdownRiskGauge
+                      riskScore={bubbleData.drawdown_risk_score ?? 50}
+                      compositeScore={bubbleData.composite_score}
+                      indicators={bubbleData.indicators}
+                      generatedAt={bubbleData.generated_at}
+                    />
+                  </div>
+                  {/* Secondary: Euphoria Index gauge (smaller) */}
+                  <div className="max-w-xs">
                     <BubbleGauge
                       compositeScore={bubbleData.composite_score}
                       regime={bubbleData.regime}
@@ -597,10 +608,11 @@ const App: React.FC = () => {
 
               {/* How the Bubble Index Works */}
               <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-xl mb-8">
-                <h3 className="text-lg font-bold text-white mb-4">How the Bubble Index Works</h3>
+                <h3 className="text-lg font-bold text-white mb-4">How the Euphoria Index Works</h3>
                 <p className="text-slate-400 leading-relaxed mb-4">
-                  The Market Bubble Index is a composite score (0-100) that aggregates <span className="text-white font-semibold">7 independent market indicators</span> across
+                  The Euphoria Index is a composite score (0-100) that aggregates <span className="text-white font-semibold">7 independent market indicators</span> across
                   three categories&mdash;sentiment, liquidity, and valuation&mdash;to measure the degree of speculative excess.
+                  It measures market exuberance, <span className="text-yellow-400 font-semibold">not crash probability</span>. Use the Risk Score on the Crash Risk tab for actual risk assessment.
                   Each indicator is converted to a percentile rank within a rolling lookback window (50-252 trading days depending on the indicator),
                   then combined via weighted average into the composite score. If any indicator is unavailable, its weight is automatically redistributed among the remaining indicators.
                 </p>
@@ -1288,8 +1300,9 @@ const App: React.FC = () => {
 
       {/* ========== FOOTER ========== */}
       <footer className="border-t border-slate-800 py-10 text-center text-slate-500 text-xs">
-        <p>&copy; 2025-2026 Market Bubble Index Dashboard. Daily market data via Yahoo Finance &amp; FRED, updated by GitHub Actions.</p>
+        <p>&copy; 2025-2026 Market Risk Dashboard. Daily market data via Yahoo Finance &amp; FRED, updated by GitHub Actions.</p>
         <p className="mt-2">Not financial advice. 7 indicators across sentiment, liquidity, and valuation dimensions. 10-year rolling data window.</p>
+        <p className="mt-1 text-slate-600">Effective sample size: ~50 independent observations (56-day decorrelation). Euphoria Index measures market exuberance, not crash probability directly.</p>
       </footer>
     </div>
   );

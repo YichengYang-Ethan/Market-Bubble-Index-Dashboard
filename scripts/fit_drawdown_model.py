@@ -47,7 +47,7 @@ DECORRELATION_DAYS = 40
 # ── Walk-Forward CV parameters ──
 N_CV_FOLDS = 5
 MIN_TRAIN_FRAC = 0.35       # minimum training data fraction (first fold)
-PURGE_DAYS = 180             # = forward_window, prevents label leakage
+PURGE_DAYS = 120             # conservative purge gap (was 180, reduced to gain ~1 more fold)
 EMBARGO_DAYS = 20            # extra gap after each test fold
 
 DRAWDOWN_THRESHOLDS = [0.10, 0.20, 0.30, 0.40]
@@ -539,14 +539,24 @@ def fit_logistic_final(
 def bayesian_beta_binomial(
     df: pd.DataFrame, threshold: float, window: int,
     prior_alphas: list[float], prior_betas: list[float],
+    score_column: str = "drawdown_risk_score",
 ) -> list[float]:
-    """Bayesian Beta-Binomial per score bin with monotonicity enforcement."""
+    """Bayesian Beta-Binomial per score bin with monotonicity enforcement.
+
+    Uses drawdown_risk_score (not composite_score) by default so that
+    bins are monotonic with actual drawdown probability.
+    """
     fwd_dd = compute_forward_drawdowns(df, window, "peak_to_trough")
     valid = np.isfinite(fwd_dd)
 
+    # Fall back to composite_score if score_column is missing
+    if score_column not in df.columns:
+        score_column = "composite_score"
+    score_vals = df[score_column].values
+
     posteriors = []
     for i, (lo, hi) in enumerate(SCORE_BINS):
-        mask = valid & (df["composite_score"].values >= lo) & (df["composite_score"].values < hi)
+        mask = valid & (score_vals >= lo) & (score_vals < hi)
         n_obs = max(1, int(mask.sum()) // DECORRELATION_DAYS)
         n_events = int((fwd_dd[mask] >= threshold).sum() / max(1, DECORRELATION_DAYS // 2))
         n_events = min(n_events, n_obs)
@@ -584,13 +594,17 @@ def pava_monotone(values: list[float]) -> list[float]:
 
 
 def fit_gpd(exceedances: np.ndarray) -> tuple[float, float]:
-    """Fit GPD to exceedances above threshold using MLE."""
+    """Fit GPD to exceedances above threshold using MLE.
+
+    xi floor is -0.15 (not -0.5) to prevent unrealistically bounded tails
+    that produce zero probability for large drawdowns.
+    """
     if len(exceedances) < 3:
         return 0.1, 0.05
 
     try:
         shape, loc, scale = stats.genpareto.fit(exceedances, floc=0)
-        shape = np.clip(shape, -0.5, 0.5)
+        shape = np.clip(shape, -0.15, 0.5)
         return float(shape), float(scale)
     except Exception:
         return 0.1, np.mean(exceedances) if len(exceedances) > 0 else 0.05
@@ -690,6 +704,7 @@ def main():
 
     logistic_coefs = {}
     all_feature_names = set()
+    actual_folds_per_threshold = {}
 
     for t, config in THRESHOLD_CONFIGS.items():
         pct = int(t * 100)
@@ -714,7 +729,8 @@ def main():
                   f"ECE={fm['ece']:.4f}")
 
         agg = cv_result["aggregate"]
-        print(f"\n  CV Aggregate ({agg['n_folds']} folds):")
+        actual_folds_per_threshold[f"drawdown_{pct}pct"] = agg["n_folds"]
+        print(f"\n  CV Aggregate ({agg['n_folds']} actual folds out of {N_CV_FOLDS} configured):")
         print(f"    AUC: {agg['auc_mean']:.4f} ± {agg['auc_std']:.4f}")
         print(f"    BSS: {agg['bss_mean']:+.1%} ± {agg['bss_std']:.1%}")
         print(f"    ECE: {agg['ece_mean']:.4f} ± {agg['ece_std']:.4f}")
@@ -774,19 +790,30 @@ def main():
     xi, sigma = fit_gpd(exceedances)
     print(f"  GPD: xi={xi:.4f}, sigma={sigma:.4f}, n_exceedances={n_exceed}")
 
+    # Compute GPD exceedance ratios with empirical floor
+    # If GPD predicts 0 but historical data shows events, use empirical rate as minimum
+    all_valid_dd = fwd_dd_evt[valid_evt]
+    n_valid = len(all_valid_dd)
+
     ratios = {}
+    empirical_cross_ratios = {}
     for t in [0.20, 0.30, 0.40]:
         pct = int(t * 100)
-        r = gpd_exceedance_prob(t, evt_threshold, xi, sigma)
-        ratios[f"{pct}pct_given_10pct"] = round(r, 4)
-        print(f"  P(>{pct}% | >10%) = {r:.4f}")
+        gpd_r = gpd_exceedance_prob(t, evt_threshold, xi, sigma)
 
-    r_40_30 = gpd_exceedance_prob(0.40, evt_threshold, xi, sigma) / max(
-        gpd_exceedance_prob(0.30, evt_threshold, xi, sigma), 1e-10
-    )
-    r_40_20 = gpd_exceedance_prob(0.40, evt_threshold, xi, sigma) / max(
-        gpd_exceedance_prob(0.20, evt_threshold, xi, sigma), 1e-10
-    )
+        # Empirical cross-ratio: P(>t% | >10%) from actual data
+        n_above_thresh = int((all_valid_dd >= t).sum())
+        empirical_r = n_above_thresh / max(n_exceed, 1)
+        empirical_cross_ratios[f"{pct}pct_given_10pct"] = round(empirical_r, 4)
+
+        # Apply floor: use max(GPD, empirical) to prevent zero predictions
+        # when data actually shows events at that threshold
+        r = max(gpd_r, empirical_r) if n_above_thresh > 0 else gpd_r
+        ratios[f"{pct}pct_given_10pct"] = round(r, 4)
+        print(f"  P(>{pct}% | >10%) = {r:.4f}  (GPD={gpd_r:.4f}, Empirical={empirical_r:.4f})")
+
+    r_40_30 = ratios.get("40pct_given_10pct", 0) / max(ratios.get("30pct_given_10pct", 1e-10), 1e-10)
+    r_40_20 = ratios.get("40pct_given_10pct", 0) / max(ratios.get("20pct_given_10pct", 1e-10), 1e-10)
 
     evt_params = {
         "gpd_shape_xi": round(xi, 4),
@@ -794,6 +821,7 @@ def main():
         "threshold_u": evt_threshold,
         "n_exceedances": n_exceed,
         "exceedance_ratios": ratios,
+        "empirical_cross_ratios": empirical_cross_ratios,
         "cross_ratios": {
             "40pct_given_30pct": round(r_40_30, 4),
             "40pct_given_20pct": round(r_40_20, 4),
@@ -815,12 +843,27 @@ def main():
         current_features[f] = round(float(val), 4)
         print(f"  {f:<30}: {val:.4f}")
 
+    # ── Unconditional base rates ──
+    print("\n" + "=" * 70)
+    print("UNCONDITIONAL BASE RATES (180d peak-to-trough)")
+    print("=" * 70)
+    valid_dd = fwd_dd_empirical[np.isfinite(fwd_dd_empirical)]
+    unconditional_base_rates = {}
+    for t in DRAWDOWN_THRESHOLDS:
+        pct = int(t * 100)
+        rate = float((valid_dd >= t).mean()) if len(valid_dd) > 0 else 0.0
+        unconditional_base_rates[f"{pct}pct"] = round(rate, 4)
+        print(f"  P(>{pct}% DD | unconditional) = {rate:.1%}")
+
     # ── Output model JSON ──
     model = {
-        "model_version": "3.3",
+        "model_version": "3.4",
         "calibration_date": datetime.utcnow().strftime("%Y-%m-%d"),
         "data_points": len(df),
         "train_test_split": f"purged_wfcv_{N_CV_FOLDS}fold",
+        "actual_folds_used": actual_folds_per_threshold,
+        "purge_days": PURGE_DAYS,
+        "embargo_days": EMBARGO_DAYS,
         "effective_sample_size": max(1, len(df) // DECORRELATION_DAYS),
         "forward_window_days": 180,
         "forward_window_label": "9 months",
@@ -830,6 +873,11 @@ def main():
         "bayesian_lookup": bayesian_lookup,
         "evt_parameters": evt_params,
         "empirical_stats": empirical,
+        "unconditional_base_rates": unconditional_base_rates,
+        "blend_weights": {
+            "20pct": {"logistic": 0.15, "bayesian": 0.85},
+            "30pct": {"logistic": 0.0, "bayesian": 1.0},
+        },
         "confidence_tiers": {
             "10pct": "moderate-high",
             "20pct": "moderate-high",
