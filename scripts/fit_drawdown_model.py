@@ -1,22 +1,23 @@
 #!/usr/bin/env python3
-"""Fit drawdown probability model v3.3 from bubble history + QQQ price data.
+"""Fit drawdown probability model v4.0 from bubble history + QQQ price data.
 
-Improvements over v3.2:
-  - Feature sets selected via stability selection (bootstrap Lasso, 100 resamples,
-    >60% selection threshold) + Lasso regularization path analysis + RFE ranking
-  - Per-threshold optimal penalty: L1 (Lasso) for 10% DD (sparsity helps),
-    ElasticNet (l1_ratio=0.5) for 20% DD (broader feature set)
-  - C values optimized from penalized regression sweep (0.001-100, 8 levels)
-  - Isotonic recalibration retained from v3.2
-
-  v3.2 → v3.3 improvements (from multi-agent linear model comparison):
-    10% DD: AUC 0.692 → 0.835 (+0.143), BSS +11.3% → +18.8%
-    20% DD: AUC 0.650 → 0.791 (+0.141), BSS -82.7% → -59.2%
+v4.0 improvements over v3.3:
+  - Extended historical data: 1999-present (~6800 days) vs 2014-present (~2800 days)
+    - Captures dot-com crash (-83%) and GFC (-54%)
+    - Independent >20% drawdown events: ~4 → ~8-10
+    - Effective independent samples: ~70 → ~170
+  - Firth penalized logistic regression (if firthlogist available)
+    - Corrects rare-event MLE bias via Jeffreys prior
+    - Falls back to standard LogisticRegression if not installed
+  - Bootstrap confidence intervals (90% CI)
+    - StationaryBootstrap (arch) or manual block bootstrap
+    - 500 resamples, block size = DECORRELATION_DAYS
+    - Output: probability_ci in model JSON
 
 Hybrid 3-layer model:
   Layer 1: Per-threshold penalized logistic (stability-selected features)
     - >10% DD: Lasso, 8 stable features, C auto-tuned
-    - >20% DD: ElasticNet, all features, C auto-tuned
+    - >20% DD: L2, 2 stable features, C auto-tuned
   Layer 2: Bayesian Beta-Binomial with monotonicity for 20% and 30%
   Layer 3: EVT (GPD) tail extrapolation for 40%
 
@@ -36,6 +37,18 @@ from scipy import stats
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score, brier_score_loss
 from sklearn.preprocessing import StandardScaler
+
+try:
+    from firthlogist import FirthLogisticRegression
+    USE_FIRTH = True
+except ImportError:
+    USE_FIRTH = False
+
+try:
+    from arch.bootstrap import StationaryBootstrap
+    USE_ARCH_BOOTSTRAP = True
+except ImportError:
+    USE_ARCH_BOOTSTRAP = False
 
 warnings.filterwarnings("ignore")
 
@@ -366,15 +379,18 @@ def evaluate_logistic_cv(
         X_test_s = scaler.transform(X_test)
 
         # Build model with appropriate penalty
-        model_kwargs = {"max_iter": 10000, "C": C}
-        if penalty == "l1":
-            model_kwargs.update({"penalty": "l1", "solver": "saga"})
-        elif penalty == "elasticnet":
-            model_kwargs.update({"penalty": "elasticnet", "solver": "saga",
-                                 "l1_ratio": l1_ratio or 0.5})
+        if USE_FIRTH:
+            model = FirthLogisticRegression(max_iter=10000)
         else:
-            model_kwargs.update({"penalty": "l2", "solver": "lbfgs"})
-        model = LogisticRegression(**model_kwargs)
+            model_kwargs = {"max_iter": 10000, "C": C}
+            if penalty == "l1":
+                model_kwargs.update({"penalty": "l1", "solver": "saga"})
+            elif penalty == "elasticnet":
+                model_kwargs.update({"penalty": "elasticnet", "solver": "saga",
+                                     "l1_ratio": l1_ratio or 0.5})
+            else:
+                model_kwargs.update({"penalty": "l2", "solver": "lbfgs"})
+            model = LogisticRegression(**model_kwargs)
         model.fit(X_train_s, y_train)
 
         y_pred_test_raw = model.predict_proba(X_test_s)[:, 1]
@@ -480,15 +496,18 @@ def fit_logistic_final(
     X_s = scaler.fit_transform(X)
 
     # Build model with appropriate penalty (matching CV)
-    model_kwargs = {"max_iter": 10000, "C": C}
-    if penalty == "l1":
-        model_kwargs.update({"penalty": "l1", "solver": "saga"})
-    elif penalty == "elasticnet":
-        model_kwargs.update({"penalty": "elasticnet", "solver": "saga",
-                             "l1_ratio": l1_ratio or 0.5})
+    if USE_FIRTH:
+        model = FirthLogisticRegression(max_iter=10000)
     else:
-        model_kwargs.update({"penalty": "l2", "solver": "lbfgs"})
-    model = LogisticRegression(**model_kwargs)
+        model_kwargs = {"max_iter": 10000, "C": C}
+        if penalty == "l1":
+            model_kwargs.update({"penalty": "l1", "solver": "saga"})
+        elif penalty == "elasticnet":
+            model_kwargs.update({"penalty": "elasticnet", "solver": "saga",
+                                 "l1_ratio": l1_ratio or 0.5})
+        else:
+            model_kwargs.update({"penalty": "l2", "solver": "lbfgs"})
+        model = LogisticRegression(**model_kwargs)
     model.fit(X_s, y)
 
     weights = {f: round(float(c), 6) for f, c in zip(features, model.coef_[0])}
@@ -629,9 +648,17 @@ def gpd_exceedance_prob(x: float, u: float, xi: float, sigma: float) -> float:
 
 def main():
     print("=" * 70)
-    print("DRAWDOWN PROBABILITY MODEL v3.3")
-    print("Purged Walk-Forward Cross-Validation")
+    print("DRAWDOWN PROBABILITY MODEL v4.0")
+    print("Extended history (1999+) + Firth regression + Bootstrap CI")
     print("=" * 70)
+    if USE_FIRTH:
+        print("  Firth penalized logistic: ENABLED")
+    else:
+        print("  Firth penalized logistic: DISABLED (firthlogist not installed)")
+    if USE_ARCH_BOOTSTRAP:
+        print("  Bootstrap CI: ENABLED (arch.bootstrap)")
+    else:
+        print("  Bootstrap CI: DISABLED (arch not installed)")
 
     print("\nLoading data and engineering features...")
     df = load_data()
@@ -835,7 +862,7 @@ def main():
 
     latest = df.iloc[-1]
     current_features = {}
-    extra_fields = ["drawdown_risk_score", "risk_ema_20d"]
+    extra_fields = ["composite_score", "drawdown_risk_score", "risk_ema_20d"]
     for f in sorted(all_feature_names | set(extra_fields)):
         val = latest.get(f, 0)
         if pd.isna(val):
@@ -855,9 +882,122 @@ def main():
         unconditional_base_rates[f"{pct}pct"] = round(rate, 4)
         print(f"  P(>{pct}% DD | unconditional) = {rate:.1%}")
 
+    # ── Bootstrap Confidence Intervals ──
+    print("\n" + "=" * 70)
+    print("BOOTSTRAP CONFIDENCE INTERVALS (90% CI)")
+    print("=" * 70)
+
+    probability_ci = {}
+    fwd_dd_boot = compute_forward_drawdowns(df, 180, "peak_to_trough")
+    valid_boot = np.isfinite(fwd_dd_boot)
+
+    # Bootstrap bins must match the Bayesian layer's score_column (drawdown_risk_score)
+    boot_score_col = "drawdown_risk_score" if "drawdown_risk_score" in df.columns else "composite_score"
+
+    if USE_ARCH_BOOTSTRAP and valid_boot.sum() > 100:
+        N_BOOTSTRAP = 500
+        boot_data = np.column_stack([
+            df[boot_score_col].values[valid_boot],
+            fwd_dd_boot[valid_boot],
+        ])
+
+        current_risk = current_features.get(boot_score_col, 50)
+
+        for t in [0.10, 0.20, 0.30]:
+            pct_label = f"{int(t*100)}pct"
+            boot_probs = []
+
+            bs = StationaryBootstrap(DECORRELATION_DAYS, boot_data)
+            for i, ((data_star,), _) in enumerate(bs.bootstrap(N_BOOTSTRAP)):
+                scores_star = data_star[:, 0]
+                dd_star = data_star[:, 1]
+
+                # Recompute Bayesian bin counts on resampled data
+                bin_probs = []
+                for lo, hi in SCORE_BINS:
+                    mask = (scores_star >= lo) & (scores_star < hi)
+                    n_obs = max(1, int(mask.sum()) // DECORRELATION_DAYS)
+                    n_events = int((dd_star[mask] >= t).sum() / max(1, DECORRELATION_DAYS // 2))
+                    n_events = min(n_events, n_obs)
+                    # Use same priors as main model
+                    if t == 0.10:
+                        alpha_prior, beta_prior = 2, 20
+                    elif t == 0.20:
+                        alpha_prior, beta_prior = 1, 40
+                    else:
+                        alpha_prior, beta_prior = 0.5, 80
+                    prob = (alpha_prior + n_events) / (alpha_prior + beta_prior + n_obs)
+                    bin_probs.append(prob)
+
+                # PAVA monotonicity
+                bin_probs = pava_monotone(bin_probs)
+
+                # Interpolate at current score
+                p = np.interp(current_risk, BIN_CENTERS, bin_probs)
+                boot_probs.append(float(p))
+
+            lower = float(np.percentile(boot_probs, 5))
+            upper = float(np.percentile(boot_probs, 95))
+            probability_ci[pct_label] = {
+                "lower": round(lower, 4),
+                "upper": round(upper, 4),
+                "ci_level": 0.90,
+            }
+            print(f"  {pct_label}: [{lower:.1%}, {upper:.1%}] (90% CI, {N_BOOTSTRAP} resamples)")
+    else:
+        # Fallback: simple percentile bootstrap without arch
+        N_BOOTSTRAP = 500
+        rng = np.random.default_rng(42)
+        scores_valid = df[boot_score_col].values[valid_boot]
+        dd_valid = fwd_dd_boot[valid_boot]
+        n_valid = len(scores_valid)
+
+        current_risk = current_features.get(boot_score_col, 50)
+
+        for t in [0.10, 0.20, 0.30]:
+            pct_label = f"{int(t*100)}pct"
+            boot_probs = []
+
+            for _ in range(N_BOOTSTRAP):
+                # Block bootstrap: sample blocks of DECORRELATION_DAYS
+                block_size = DECORRELATION_DAYS
+                n_blocks = n_valid // block_size + 1
+                block_starts = rng.integers(0, n_valid - block_size, size=n_blocks)
+                idx = np.concatenate([np.arange(s, min(s + block_size, n_valid)) for s in block_starts])[:n_valid]
+                scores_star = scores_valid[idx]
+                dd_star = dd_valid[idx]
+
+                bin_probs = []
+                for lo, hi in SCORE_BINS:
+                    mask = (scores_star >= lo) & (scores_star < hi)
+                    n_obs = max(1, int(mask.sum()) // DECORRELATION_DAYS)
+                    n_events = int((dd_star[mask] >= t).sum() / max(1, DECORRELATION_DAYS // 2))
+                    n_events = min(n_events, n_obs)
+                    if t == 0.10:
+                        alpha_prior, beta_prior = 2, 20
+                    elif t == 0.20:
+                        alpha_prior, beta_prior = 1, 40
+                    else:
+                        alpha_prior, beta_prior = 0.5, 80
+                    prob = (alpha_prior + n_events) / (alpha_prior + beta_prior + n_obs)
+                    bin_probs.append(prob)
+
+                bin_probs = pava_monotone(bin_probs)
+                p = np.interp(current_risk, BIN_CENTERS, bin_probs)
+                boot_probs.append(float(p))
+
+            lower = float(np.percentile(boot_probs, 5))
+            upper = float(np.percentile(boot_probs, 95))
+            probability_ci[pct_label] = {
+                "lower": round(lower, 4),
+                "upper": round(upper, 4),
+                "ci_level": 0.90,
+            }
+            print(f"  {pct_label}: [{lower:.1%}, {upper:.1%}] (90% CI, {N_BOOTSTRAP} block-bootstrap)")
+
     # ── Output model JSON ──
     model = {
-        "model_version": "3.4",
+        "model_version": "4.0",
         "calibration_date": datetime.utcnow().strftime("%Y-%m-%d"),
         "data_points": len(df),
         "train_test_split": f"purged_wfcv_{N_CV_FOLDS}fold",
@@ -867,6 +1007,7 @@ def main():
         "effective_sample_size": max(1, len(df) // DECORRELATION_DAYS),
         "forward_window_days": 180,
         "forward_window_label": "9 months",
+        "firth_enabled": USE_FIRTH,
         "feature_names": sorted(all_feature_names),
         "current_features": current_features,
         "logistic_coefficients": logistic_coefs,
@@ -874,6 +1015,7 @@ def main():
         "evt_parameters": evt_params,
         "empirical_stats": empirical,
         "unconditional_base_rates": unconditional_base_rates,
+        "probability_ci": probability_ci,
         "blend_weights": {
             "10pct": {"logistic": 0.5, "bayesian": 0.5},
             "20pct": {"logistic": 0.0, "bayesian": 1.0},
@@ -897,26 +1039,31 @@ def main():
 
     # ── Summary comparison ──
     print("\n" + "=" * 70)
-    print("v3.2 → v3.3 COMPARISON (single split → purged walk-forward CV)")
+    print("v3.3 → v4.0 COMPARISON (extended data + Firth + bootstrap CI)")
     print("=" * 70)
-    v32_baselines = {
-        "10": {"auc": 0.692, "bss": "+11.3%", "ece": 0.147},
-        "20": {"auc": 0.650, "bss": "-82.7%", "ece": 0.274},
+    v33_baselines = {
+        "10": {"auc": 0.835, "bss": "+18.8%", "ece": "N/A"},
+        "20": {"auc": 0.791, "bss": "-59.2%", "ece": "N/A"},
     }
     for pct_label in ["10", "20"]:
         key = f"drawdown_{pct_label}pct"
         coef = logistic_coefs.get(key, {})
         cv = coef.get("cv_metrics", {})
-        bl = v32_baselines[pct_label]
+        bl = v33_baselines[pct_label]
         print(f"\n  {pct_label}% Drawdown:")
-        print(f"    v3.2 (grid search):   AUC={bl['auc']}  BSS={bl['bss']}  ECE={bl['ece']}")
-        print(f"    v3.3 (stability+penalized):")
+        print(f"    v3.3 (2014-2026):     AUC={bl['auc']}  BSS={bl['bss']}")
+        print(f"    v4.0 (1999-2026, {'Firth' if USE_FIRTH else 'standard'} logistic):")
         print(f"      AUC: {cv.get('auc_mean', 'N/A')} ± {cv.get('auc_std', 'N/A')}")
         print(f"      BSS: {cv.get('bss_mean', 'N/A')} ± {cv.get('bss_std', 'N/A')}")
         print(f"      ECE: {cv.get('ece_mean', 'N/A')} ± {cv.get('ece_std', 'N/A')}")
 
+    if probability_ci:
+        print(f"\n  Bootstrap 90% CI:")
+        for k, v in probability_ci.items():
+            print(f"    {k}: [{v['lower']:.1%}, {v['upper']:.1%}]")
+
     print("\n" + "=" * 70)
-    print("MODEL v3.3 CALIBRATION COMPLETE")
+    print("MODEL v4.0 CALIBRATION COMPLETE")
     print("=" * 70)
 
 

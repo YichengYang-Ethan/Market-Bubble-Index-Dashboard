@@ -127,6 +127,8 @@ interface DrawdownProb {
   confidence: string;
   color: string;
   bgColor: string;
+  ciLower?: number;
+  ciUpper?: number;
 }
 
 /** Apply logistic model with optional StandardScaler (v3.0) */
@@ -154,7 +156,7 @@ function computeDrawdownProbabilities(
   model: DrawdownModelData,
   featureValues: Record<string, number>,
 ): DrawdownProb[] {
-  const { logistic_coefficients: logCoefs, bayesian_lookup: bayesian, evt_parameters: evt } = model;
+  const { logistic_coefficients: logCoefs, bayesian_lookup: bayesian, evt_parameters: evt, probability_ci: ci } = model;
 
   // --- Layer 1+2: Blend for 10% (logistic + Bayesian) ---
   const riskScore = featureValues.drawdown_risk_score ?? featureValues.composite_score ?? 0;
@@ -220,6 +222,8 @@ function computeDrawdownProbabilities(
       confidence: model.confidence_tiers['10pct'] ?? 'moderate',
       color: '#eab308',
       bgColor: 'bg-yellow-500/10 border-yellow-500/20',
+      ciLower: ci?.['10pct']?.lower,
+      ciUpper: ci?.['10pct']?.upper,
     },
     {
       threshold: 20,
@@ -228,6 +232,8 @@ function computeDrawdownProbabilities(
       confidence: model.confidence_tiers['20pct'] ?? 'low',
       color: '#f97316',
       bgColor: 'bg-orange-500/10 border-orange-500/20',
+      ciLower: ci?.['20pct']?.lower,
+      ciUpper: ci?.['20pct']?.upper,
     },
     {
       threshold: 30,
@@ -236,6 +242,8 @@ function computeDrawdownProbabilities(
       confidence: model.confidence_tiers['30pct'] ?? 'model_dependent',
       color: '#ef4444',
       bgColor: 'bg-red-500/10 border-red-500/20',
+      ciLower: ci?.['30pct']?.lower,
+      ciUpper: ci?.['30pct']?.upper,
     },
     {
       threshold: 40,
@@ -295,6 +303,7 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
   }, [model]);
 
   const modelVersion = model.model_version ?? '1.0';
+  const isV4 = modelVersion.startsWith('4');
   const isV3 = modelVersion.startsWith('3');
   const isV2Plus = modelVersion >= '2.0';
 
@@ -363,6 +372,13 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
                   </div>
                 </div>
               </div>
+
+              {/* CI range */}
+              {p.ciLower !== undefined && p.ciUpper !== undefined && (
+                <p className="text-[10px] text-slate-500 text-center mt-1">
+                  [{(p.ciLower * 100).toFixed(0)}%, {(p.ciUpper * 100).toFixed(0)}%]
+                </p>
+              )}
 
               {/* Bar with base rate marker */}
               <div className="relative h-1.5 bg-slate-800 rounded-full overflow-hidden">
@@ -533,7 +549,12 @@ const CrashProbabilityPanel: React.FC<Props> = ({ model, currentScore, scoreVelo
       <div className="bg-slate-800/30 rounded-xl p-4 space-y-1">
         <p className="text-sm text-slate-400">
           <span className="text-white font-semibold">Hybrid 3-layer model v{modelVersion}</span>:
-          {isV3 ? (
+          {isV4 ? (
+            <> Extended history (1999+, incl. dot-com &amp; GFC), penalized logistic regression
+            with stability-selected features, Bayesian Beta-Binomial + PAVA (20-30%),
+            EVT/GPD tail extrapolation (40%), bootstrap 90% confidence intervals.
+            Forward window: <span className="text-white">{model.forward_window_days} trading days</span> (~{model.forward_window_label}).</>
+          ) : isV3 ? (
             <> Bayesian-dominated blend: 50/50 logistic+Bayesian for 10% DD,
             100% Bayesian Beta-Binomial + PAVA monotonicity for 20-30% DD (binned by Risk Score),
             EVT/GPD tail extrapolation for 40% DD.

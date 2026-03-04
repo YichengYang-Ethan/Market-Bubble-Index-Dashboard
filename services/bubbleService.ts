@@ -113,6 +113,7 @@ export interface DrawdownModelData {
   blend_weights?: Record<string, { logistic: number; bayesian: number }>;
   effective_sample_size?: number;
   confidence_tiers: Record<string, string>;
+  probability_ci?: Record<string, { lower: number; upper: number; ci_level: number }>;
 }
 
 export const fetchDrawdownModel = async (): Promise<DrawdownModelData | null> => {
