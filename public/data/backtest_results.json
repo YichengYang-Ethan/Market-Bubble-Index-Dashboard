@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-18T21:59:31.420095+00:00",
+  "generated_at": "2026-03-19T21:55:36.645220+00:00",
   "autocorrelation": {
     "lag_1": 0.9622,
     "lag_5": 0.8635,
@@ -9,23 +9,23 @@
   "buy_signal_threshold": 30,
   "sell_signal_threshold": 70,
   "buy_signals": {
-    "count": 787,
+    "count": 788,
     "stats": {
       "1d": {
-        "count": 787,
-        "mean_return": 0.1081,
-        "median_return": 0.1551,
-        "std": 2.4051,
+        "count": 788,
+        "mean_return": 0.1076,
+        "median_return": 0.1526,
+        "std": 2.4037,
         "hit_rate": 53.7,
-        "t_statistic": 1.261
+        "t_statistic": 1.257
       },
       "5d": {
-        "count": 785,
-        "mean_return": 0.4615,
-        "median_return": 0.7817,
-        "std": 4.465,
-        "hit_rate": 56.8,
-        "t_statistic": 2.896
+        "count": 786,
+        "mean_return": 0.4597,
+        "median_return": 0.7805,
+        "std": 4.4624,
+        "hit_rate": 56.7,
+        "t_statistic": 2.888
       },
       "20d": {
         "count": 785,
@@ -46,39 +46,39 @@
     }
   },
   "sell_signals": {
-    "count": 1407,
+    "count": 1406,
     "stats": {
       "1d": {
-        "count": 1407,
+        "count": 1406,
         "mean_return": 0.0425,
-        "median_return": 0.0519,
-        "std": 0.6198,
-        "hit_rate": 54.9,
-        "t_statistic": 2.575
+        "median_return": 0.0516,
+        "std": 0.6201,
+        "hit_rate": 54.8,
+        "t_statistic": 2.572
       },
       "5d": {
-        "count": 1407,
-        "mean_return": 0.1977,
-        "median_return": 0.2602,
-        "std": 1.321,
+        "count": 1406,
+        "mean_return": 0.1978,
+        "median_return": 0.2604,
+        "std": 1.3214,
         "hit_rate": 58.5,
         "t_statistic": 5.613
       },
       "20d": {
-        "count": 1407,
-        "mean_return": 0.8546,
-        "median_return": 1.193,
-        "std": 2.8313,
-        "hit_rate": 68.4,
-        "t_statistic": 11.322
+        "count": 1406,
+        "mean_return": 0.8542,
+        "median_return": 1.1924,
+        "std": 2.8322,
+        "hit_rate": 68.3,
+        "t_statistic": 11.309
       },
       "60d": {
         "count": 1388,
-        "mean_return": 2.669,
-        "median_return": 3.7617,
-        "std": 5.681,
-        "hit_rate": 78.0,
-        "t_statistic": 17.503
+        "mean_return": 2.6639,
+        "median_return": 3.7542,
+        "std": 5.6829,
+        "hit_rate": 77.9,
+        "t_statistic": 17.464
       }
     }
   }
