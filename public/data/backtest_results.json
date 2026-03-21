@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-20T21:54:07.874209+00:00",
+  "generated_at": "2026-03-21T21:49:05.830649+00:00",
   "autocorrelation": {
     "lag_1": 0.9622,
     "lag_5": 0.8636,
@@ -13,32 +13,32 @@
     "stats": {
       "1d": {
         "count": 789,
-        "mean_return": 0.1054,
-        "median_return": 0.1501,
-        "std": 2.403,
-        "hit_rate": 53.6,
-        "t_statistic": 1.232
+        "mean_return": 0.1058,
+        "median_return": 0.1505,
+        "std": 2.4025,
+        "hit_rate": 53.5,
+        "t_statistic": 1.237
       },
       "5d": {
         "count": 787,
-        "mean_return": 0.4565,
-        "median_return": 0.7794,
-        "std": 4.4605,
+        "mean_return": 0.4568,
+        "median_return": 0.7815,
+        "std": 4.4598,
         "hit_rate": 56.7,
-        "t_statistic": 2.871
+        "t_statistic": 2.874
       },
       "20d": {
         "count": 785,
-        "mean_return": 1.8023,
-        "median_return": 2.7774,
+        "mean_return": 1.8022,
+        "median_return": 2.7851,
         "std": 7.422,
         "hit_rate": 64.5,
-        "t_statistic": 6.804
+        "t_statistic": 6.803
       },
       "60d": {
         "count": 785,
-        "mean_return": 3.1854,
-        "median_return": 4.6571,
+        "mean_return": 3.1853,
+        "median_return": 4.6516,
         "std": 10.4625,
         "hit_rate": 68.7,
         "t_statistic": 8.53
@@ -51,34 +51,34 @@
       "1d": {
         "count": 1406,
         "mean_return": 0.0425,
-        "median_return": 0.0516,
+        "median_return": 0.0517,
         "std": 0.62,
-        "hit_rate": 54.8,
-        "t_statistic": 2.572
+        "hit_rate": 54.6,
+        "t_statistic": 2.571
       },
       "5d": {
         "count": 1406,
         "mean_return": 0.1978,
-        "median_return": 0.2604,
-        "std": 1.3215,
+        "median_return": 0.2618,
+        "std": 1.3216,
         "hit_rate": 58.5,
-        "t_statistic": 5.613
+        "t_statistic": 5.611
       },
       "20d": {
         "count": 1406,
         "mean_return": 0.8542,
-        "median_return": 1.1924,
-        "std": 2.8322,
+        "median_return": 1.1957,
+        "std": 2.8321,
         "hit_rate": 68.3,
-        "t_statistic": 11.308
+        "t_statistic": 11.309
       },
       "60d": {
         "count": 1389,
-        "mean_return": 2.6582,
-        "median_return": 3.7478,
-        "std": 5.6849,
-        "hit_rate": 77.8,
-        "t_statistic": 17.427
+        "mean_return": 2.6584,
+        "median_return": 3.7504,
+        "std": 5.6846,
+        "hit_rate": 77.9,
+        "t_statistic": 17.429
       }
     }
   }
