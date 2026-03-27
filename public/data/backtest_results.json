@@ -1,37 +1,37 @@
 {
-  "generated_at": "2026-03-26T21:53:49.918620+00:00",
+  "generated_at": "2026-03-27T21:58:21.981473+00:00",
   "autocorrelation": {
     "lag_1": 0.9623,
-    "lag_5": 0.8637,
-    "lag_10": 0.7736,
+    "lag_5": 0.8638,
+    "lag_10": 0.7737,
     "lag_20": 0.6156
   },
   "buy_signal_threshold": 30,
   "sell_signal_threshold": 70,
   "buy_signals": {
-    "count": 791,
+    "count": 792,
     "stats": {
       "1d": {
-        "count": 791,
-        "mean_return": 0.1046,
-        "median_return": 0.1505,
-        "std": 2.4006,
-        "hit_rate": 53.5,
-        "t_statistic": 1.226
+        "count": 792,
+        "mean_return": 0.1023,
+        "median_return": 0.1492,
+        "std": 2.4,
+        "hit_rate": 53.4,
+        "t_statistic": 1.2
       },
       "5d": {
-        "count": 789,
-        "mean_return": 0.4527,
-        "median_return": 0.7737,
-        "std": 4.4551,
+        "count": 790,
+        "mean_return": 0.4493,
+        "median_return": 0.7622,
+        "std": 4.4533,
         "hit_rate": 56.5,
-        "t_statistic": 2.854
+        "t_statistic": 2.836
       },
       "20d": {
         "count": 785,
         "mean_return": 1.8022,
         "median_return": 2.7851,
-        "std": 7.4219,
+        "std": 7.422,
         "hit_rate": 64.5,
         "t_statistic": 6.803
       },
@@ -54,7 +54,7 @@
         "median_return": 0.0517,
         "std": 0.62,
         "hit_rate": 54.6,
-        "t_statistic": 2.571
+        "t_statistic": 2.572
       },
       "5d": {
         "count": 1406,
@@ -66,19 +66,19 @@
       },
       "20d": {
         "count": 1406,
-        "mean_return": 0.8541,
+        "mean_return": 0.8542,
         "median_return": 1.1957,
         "std": 2.8321,
         "hit_rate": 68.3,
         "t_statistic": 11.309
       },
       "60d": {
-        "count": 1393,
-        "mean_return": 2.6363,
-        "median_return": 3.7405,
-        "std": 5.6914,
-        "hit_rate": 77.7,
-        "t_statistic": 17.288
+        "count": 1394,
+        "mean_return": 2.6291,
+        "median_return": 3.7368,
+        "std": 5.6958,
+        "hit_rate": 77.6,
+        "t_statistic": 17.234
       }
     }
   }
