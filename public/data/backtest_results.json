@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-11T21:57:07.862936+00:00",
+  "generated_at": "2026-04-12T21:59:28.748049+00:00",
   "autocorrelation": {
     "lag_1": 0.9623,
     "lag_5": 0.8638,
@@ -29,7 +29,7 @@
       },
       "20d": {
         "count": 786,
-        "mean_return": 1.8029,
+        "mean_return": 1.8028,
         "median_return": 2.7616,
         "std": 7.4173,
         "hit_rate": 64.5,
@@ -54,11 +54,11 @@
         "median_return": 0.0517,
         "std": 0.62,
         "hit_rate": 54.6,
-        "t_statistic": 2.572
+        "t_statistic": 2.571
       },
       "5d": {
         "count": 1406,
-        "mean_return": 0.1977,
+        "mean_return": 0.1978,
         "median_return": 0.2618,
         "std": 1.3216,
         "hit_rate": 58.5,
