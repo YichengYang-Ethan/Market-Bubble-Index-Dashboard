@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-25T22:09:55.522511+00:00",
+  "generated_at": "2026-04-26T22:11:45.418011+00:00",
   "method": "Markov Regime-Switching (Hamilton 1989)",
   "n_regimes": 3,
   "regime_labels": [
@@ -22,8 +22,8 @@
     },
     {
       "date": "2000-01-04",
-      "normal_prob": 0.8895,
-      "elevated_prob": 0.1105,
+      "normal_prob": 0.8896,
+      "elevated_prob": 0.1104,
       "bubble_prob": 0.0
     },
     {
@@ -34,8 +34,8 @@
     },
     {
       "date": "2000-01-06",
-      "normal_prob": 0.6351,
-      "elevated_prob": 0.3649,
+      "normal_prob": 0.6352,
+      "elevated_prob": 0.3648,
       "bubble_prob": 0.0
     },
     {
@@ -322,8 +322,8 @@
     },
     {
       "date": "2000-03-16",
-      "normal_prob": 0.5706,
-      "elevated_prob": 0.4294,
+      "normal_prob": 0.5705,
+      "elevated_prob": 0.4295,
       "bubble_prob": 0.0
     },
     {
@@ -340,8 +340,8 @@
     },
     {
       "date": "2000-03-21",
-      "normal_prob": 0.4759,
-      "elevated_prob": 0.5241,
+      "normal_prob": 0.4758,
+      "elevated_prob": 0.5242,
       "bubble_prob": 0.0
     },
     {
@@ -772,8 +772,8 @@
     },
     {
       "date": "2000-07-03",
-      "normal_prob": 0.9158,
-      "elevated_prob": 0.0842,
+      "normal_prob": 0.9159,
+      "elevated_prob": 0.0841,
       "bubble_prob": 0.0
     },
     {
@@ -1390,26 +1390,26 @@
     },
     {
       "date": "2000-11-28",
-      "normal_prob": 0.2805,
-      "elevated_prob": 0.7195,
+      "normal_prob": 0.2806,
+      "elevated_prob": 0.7194,
       "bubble_prob": 0.0
     },
     {
       "date": "2000-11-29",
-      "normal_prob": 0.3899,
-      "elevated_prob": 0.6101,
+      "normal_prob": 0.39,
+      "elevated_prob": 0.61,
       "bubble_prob": 0.0
     },
     {
       "date": "2000-11-30",
-      "normal_prob": 0.4451,
-      "elevated_prob": 0.5549,
+      "normal_prob": 0.4452,
+      "elevated_prob": 0.5548,
       "bubble_prob": 0.0
     },
     {
       "date": "2000-12-01",
-      "normal_prob": 0.3089,
-      "elevated_prob": 0.6911,
+      "normal_prob": 0.309,
+      "elevated_prob": 0.691,
       "bubble_prob": 0.0
     },
     {
@@ -1606,14 +1606,14 @@
     },
     {
       "date": "2001-01-22",
-      "normal_prob": 0.6098,
-      "elevated_prob": 0.3902,
+      "normal_prob": 0.6099,
+      "elevated_prob": 0.3901,
       "bubble_prob": 0.0
     },
     {
       "date": "2001-01-23",
-      "normal_prob": 0.4425,
-      "elevated_prob": 0.5575,
+      "normal_prob": 0.4426,
+      "elevated_prob": 0.5574,
       "bubble_prob": 0.0
     },
     {
@@ -1624,8 +1624,8 @@
     },
     {
       "date": "2001-01-25",
-      "normal_prob": 0.208,
-      "elevated_prob": 0.792,
+      "normal_prob": 0.2081,
+      "elevated_prob": 0.7919,
       "bubble_prob": 0.0
     },
     {
@@ -1696,8 +1696,8 @@
     },
     {
       "date": "2001-02-12",
-      "normal_prob": 0.683,
-      "elevated_prob": 0.317,
+      "normal_prob": 0.6831,
+      "elevated_prob": 0.3169,
       "bubble_prob": 0.0
     },
     {
@@ -1714,8 +1714,8 @@
     },
     {
       "date": "2001-02-15",
-      "normal_prob": 0.8172,
-      "elevated_prob": 0.1828,
+      "normal_prob": 0.8173,
+      "elevated_prob": 0.1827,
       "bubble_prob": 0.0
     },
     {
@@ -2650,8 +2650,8 @@
     },
     {
       "date": "2001-10-04",
-      "normal_prob": 0.9517,
-      "elevated_prob": 0.0483,
+      "normal_prob": 0.9518,
+      "elevated_prob": 0.0482,
       "bubble_prob": 0.0
     },
     {
@@ -2807,8 +2807,8 @@
     {
       "date": "2001-11-09",
       "normal_prob": 0.0,
-      "elevated_prob": 0.6824,
-      "bubble_prob": 0.3176
+      "elevated_prob": 0.6823,
+      "bubble_prob": 0.3177
     },
     {
       "date": "2001-11-12",
@@ -3065,8 +3065,8 @@
     {
       "date": "2002-01-14",
       "normal_prob": 0.0,
-      "elevated_prob": 0.7605,
-      "bubble_prob": 0.2395
+      "elevated_prob": 0.7604,
+      "bubble_prob": 0.2396
     },
     {
       "date": "2002-01-15",
@@ -3246,13 +3246,13 @@
       "date": "2002-02-27",
       "normal_prob": 0.0,
       "elevated_prob": 0.9713,
-      "bubble_prob": 0.0286
+      "bubble_prob": 0.0287
     },
     {
       "date": "2002-02-28",
       "normal_prob": 0.0,
-      "elevated_prob": 0.7997,
-      "bubble_prob": 0.2003
+      "elevated_prob": 0.7996,
+      "bubble_prob": 0.2004
     },
     {
       "date": "2002-03-01",
@@ -3365,8 +3365,8 @@
     {
       "date": "2002-03-27",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5036,
-      "bubble_prob": 0.4964
+      "elevated_prob": 0.5035,
+      "bubble_prob": 0.4965
     },
     {
       "date": "2002-03-28",
@@ -3556,8 +3556,8 @@
     },
     {
       "date": "2002-05-13",
-      "normal_prob": 0.6983,
-      "elevated_prob": 0.3017,
+      "normal_prob": 0.6984,
+      "elevated_prob": 0.3016,
       "bubble_prob": 0.0
     },
     {
@@ -3946,8 +3946,8 @@
     },
     {
       "date": "2002-08-14",
-      "normal_prob": 0.9902,
-      "elevated_prob": 0.0098,
+      "normal_prob": 0.9903,
+      "elevated_prob": 0.0097,
       "bubble_prob": 0.0
     },
     {
@@ -3994,8 +3994,8 @@
     },
     {
       "date": "2002-08-26",
-      "normal_prob": 0.242,
-      "elevated_prob": 0.758,
+      "normal_prob": 0.2419,
+      "elevated_prob": 0.7581,
       "bubble_prob": 0.0
     },
     {
@@ -5405,7 +5405,7 @@
     {
       "date": "2003-08-01",
       "normal_prob": 0.0,
-      "elevated_prob": 0.9767,
+      "elevated_prob": 0.9766,
       "bubble_prob": 0.0233
     },
     {
@@ -6316,14 +6316,14 @@
     },
     {
       "date": "2004-03-10",
-      "normal_prob": 0.1784,
-      "elevated_prob": 0.8216,
+      "normal_prob": 0.1785,
+      "elevated_prob": 0.8215,
       "bubble_prob": 0.0
     },
     {
       "date": "2004-03-11",
-      "normal_prob": 0.3149,
-      "elevated_prob": 0.6851,
+      "normal_prob": 0.315,
+      "elevated_prob": 0.685,
       "bubble_prob": 0.0
     },
     {
@@ -6340,8 +6340,8 @@
     },
     {
       "date": "2004-03-16",
-      "normal_prob": 0.178,
-      "elevated_prob": 0.822,
+      "normal_prob": 0.1781,
+      "elevated_prob": 0.8219,
       "bubble_prob": 0.0
     },
     {
@@ -6431,7 +6431,7 @@
     {
       "date": "2004-04-06",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8095,
+      "elevated_prob": 0.8096,
       "bubble_prob": 0.1904
     },
     {
@@ -6544,14 +6544,14 @@
     },
     {
       "date": "2004-05-04",
-      "normal_prob": 0.6092,
-      "elevated_prob": 0.3908,
+      "normal_prob": 0.6093,
+      "elevated_prob": 0.3907,
       "bubble_prob": 0.0
     },
     {
       "date": "2004-05-05",
-      "normal_prob": 0.6609,
-      "elevated_prob": 0.3391,
+      "normal_prob": 0.661,
+      "elevated_prob": 0.339,
       "bubble_prob": 0.0
     },
     {
@@ -6701,7 +6701,7 @@
     {
       "date": "2004-06-10",
       "normal_prob": 0.0,
-      "elevated_prob": 0.6538,
+      "elevated_prob": 0.6537,
       "bubble_prob": 0.3462
     },
     {
@@ -6868,8 +6868,8 @@
     },
     {
       "date": "2004-07-22",
-      "normal_prob": 0.8256,
-      "elevated_prob": 0.1744,
+      "normal_prob": 0.8257,
+      "elevated_prob": 0.1743,
       "bubble_prob": 0.0
     },
     {
@@ -6982,8 +6982,8 @@
     },
     {
       "date": "2004-08-18",
-      "normal_prob": 0.8988,
-      "elevated_prob": 0.1012,
+      "normal_prob": 0.8989,
+      "elevated_prob": 0.1011,
       "bubble_prob": 0.0
     },
     {
@@ -7000,8 +7000,8 @@
     },
     {
       "date": "2004-08-23",
-      "normal_prob": 0.24,
-      "elevated_prob": 0.76,
+      "normal_prob": 0.2401,
+      "elevated_prob": 0.7599,
       "bubble_prob": 0.0
     },
     {
@@ -7252,14 +7252,14 @@
     },
     {
       "date": "2004-10-21",
-      "normal_prob": 0.7359,
-      "elevated_prob": 0.2641,
+      "normal_prob": 0.736,
+      "elevated_prob": 0.264,
       "bubble_prob": 0.0
     },
     {
       "date": "2004-10-22",
-      "normal_prob": 0.915,
-      "elevated_prob": 0.085,
+      "normal_prob": 0.9151,
+      "elevated_prob": 0.0849,
       "bubble_prob": 0.0
     },
     {
@@ -7270,8 +7270,8 @@
     },
     {
       "date": "2004-10-26",
-      "normal_prob": 0.8237,
-      "elevated_prob": 0.1763,
+      "normal_prob": 0.8238,
+      "elevated_prob": 0.1762,
       "bubble_prob": 0.0
     },
     {
@@ -7282,7 +7282,7 @@
     },
     {
       "date": "2004-10-28",
-      "normal_prob": 0.0136,
+      "normal_prob": 0.0135,
       "elevated_prob": 0.9864,
       "bubble_prob": 0.0
     },
@@ -7355,7 +7355,7 @@
     {
       "date": "2004-11-15",
       "normal_prob": 0.0,
-      "elevated_prob": 0.9315,
+      "elevated_prob": 0.9314,
       "bubble_prob": 0.0685
     },
     {
@@ -7392,7 +7392,7 @@
       "date": "2004-11-23",
       "normal_prob": 0.0,
       "elevated_prob": 0.9588,
-      "bubble_prob": 0.0411
+      "bubble_prob": 0.0412
     },
     {
       "date": "2004-11-24",
@@ -7416,19 +7416,19 @@
       "date": "2004-11-30",
       "normal_prob": 0.0,
       "elevated_prob": 0.5064,
-      "bubble_prob": 0.4935
+      "bubble_prob": 0.4936
     },
     {
       "date": "2004-12-01",
       "normal_prob": 0.0,
-      "elevated_prob": 0.4065,
-      "bubble_prob": 0.5935
+      "elevated_prob": 0.4064,
+      "bubble_prob": 0.5936
     },
     {
       "date": "2004-12-02",
       "normal_prob": 0.0,
-      "elevated_prob": 0.3626,
-      "bubble_prob": 0.6374
+      "elevated_prob": 0.3625,
+      "bubble_prob": 0.6375
     },
     {
       "date": "2004-12-03",
@@ -7445,20 +7445,20 @@
     {
       "date": "2004-12-07",
       "normal_prob": 0.0,
-      "elevated_prob": 0.4377,
-      "bubble_prob": 0.5623
+      "elevated_prob": 0.4376,
+      "bubble_prob": 0.5624
     },
     {
       "date": "2004-12-08",
       "normal_prob": 0.0,
-      "elevated_prob": 0.4292,
-      "bubble_prob": 0.5708
+      "elevated_prob": 0.4291,
+      "bubble_prob": 0.5709
     },
     {
       "date": "2004-12-09",
       "normal_prob": 0.0,
-      "elevated_prob": 0.3181,
-      "bubble_prob": 0.6819
+      "elevated_prob": 0.318,
+      "bubble_prob": 0.682
     },
     {
       "date": "2004-12-10",
@@ -7685,26 +7685,26 @@
     {
       "date": "2005-02-03",
       "normal_prob": 0.0,
-      "elevated_prob": 0.7524,
+      "elevated_prob": 0.7523,
       "bubble_prob": 0.2476
     },
     {
       "date": "2005-02-04",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5417,
-      "bubble_prob": 0.4583
+      "elevated_prob": 0.5416,
+      "bubble_prob": 0.4584
     },
     {
       "date": "2005-02-07",
       "normal_prob": 0.0,
-      "elevated_prob": 0.4835,
-      "bubble_prob": 0.5165
+      "elevated_prob": 0.4834,
+      "bubble_prob": 0.5166
     },
     {
       "date": "2005-02-08",
       "normal_prob": 0.0,
-      "elevated_prob": 0.4198,
-      "bubble_prob": 0.5802
+      "elevated_prob": 0.4197,
+      "bubble_prob": 0.5803
     },
     {
       "date": "2005-02-09",
@@ -7757,50 +7757,50 @@
     {
       "date": "2005-02-22",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5101,
-      "bubble_prob": 0.4899
+      "elevated_prob": 0.51,
+      "bubble_prob": 0.49
     },
     {
       "date": "2005-02-23",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5342,
-      "bubble_prob": 0.4658
+      "elevated_prob": 0.5341,
+      "bubble_prob": 0.4659
     },
     {
       "date": "2005-02-24",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5109,
-      "bubble_prob": 0.4891
+      "elevated_prob": 0.5108,
+      "bubble_prob": 0.4892
     },
     {
       "date": "2005-02-25",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5132,
-      "bubble_prob": 0.4868
+      "elevated_prob": 0.5131,
+      "bubble_prob": 0.4869
     },
     {
       "date": "2005-02-28",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5764,
-      "bubble_prob": 0.4236
+      "elevated_prob": 0.5763,
+      "bubble_prob": 0.4237
     },
     {
       "date": "2005-03-01",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5913,
-      "bubble_prob": 0.4087
+      "elevated_prob": 0.5912,
+      "bubble_prob": 0.4088
     },
     {
       "date": "2005-03-02",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5788,
-      "bubble_prob": 0.4212
+      "elevated_prob": 0.5787,
+      "bubble_prob": 0.4213
     },
     {
       "date": "2005-03-03",
       "normal_prob": 0.0,
-      "elevated_prob": 0.3863,
-      "bubble_prob": 0.6137
+      "elevated_prob": 0.3862,
+      "bubble_prob": 0.6138
     },
     {
       "date": "2005-03-04",
@@ -7823,7 +7823,7 @@
     {
       "date": "2005-03-09",
       "normal_prob": 0.0,
-      "elevated_prob": 0.9517,
+      "elevated_prob": 0.9516,
       "bubble_prob": 0.0483
     },
     {
@@ -8195,8 +8195,8 @@
     {
       "date": "2005-06-07",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0745,
-      "bubble_prob": 0.9255
+      "elevated_prob": 0.0744,
+      "bubble_prob": 0.9256
     },
     {
       "date": "2005-06-08",
@@ -8213,20 +8213,20 @@
     {
       "date": "2005-06-10",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1197,
-      "bubble_prob": 0.8803
+      "elevated_prob": 0.1196,
+      "bubble_prob": 0.8804
     },
     {
       "date": "2005-06-13",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1087,
-      "bubble_prob": 0.8913
+      "elevated_prob": 0.1086,
+      "bubble_prob": 0.8914
     },
     {
       "date": "2005-06-14",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0389,
-      "bubble_prob": 0.9611
+      "elevated_prob": 0.0388,
+      "bubble_prob": 0.9612
     },
     {
       "date": "2005-06-15",
@@ -8453,7 +8453,7 @@
     {
       "date": "2005-08-08",
       "normal_prob": 0.0,
-      "elevated_prob": 0.9775,
+      "elevated_prob": 0.9774,
       "bubble_prob": 0.0225
     },
     {
@@ -8837,8 +8837,8 @@
     {
       "date": "2005-11-07",
       "normal_prob": 0.0,
-      "elevated_prob": 0.559,
-      "bubble_prob": 0.441
+      "elevated_prob": 0.5589,
+      "bubble_prob": 0.4411
     },
     {
       "date": "2005-11-08",
@@ -10433,8 +10433,8 @@
     {
       "date": "2006-11-28",
       "normal_prob": 0.0,
-      "elevated_prob": 0.7744,
-      "bubble_prob": 0.2256
+      "elevated_prob": 0.7743,
+      "bubble_prob": 0.2257
     },
     {
       "date": "2006-11-29",
@@ -10655,8 +10655,8 @@
     {
       "date": "2007-01-24",
       "normal_prob": 0.0,
-      "elevated_prob": 0.9472,
-      "bubble_prob": 0.0528
+      "elevated_prob": 0.9471,
+      "bubble_prob": 0.0529
     },
     {
       "date": "2007-01-25",
@@ -10943,7 +10943,7 @@
     {
       "date": "2007-04-03",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5363,
+      "elevated_prob": 0.5362,
       "bubble_prob": 0.4637
     },
     {
@@ -11566,8 +11566,8 @@
     },
     {
       "date": "2007-08-30",
-      "normal_prob": 0.3551,
-      "elevated_prob": 0.6449,
+      "normal_prob": 0.3552,
+      "elevated_prob": 0.6448,
       "bubble_prob": 0.0
     },
     {
@@ -11974,20 +11974,20 @@
     },
     {
       "date": "2007-12-06",
-      "normal_prob": 0.1488,
-      "elevated_prob": 0.8512,
+      "normal_prob": 0.1487,
+      "elevated_prob": 0.8513,
       "bubble_prob": 0.0
     },
     {
       "date": "2007-12-07",
-      "normal_prob": 0.1056,
-      "elevated_prob": 0.8944,
+      "normal_prob": 0.1055,
+      "elevated_prob": 0.8945,
       "bubble_prob": 0.0
     },
     {
       "date": "2007-12-10",
-      "normal_prob": 0.1152,
-      "elevated_prob": 0.8848,
+      "normal_prob": 0.1151,
+      "elevated_prob": 0.8849,
       "bubble_prob": 0.0
     },
     {
@@ -12040,8 +12040,8 @@
     },
     {
       "date": "2007-12-21",
-      "normal_prob": 0.0665,
-      "elevated_prob": 0.9335,
+      "normal_prob": 0.0664,
+      "elevated_prob": 0.9336,
       "bubble_prob": 0.0
     },
     {
@@ -12058,8 +12058,8 @@
     },
     {
       "date": "2007-12-27",
-      "normal_prob": 0.0855,
-      "elevated_prob": 0.9145,
+      "normal_prob": 0.0854,
+      "elevated_prob": 0.9146,
       "bubble_prob": 0.0
     },
     {
@@ -12449,7 +12449,7 @@
     {
       "date": "2008-04-02",
       "normal_prob": 0.3463,
-      "elevated_prob": 0.6536,
+      "elevated_prob": 0.6537,
       "bubble_prob": 0.0
     },
     {
@@ -12976,8 +12976,8 @@
     },
     {
       "date": "2008-08-06",
-      "normal_prob": 0.711,
-      "elevated_prob": 0.289,
+      "normal_prob": 0.7111,
+      "elevated_prob": 0.2889,
       "bubble_prob": 0.0
     },
     {
@@ -13042,8 +13042,8 @@
     },
     {
       "date": "2008-08-21",
-      "normal_prob": 0.2634,
-      "elevated_prob": 0.7366,
+      "normal_prob": 0.2635,
+      "elevated_prob": 0.7365,
       "bubble_prob": 0.0
     },
     {
@@ -13054,14 +13054,14 @@
     },
     {
       "date": "2008-08-25",
-      "normal_prob": 0.7426,
-      "elevated_prob": 0.2574,
+      "normal_prob": 0.7427,
+      "elevated_prob": 0.2573,
       "bubble_prob": 0.0
     },
     {
       "date": "2008-08-26",
-      "normal_prob": 0.8403,
-      "elevated_prob": 0.1597,
+      "normal_prob": 0.8404,
+      "elevated_prob": 0.1596,
       "bubble_prob": 0.0
     },
     {
@@ -13972,8 +13972,8 @@
     },
     {
       "date": "2009-04-03",
-      "normal_prob": 0.5529,
-      "elevated_prob": 0.4471,
+      "normal_prob": 0.553,
+      "elevated_prob": 0.447,
       "bubble_prob": 0.0
     },
     {
@@ -14100,7 +14100,7 @@
       "date": "2009-05-05",
       "normal_prob": 0.0,
       "elevated_prob": 0.9844,
-      "bubble_prob": 0.0155
+      "bubble_prob": 0.0156
     },
     {
       "date": "2009-05-06",
@@ -14141,8 +14141,8 @@
     {
       "date": "2009-05-14",
       "normal_prob": 0.0,
-      "elevated_prob": 0.6539,
-      "bubble_prob": 0.3461
+      "elevated_prob": 0.6538,
+      "bubble_prob": 0.3462
     },
     {
       "date": "2009-05-15",
@@ -15275,32 +15275,32 @@
     {
       "date": "2010-02-12",
       "normal_prob": 0.0001,
-      "elevated_prob": 0.9985,
-      "bubble_prob": 0.0014
+      "elevated_prob": 0.9986,
+      "bubble_prob": 0.0013
     },
     {
       "date": "2010-02-16",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5001,
-      "bubble_prob": 0.4999
+      "elevated_prob": 0.5101,
+      "bubble_prob": 0.4899
     },
     {
       "date": "2010-02-17",
       "normal_prob": 0.0,
-      "elevated_prob": 0.2044,
-      "bubble_prob": 0.7956
+      "elevated_prob": 0.2085,
+      "bubble_prob": 0.7915
     },
     {
       "date": "2010-02-18",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0138,
-      "bubble_prob": 0.9862
+      "elevated_prob": 0.014,
+      "bubble_prob": 0.986
     },
     {
       "date": "2010-02-19",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0032,
-      "bubble_prob": 0.9968
+      "elevated_prob": 0.0033,
+      "bubble_prob": 0.9967
     },
     {
       "date": "2010-02-22",
@@ -15664,8 +15664,8 @@
     },
     {
       "date": "2010-05-18",
-      "normal_prob": 0.879,
-      "elevated_prob": 0.121,
+      "normal_prob": 0.8791,
+      "elevated_prob": 0.1209,
       "bubble_prob": 0.0
     },
     {
@@ -15778,8 +15778,8 @@
     },
     {
       "date": "2010-06-15",
-      "normal_prob": 0.7576,
-      "elevated_prob": 0.2424,
+      "normal_prob": 0.7575,
+      "elevated_prob": 0.2425,
       "bubble_prob": 0.0
     },
     {
@@ -15790,8 +15790,8 @@
     },
     {
       "date": "2010-06-17",
-      "normal_prob": 0.6652,
-      "elevated_prob": 0.3348,
+      "normal_prob": 0.6651,
+      "elevated_prob": 0.3349,
       "bubble_prob": 0.0
     },
     {
@@ -15802,8 +15802,8 @@
     },
     {
       "date": "2010-06-21",
-      "normal_prob": 0.7416,
-      "elevated_prob": 0.2584,
+      "normal_prob": 0.7415,
+      "elevated_prob": 0.2585,
       "bubble_prob": 0.0
     },
     {
@@ -16132,8 +16132,8 @@
     },
     {
       "date": "2010-09-08",
-      "normal_prob": 0.0897,
-      "elevated_prob": 0.9103,
+      "normal_prob": 0.0896,
+      "elevated_prob": 0.9104,
       "bubble_prob": 0.0
     },
     {
@@ -16403,8 +16403,8 @@
     {
       "date": "2010-11-10",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8458,
-      "bubble_prob": 0.1542
+      "elevated_prob": 0.8459,
+      "bubble_prob": 0.1541
     },
     {
       "date": "2010-11-11",
@@ -17159,50 +17159,50 @@
     {
       "date": "2011-05-12",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0037,
-      "bubble_prob": 0.9963
+      "elevated_prob": 0.0038,
+      "bubble_prob": 0.9962
     },
     {
       "date": "2011-05-13",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0462,
-      "bubble_prob": 0.9538
+      "elevated_prob": 0.048,
+      "bubble_prob": 0.952
     },
     {
       "date": "2011-05-16",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1228,
-      "bubble_prob": 0.8772
+      "elevated_prob": 0.1245,
+      "bubble_prob": 0.8755
     },
     {
       "date": "2011-05-17",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1721,
-      "bubble_prob": 0.8279
+      "elevated_prob": 0.1736,
+      "bubble_prob": 0.8264
     },
     {
       "date": "2011-05-18",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1688,
-      "bubble_prob": 0.8312
+      "elevated_prob": 0.1701,
+      "bubble_prob": 0.8299
     },
     {
       "date": "2011-05-19",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1737,
-      "bubble_prob": 0.8263
+      "elevated_prob": 0.175,
+      "bubble_prob": 0.825
     },
     {
       "date": "2011-05-20",
       "normal_prob": 0.0,
-      "elevated_prob": 0.4043,
-      "bubble_prob": 0.5957
+      "elevated_prob": 0.4053,
+      "bubble_prob": 0.5947
     },
     {
       "date": "2011-05-23",
       "normal_prob": 0.0,
-      "elevated_prob": 0.9396,
-      "bubble_prob": 0.0604
+      "elevated_prob": 0.9397,
+      "bubble_prob": 0.0603
     },
     {
       "date": "2011-05-24",
@@ -17220,7 +17220,7 @@
       "date": "2011-05-26",
       "normal_prob": 0.0,
       "elevated_prob": 0.9925,
-      "bubble_prob": 0.0075
+      "bubble_prob": 0.0074
     },
     {
       "date": "2011-05-27",
@@ -17278,14 +17278,14 @@
     },
     {
       "date": "2011-06-10",
-      "normal_prob": 0.4592,
-      "elevated_prob": 0.5408,
+      "normal_prob": 0.4593,
+      "elevated_prob": 0.5407,
       "bubble_prob": 0.0
     },
     {
       "date": "2011-06-13",
-      "normal_prob": 0.4723,
-      "elevated_prob": 0.5277,
+      "normal_prob": 0.4724,
+      "elevated_prob": 0.5276,
       "bubble_prob": 0.0
     },
     {
@@ -17363,7 +17363,7 @@
     {
       "date": "2011-06-30",
       "normal_prob": 0.0,
-      "elevated_prob": 0.444,
+      "elevated_prob": 0.4439,
       "bubble_prob": 0.556
     },
     {
@@ -17872,8 +17872,8 @@
     },
     {
       "date": "2011-10-31",
-      "normal_prob": 0.7699,
-      "elevated_prob": 0.2301,
+      "normal_prob": 0.77,
+      "elevated_prob": 0.23,
       "bubble_prob": 0.0
     },
     {
@@ -17884,8 +17884,8 @@
     },
     {
       "date": "2011-11-02",
-      "normal_prob": 0.8865,
-      "elevated_prob": 0.1135,
+      "normal_prob": 0.8866,
+      "elevated_prob": 0.1134,
       "bubble_prob": 0.0
     },
     {
@@ -17896,8 +17896,8 @@
     },
     {
       "date": "2011-11-04",
-      "normal_prob": 0.8928,
-      "elevated_prob": 0.1072,
+      "normal_prob": 0.8929,
+      "elevated_prob": 0.1071,
       "bubble_prob": 0.0
     },
     {
@@ -18251,44 +18251,44 @@
     {
       "date": "2012-02-01",
       "normal_prob": 0.0,
-      "elevated_prob": 0.9821,
-      "bubble_prob": 0.0178
+      "elevated_prob": 0.982,
+      "bubble_prob": 0.018
     },
     {
       "date": "2012-02-02",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8905,
-      "bubble_prob": 0.1095
+      "elevated_prob": 0.8897,
+      "bubble_prob": 0.1103
     },
     {
       "date": "2012-02-03",
       "normal_prob": 0.0,
-      "elevated_prob": 0.3618,
-      "bubble_prob": 0.6382
+      "elevated_prob": 0.3571,
+      "bubble_prob": 0.6429
     },
     {
       "date": "2012-02-06",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1896,
-      "bubble_prob": 0.8104
+      "elevated_prob": 0.1835,
+      "bubble_prob": 0.8165
     },
     {
       "date": "2012-02-07",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0362,
-      "bubble_prob": 0.9638
+      "elevated_prob": 0.035,
+      "bubble_prob": 0.965
     },
     {
       "date": "2012-02-08",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0062,
-      "bubble_prob": 0.9938
+      "elevated_prob": 0.006,
+      "bubble_prob": 0.994
     },
     {
       "date": "2012-02-09",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0025,
-      "bubble_prob": 0.9975
+      "elevated_prob": 0.0024,
+      "bubble_prob": 0.9976
     },
     {
       "date": "2012-02-10",
@@ -18305,8 +18305,8 @@
     {
       "date": "2012-02-14",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0022,
-      "bubble_prob": 0.9978
+      "elevated_prob": 0.0021,
+      "bubble_prob": 0.9979
     },
     {
       "date": "2012-02-15",
@@ -18611,20 +18611,20 @@
     {
       "date": "2012-04-27",
       "normal_prob": 0.0,
-      "elevated_prob": 0.6789,
-      "bubble_prob": 0.3211
+      "elevated_prob": 0.679,
+      "bubble_prob": 0.321
     },
     {
       "date": "2012-04-30",
       "normal_prob": 0.0,
-      "elevated_prob": 0.7023,
-      "bubble_prob": 0.2977
+      "elevated_prob": 0.7024,
+      "bubble_prob": 0.2976
     },
     {
       "date": "2012-05-01",
       "normal_prob": 0.0,
-      "elevated_prob": 0.6936,
-      "bubble_prob": 0.3064
+      "elevated_prob": 0.6937,
+      "bubble_prob": 0.3063
     },
     {
       "date": "2012-05-02",
@@ -18658,8 +18658,8 @@
     },
     {
       "date": "2012-05-09",
-      "normal_prob": 0.4128,
-      "elevated_prob": 0.5872,
+      "normal_prob": 0.4129,
+      "elevated_prob": 0.5871,
       "bubble_prob": 0.0
     },
     {
@@ -18670,8 +18670,8 @@
     },
     {
       "date": "2012-05-11",
-      "normal_prob": 0.7898,
-      "elevated_prob": 0.2102,
+      "normal_prob": 0.7899,
+      "elevated_prob": 0.2101,
       "bubble_prob": 0.0
     },
     {
@@ -18694,8 +18694,8 @@
     },
     {
       "date": "2012-05-17",
-      "normal_prob": 0.9998,
-      "elevated_prob": 0.0002,
+      "normal_prob": 0.9999,
+      "elevated_prob": 0.0001,
       "bubble_prob": 0.0
     },
     {
@@ -19031,8 +19031,8 @@
     {
       "date": "2012-08-07",
       "normal_prob": 0.0,
-      "elevated_prob": 0.596,
-      "bubble_prob": 0.404
+      "elevated_prob": 0.5959,
+      "bubble_prob": 0.4041
     },
     {
       "date": "2012-08-08",
@@ -19134,19 +19134,19 @@
       "date": "2012-08-30",
       "normal_prob": 0.0,
       "elevated_prob": 0.8259,
-      "bubble_prob": 0.174
+      "bubble_prob": 0.1741
     },
     {
       "date": "2012-08-31",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8508,
-      "bubble_prob": 0.1492
+      "elevated_prob": 0.8507,
+      "bubble_prob": 0.1493
     },
     {
       "date": "2012-09-04",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8483,
-      "bubble_prob": 0.1517
+      "elevated_prob": 0.8482,
+      "bubble_prob": 0.1518
     },
     {
       "date": "2012-09-05",
@@ -19157,8 +19157,8 @@
     {
       "date": "2012-09-06",
       "normal_prob": 0.0,
-      "elevated_prob": 0.2158,
-      "bubble_prob": 0.7842
+      "elevated_prob": 0.2157,
+      "bubble_prob": 0.7843
     },
     {
       "date": "2012-09-07",
@@ -19384,14 +19384,14 @@
     },
     {
       "date": "2012-11-01",
-      "normal_prob": 0.5882,
-      "elevated_prob": 0.4118,
+      "normal_prob": 0.5883,
+      "elevated_prob": 0.4117,
       "bubble_prob": 0.0
     },
     {
       "date": "2012-11-02",
-      "normal_prob": 0.7744,
-      "elevated_prob": 0.2256,
+      "normal_prob": 0.7745,
+      "elevated_prob": 0.2255,
       "bubble_prob": 0.0
     },
     {
@@ -19402,8 +19402,8 @@
     },
     {
       "date": "2012-11-06",
-      "normal_prob": 0.9173,
-      "elevated_prob": 0.0827,
+      "normal_prob": 0.9174,
+      "elevated_prob": 0.0826,
       "bubble_prob": 0.0
     },
     {
@@ -19468,8 +19468,8 @@
     },
     {
       "date": "2012-11-21",
-      "normal_prob": 0.6846,
-      "elevated_prob": 0.3154,
+      "normal_prob": 0.6847,
+      "elevated_prob": 0.3153,
       "bubble_prob": 0.0
     },
     {
@@ -19595,8 +19595,8 @@
     {
       "date": "2012-12-21",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8526,
-      "bubble_prob": 0.1474
+      "elevated_prob": 0.8527,
+      "bubble_prob": 0.1473
     },
     {
       "date": "2012-12-24",
@@ -19847,8 +19847,8 @@
     {
       "date": "2013-02-25",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0956,
-      "bubble_prob": 0.9044
+      "elevated_prob": 0.0955,
+      "bubble_prob": 0.9045
     },
     {
       "date": "2013-02-26",
@@ -20015,14 +20015,14 @@
     {
       "date": "2013-04-05",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1821,
-      "bubble_prob": 0.8179
+      "elevated_prob": 0.182,
+      "bubble_prob": 0.818
     },
     {
       "date": "2013-04-08",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1406,
-      "bubble_prob": 0.8594
+      "elevated_prob": 0.1405,
+      "bubble_prob": 0.8595
     },
     {
       "date": "2013-04-09",
@@ -20261,8 +20261,8 @@
     {
       "date": "2013-06-04",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0956,
-      "bubble_prob": 0.9044
+      "elevated_prob": 0.0955,
+      "bubble_prob": 0.9045
     },
     {
       "date": "2013-06-05",
@@ -20273,14 +20273,14 @@
     {
       "date": "2013-06-06",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1971,
-      "bubble_prob": 0.8029
+      "elevated_prob": 0.197,
+      "bubble_prob": 0.803
     },
     {
       "date": "2013-06-07",
       "normal_prob": 0.0,
-      "elevated_prob": 0.214,
-      "bubble_prob": 0.786
+      "elevated_prob": 0.2139,
+      "bubble_prob": 0.7861
     },
     {
       "date": "2013-06-10",
@@ -20298,7 +20298,7 @@
       "date": "2013-06-12",
       "normal_prob": 0.0,
       "elevated_prob": 0.5716,
-      "bubble_prob": 0.4283
+      "bubble_prob": 0.4284
     },
     {
       "date": "2013-06-13",
@@ -20309,14 +20309,14 @@
     {
       "date": "2013-06-14",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5333,
-      "bubble_prob": 0.4667
+      "elevated_prob": 0.5332,
+      "bubble_prob": 0.4668
     },
     {
       "date": "2013-06-17",
       "normal_prob": 0.0,
-      "elevated_prob": 0.493,
-      "bubble_prob": 0.507
+      "elevated_prob": 0.4929,
+      "bubble_prob": 0.5071
     },
     {
       "date": "2013-06-18",
@@ -20621,26 +20621,26 @@
     {
       "date": "2013-08-28",
       "normal_prob": 0.0,
-      "elevated_prob": 0.4085,
-      "bubble_prob": 0.5915
+      "elevated_prob": 0.4084,
+      "bubble_prob": 0.5916
     },
     {
       "date": "2013-08-29",
       "normal_prob": 0.0,
-      "elevated_prob": 0.4272,
-      "bubble_prob": 0.5728
+      "elevated_prob": 0.4271,
+      "bubble_prob": 0.5729
     },
     {
       "date": "2013-08-30",
       "normal_prob": 0.0,
-      "elevated_prob": 0.4175,
-      "bubble_prob": 0.5825
+      "elevated_prob": 0.4174,
+      "bubble_prob": 0.5826
     },
     {
       "date": "2013-09-03",
       "normal_prob": 0.0,
-      "elevated_prob": 0.342,
-      "bubble_prob": 0.658
+      "elevated_prob": 0.3419,
+      "bubble_prob": 0.6581
     },
     {
       "date": "2013-09-04",
@@ -20795,8 +20795,8 @@
     {
       "date": "2013-10-09",
       "normal_prob": 0.0,
-      "elevated_prob": 0.2513,
-      "bubble_prob": 0.7487
+      "elevated_prob": 0.2512,
+      "bubble_prob": 0.7488
     },
     {
       "date": "2013-10-10",
@@ -21719,8 +21719,8 @@
     {
       "date": "2014-05-21",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8956,
-      "bubble_prob": 0.1044
+      "elevated_prob": 0.8955,
+      "bubble_prob": 0.1045
     },
     {
       "date": "2014-05-22",
@@ -21959,14 +21959,14 @@
     {
       "date": "2014-07-18",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1851,
-      "bubble_prob": 0.8149
+      "elevated_prob": 0.185,
+      "bubble_prob": 0.815
     },
     {
       "date": "2014-07-21",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1802,
-      "bubble_prob": 0.8198
+      "elevated_prob": 0.1801,
+      "bubble_prob": 0.8199
     },
     {
       "date": "2014-07-22",
@@ -22024,8 +22024,8 @@
     },
     {
       "date": "2014-08-04",
-      "normal_prob": 0.9245,
-      "elevated_prob": 0.0755,
+      "normal_prob": 0.9246,
+      "elevated_prob": 0.0754,
       "bubble_prob": 0.0
     },
     {
@@ -22523,8 +22523,8 @@
     {
       "date": "2014-12-01",
       "normal_prob": 0.0,
-      "elevated_prob": 0.6849,
-      "bubble_prob": 0.3151
+      "elevated_prob": 0.6848,
+      "bubble_prob": 0.3152
     },
     {
       "date": "2014-12-02",
@@ -22535,8 +22535,8 @@
     {
       "date": "2014-12-03",
       "normal_prob": 0.0,
-      "elevated_prob": 0.7229,
-      "bubble_prob": 0.2771
+      "elevated_prob": 0.7228,
+      "bubble_prob": 0.2772
     },
     {
       "date": "2014-12-04",
@@ -22553,7 +22553,7 @@
     {
       "date": "2014-12-08",
       "normal_prob": 0.0,
-      "elevated_prob": 0.9447,
+      "elevated_prob": 0.9446,
       "bubble_prob": 0.0553
     },
     {
@@ -22582,8 +22582,8 @@
     },
     {
       "date": "2014-12-15",
-      "normal_prob": 0.9789,
-      "elevated_prob": 0.0211,
+      "normal_prob": 0.979,
+      "elevated_prob": 0.021,
       "bubble_prob": 0.0
     },
     {
@@ -22954,8 +22954,8 @@
     },
     {
       "date": "2015-03-17",
-      "normal_prob": 0.6761,
-      "elevated_prob": 0.3239,
+      "normal_prob": 0.6762,
+      "elevated_prob": 0.3238,
       "bubble_prob": 0.0
     },
     {
@@ -23038,8 +23038,8 @@
     },
     {
       "date": "2015-04-07",
-      "normal_prob": 0.9576,
-      "elevated_prob": 0.0424,
+      "normal_prob": 0.9577,
+      "elevated_prob": 0.0423,
       "bubble_prob": 0.0
     },
     {
@@ -23158,20 +23158,20 @@
     },
     {
       "date": "2015-05-05",
-      "normal_prob": 0.4008,
-      "elevated_prob": 0.5992,
+      "normal_prob": 0.4009,
+      "elevated_prob": 0.5991,
       "bubble_prob": 0.0
     },
     {
       "date": "2015-05-06",
-      "normal_prob": 0.5512,
-      "elevated_prob": 0.4488,
+      "normal_prob": 0.5513,
+      "elevated_prob": 0.4487,
       "bubble_prob": 0.0
     },
     {
       "date": "2015-05-07",
-      "normal_prob": 0.4966,
-      "elevated_prob": 0.5034,
+      "normal_prob": 0.4967,
+      "elevated_prob": 0.5033,
       "bubble_prob": 0.0
     },
     {
@@ -23284,8 +23284,8 @@
     },
     {
       "date": "2015-06-04",
-      "normal_prob": 0.6151,
-      "elevated_prob": 0.3849,
+      "normal_prob": 0.6152,
+      "elevated_prob": 0.3848,
       "bubble_prob": 0.0
     },
     {
@@ -23314,8 +23314,8 @@
     },
     {
       "date": "2015-06-11",
-      "normal_prob": 0.8236,
-      "elevated_prob": 0.1764,
+      "normal_prob": 0.8235,
+      "elevated_prob": 0.1765,
       "bubble_prob": 0.0
     },
     {
@@ -23369,7 +23369,7 @@
     {
       "date": "2015-06-24",
       "normal_prob": 0.1132,
-      "elevated_prob": 0.8867,
+      "elevated_prob": 0.8868,
       "bubble_prob": 0.0
     },
     {
@@ -23494,8 +23494,8 @@
     },
     {
       "date": "2015-07-24",
-      "normal_prob": 0.0963,
-      "elevated_prob": 0.9037,
+      "normal_prob": 0.0964,
+      "elevated_prob": 0.9036,
       "bubble_prob": 0.0
     },
     {
@@ -23542,8 +23542,8 @@
     },
     {
       "date": "2015-08-05",
-      "normal_prob": 0.6306,
-      "elevated_prob": 0.3694,
+      "normal_prob": 0.6307,
+      "elevated_prob": 0.3693,
       "bubble_prob": 0.0
     },
     {
@@ -23800,8 +23800,8 @@
     },
     {
       "date": "2015-10-06",
-      "normal_prob": 0.93,
-      "elevated_prob": 0.07,
+      "normal_prob": 0.9301,
+      "elevated_prob": 0.0699,
       "bubble_prob": 0.0
     },
     {
@@ -24016,7 +24016,7 @@
     },
     {
       "date": "2015-11-25",
-      "normal_prob": 0.0231,
+      "normal_prob": 0.023,
       "elevated_prob": 0.9769,
       "bubble_prob": 0.0
     },
@@ -24052,8 +24052,8 @@
     },
     {
       "date": "2015-12-04",
-      "normal_prob": 0.8034,
-      "elevated_prob": 0.1966,
+      "normal_prob": 0.8035,
+      "elevated_prob": 0.1965,
       "bubble_prob": 0.0
     },
     {
@@ -24568,8 +24568,8 @@
     },
     {
       "date": "2016-04-11",
-      "normal_prob": 0.1085,
-      "elevated_prob": 0.8915,
+      "normal_prob": 0.1086,
+      "elevated_prob": 0.8914,
       "bubble_prob": 0.0
     },
     {
@@ -24664,8 +24664,8 @@
     },
     {
       "date": "2016-05-03",
-      "normal_prob": 0.6814,
-      "elevated_prob": 0.3186,
+      "normal_prob": 0.6815,
+      "elevated_prob": 0.3185,
       "bubble_prob": 0.0
     },
     {
@@ -24742,8 +24742,8 @@
     },
     {
       "date": "2016-05-20",
-      "normal_prob": 0.9768,
-      "elevated_prob": 0.0232,
+      "normal_prob": 0.9769,
+      "elevated_prob": 0.0231,
       "bubble_prob": 0.0
     },
     {
@@ -24869,7 +24869,7 @@
     {
       "date": "2016-06-21",
       "normal_prob": 0.0218,
-      "elevated_prob": 0.9781,
+      "elevated_prob": 0.9782,
       "bubble_prob": 0.0
     },
     {
@@ -24880,8 +24880,8 @@
     },
     {
       "date": "2016-06-23",
-      "normal_prob": 0.0259,
-      "elevated_prob": 0.9741,
+      "normal_prob": 0.0258,
+      "elevated_prob": 0.9742,
       "bubble_prob": 0.0
     },
     {
@@ -24917,7 +24917,7 @@
     {
       "date": "2016-07-01",
       "normal_prob": 0.0299,
-      "elevated_prob": 0.97,
+      "elevated_prob": 0.9701,
       "bubble_prob": 0.0
     },
     {
@@ -25392,7 +25392,7 @@
       "date": "2016-10-24",
       "normal_prob": 0.0,
       "elevated_prob": 0.9958,
-      "bubble_prob": 0.0042
+      "bubble_prob": 0.0041
     },
     {
       "date": "2016-10-25",
@@ -26093,8 +26093,8 @@
     {
       "date": "2017-04-12",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8627,
-      "bubble_prob": 0.1373
+      "elevated_prob": 0.8626,
+      "bubble_prob": 0.1374
     },
     {
       "date": "2017-04-13",
@@ -26111,8 +26111,8 @@
     {
       "date": "2017-04-18",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8775,
-      "bubble_prob": 0.1225
+      "elevated_prob": 0.8774,
+      "bubble_prob": 0.1226
     },
     {
       "date": "2017-04-19",
@@ -26123,8 +26123,8 @@
     {
       "date": "2017-04-20",
       "normal_prob": 0.0,
-      "elevated_prob": 0.2787,
-      "bubble_prob": 0.7213
+      "elevated_prob": 0.2786,
+      "bubble_prob": 0.7214
     },
     {
       "date": "2017-04-21",
@@ -26411,14 +26411,14 @@
     {
       "date": "2017-06-28",
       "normal_prob": 0.0,
-      "elevated_prob": 0.7827,
-      "bubble_prob": 0.2173
+      "elevated_prob": 0.7826,
+      "bubble_prob": 0.2174
     },
     {
       "date": "2017-06-29",
       "normal_prob": 0.0,
       "elevated_prob": 0.9404,
-      "bubble_prob": 0.0595
+      "bubble_prob": 0.0596
     },
     {
       "date": "2017-06-30",
@@ -26777,8 +26777,8 @@
     {
       "date": "2017-09-25",
       "normal_prob": 0.0,
-      "elevated_prob": 0.096,
-      "bubble_prob": 0.904
+      "elevated_prob": 0.0959,
+      "bubble_prob": 0.9041
     },
     {
       "date": "2017-09-26",
@@ -26927,8 +26927,8 @@
     {
       "date": "2017-10-30",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1799,
-      "bubble_prob": 0.8201
+      "elevated_prob": 0.1798,
+      "bubble_prob": 0.8202
     },
     {
       "date": "2017-10-31",
@@ -27251,7 +27251,7 @@
     {
       "date": "2018-01-18",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1376,
+      "elevated_prob": 0.1375,
       "bubble_prob": 0.8624
     },
     {
@@ -27322,20 +27322,20 @@
     },
     {
       "date": "2018-02-05",
-      "normal_prob": 0.5338,
-      "elevated_prob": 0.4662,
+      "normal_prob": 0.5339,
+      "elevated_prob": 0.4661,
       "bubble_prob": 0.0
     },
     {
       "date": "2018-02-06",
-      "normal_prob": 0.5941,
-      "elevated_prob": 0.4059,
+      "normal_prob": 0.5942,
+      "elevated_prob": 0.4058,
       "bubble_prob": 0.0
     },
     {
       "date": "2018-02-07",
-      "normal_prob": 0.6768,
-      "elevated_prob": 0.3232,
+      "normal_prob": 0.6769,
+      "elevated_prob": 0.3231,
       "bubble_prob": 0.0
     },
     {
@@ -27503,7 +27503,7 @@
     {
       "date": "2018-03-20",
       "normal_prob": 0.0078,
-      "elevated_prob": 0.9921,
+      "elevated_prob": 0.9922,
       "bubble_prob": 0.0
     },
     {
@@ -27664,14 +27664,14 @@
     },
     {
       "date": "2018-04-27",
-      "normal_prob": 0.9285,
-      "elevated_prob": 0.0715,
+      "normal_prob": 0.9286,
+      "elevated_prob": 0.0714,
       "bubble_prob": 0.0
     },
     {
       "date": "2018-04-30",
-      "normal_prob": 0.9426,
-      "elevated_prob": 0.0574,
+      "normal_prob": 0.9427,
+      "elevated_prob": 0.0573,
       "bubble_prob": 0.0
     },
     {
@@ -27682,8 +27682,8 @@
     },
     {
       "date": "2018-05-02",
-      "normal_prob": 0.9623,
-      "elevated_prob": 0.0377,
+      "normal_prob": 0.9624,
+      "elevated_prob": 0.0376,
       "bubble_prob": 0.0
     },
     {
@@ -28193,8 +28193,8 @@
     {
       "date": "2018-08-31",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0063,
-      "bubble_prob": 0.9937
+      "elevated_prob": 0.0062,
+      "bubble_prob": 0.9938
     },
     {
       "date": "2018-09-04",
@@ -28205,8 +28205,8 @@
     {
       "date": "2018-09-05",
       "normal_prob": 0.0,
-      "elevated_prob": 0.4625,
-      "bubble_prob": 0.5375
+      "elevated_prob": 0.4624,
+      "bubble_prob": 0.5376
     },
     {
       "date": "2018-09-06",
@@ -28217,14 +28217,14 @@
     {
       "date": "2018-09-07",
       "normal_prob": 0.0,
-      "elevated_prob": 0.6762,
-      "bubble_prob": 0.3238
+      "elevated_prob": 0.6761,
+      "bubble_prob": 0.3239
     },
     {
       "date": "2018-09-10",
       "normal_prob": 0.0,
-      "elevated_prob": 0.641,
-      "bubble_prob": 0.359
+      "elevated_prob": 0.6409,
+      "bubble_prob": 0.3591
     },
     {
       "date": "2018-09-11",
@@ -28253,8 +28253,8 @@
     {
       "date": "2018-09-17",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1586,
-      "bubble_prob": 0.8414
+      "elevated_prob": 0.1585,
+      "bubble_prob": 0.8415
     },
     {
       "date": "2018-09-18",
@@ -28289,8 +28289,8 @@
     {
       "date": "2018-09-25",
       "normal_prob": 0.0,
-      "elevated_prob": 0.891,
-      "bubble_prob": 0.109
+      "elevated_prob": 0.8909,
+      "bubble_prob": 0.1091
     },
     {
       "date": "2018-09-26",
@@ -28960,8 +28960,8 @@
     },
     {
       "date": "2019-03-08",
-      "normal_prob": 0.0462,
-      "elevated_prob": 0.9538,
+      "normal_prob": 0.0463,
+      "elevated_prob": 0.9537,
       "bubble_prob": 0.0
     },
     {
@@ -29206,8 +29206,8 @@
     },
     {
       "date": "2019-05-07",
-      "normal_prob": 0.9752,
-      "elevated_prob": 0.0248,
+      "normal_prob": 0.9753,
+      "elevated_prob": 0.0247,
       "bubble_prob": 0.0
     },
     {
@@ -29344,8 +29344,8 @@
     },
     {
       "date": "2019-06-10",
-      "normal_prob": 0.6958,
-      "elevated_prob": 0.3042,
+      "normal_prob": 0.6959,
+      "elevated_prob": 0.3041,
       "bubble_prob": 0.0
     },
     {
@@ -29356,8 +29356,8 @@
     },
     {
       "date": "2019-06-12",
-      "normal_prob": 0.3475,
-      "elevated_prob": 0.6525,
+      "normal_prob": 0.3476,
+      "elevated_prob": 0.6524,
       "bubble_prob": 0.0
     },
     {
@@ -29436,7 +29436,7 @@
       "date": "2019-07-01",
       "normal_prob": 0.0,
       "elevated_prob": 0.8665,
-      "bubble_prob": 0.1334
+      "bubble_prob": 0.1335
     },
     {
       "date": "2019-07-02",
@@ -29447,8 +29447,8 @@
     {
       "date": "2019-07-03",
       "normal_prob": 0.0,
-      "elevated_prob": 0.608,
-      "bubble_prob": 0.392
+      "elevated_prob": 0.6079,
+      "bubble_prob": 0.3921
     },
     {
       "date": "2019-07-05",
@@ -29460,7 +29460,7 @@
       "date": "2019-07-08",
       "normal_prob": 0.0,
       "elevated_prob": 0.5766,
-      "bubble_prob": 0.4233
+      "bubble_prob": 0.4234
     },
     {
       "date": "2019-07-09",
@@ -29812,8 +29812,8 @@
     },
     {
       "date": "2019-09-30",
-      "normal_prob": 0.9849,
-      "elevated_prob": 0.0151,
+      "normal_prob": 0.985,
+      "elevated_prob": 0.015,
       "bubble_prob": 0.0
     },
     {
@@ -29891,19 +29891,19 @@
     {
       "date": "2019-10-17",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8552,
-      "bubble_prob": 0.1448
+      "elevated_prob": 0.8551,
+      "bubble_prob": 0.1449
     },
     {
       "date": "2019-10-18",
       "normal_prob": 0.0,
-      "elevated_prob": 0.7727,
-      "bubble_prob": 0.2273
+      "elevated_prob": 0.7726,
+      "bubble_prob": 0.2274
     },
     {
       "date": "2019-10-21",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5932,
+      "elevated_prob": 0.5931,
       "bubble_prob": 0.4068
     },
     {
@@ -30089,8 +30089,8 @@
     {
       "date": "2019-12-04",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0839,
-      "bubble_prob": 0.9161
+      "elevated_prob": 0.0838,
+      "bubble_prob": 0.9162
     },
     {
       "date": "2019-12-05",
@@ -30412,7 +30412,7 @@
     },
     {
       "date": "2020-02-24",
-      "normal_prob": 0.2446,
+      "normal_prob": 0.2445,
       "elevated_prob": 0.7554,
       "bubble_prob": 0.0
     },
@@ -30664,14 +30664,14 @@
     },
     {
       "date": "2020-04-23",
-      "normal_prob": 0.9533,
-      "elevated_prob": 0.0467,
+      "normal_prob": 0.9534,
+      "elevated_prob": 0.0466,
       "bubble_prob": 0.0
     },
     {
       "date": "2020-04-24",
-      "normal_prob": 0.7086,
-      "elevated_prob": 0.2914,
+      "normal_prob": 0.7087,
+      "elevated_prob": 0.2913,
       "bubble_prob": 0.0
     },
     {
@@ -31068,13 +31068,13 @@
       "date": "2020-07-29",
       "normal_prob": 0.0,
       "elevated_prob": 0.8595,
-      "bubble_prob": 0.1404
+      "bubble_prob": 0.1405
     },
     {
       "date": "2020-07-30",
       "normal_prob": 0.0,
-      "elevated_prob": 0.7548,
-      "bubble_prob": 0.2452
+      "elevated_prob": 0.7547,
+      "bubble_prob": 0.2453
     },
     {
       "date": "2020-07-31",
@@ -31085,8 +31085,8 @@
     {
       "date": "2020-08-03",
       "normal_prob": 0.0,
-      "elevated_prob": 0.309,
-      "bubble_prob": 0.691
+      "elevated_prob": 0.3089,
+      "bubble_prob": 0.6911
     },
     {
       "date": "2020-08-04",
@@ -31937,8 +31937,8 @@
     {
       "date": "2021-02-25",
       "normal_prob": 0.0,
-      "elevated_prob": 0.7119,
-      "bubble_prob": 0.2881
+      "elevated_prob": 0.7118,
+      "bubble_prob": 0.2882
     },
     {
       "date": "2021-02-26",
@@ -31949,8 +31949,8 @@
     {
       "date": "2021-03-01",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8173,
-      "bubble_prob": 0.1827
+      "elevated_prob": 0.8172,
+      "bubble_prob": 0.1828
     },
     {
       "date": "2021-03-02",
@@ -32255,8 +32255,8 @@
     {
       "date": "2021-05-12",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0714,
-      "bubble_prob": 0.9286
+      "elevated_prob": 0.0713,
+      "bubble_prob": 0.9287
     },
     {
       "date": "2021-05-13",
@@ -32777,8 +32777,8 @@
     {
       "date": "2021-09-15",
       "normal_prob": 0.0,
-      "elevated_prob": 0.4332,
-      "bubble_prob": 0.5668
+      "elevated_prob": 0.4331,
+      "bubble_prob": 0.5669
     },
     {
       "date": "2021-09-16",
@@ -33084,7 +33084,7 @@
       "date": "2021-11-26",
       "normal_prob": 0.0,
       "elevated_prob": 0.9981,
-      "bubble_prob": 0.0018
+      "bubble_prob": 0.0019
     },
     {
       "date": "2021-11-29",
@@ -33160,7 +33160,7 @@
     },
     {
       "date": "2021-12-15",
-      "normal_prob": 0.047,
+      "normal_prob": 0.0469,
       "elevated_prob": 0.953,
       "bubble_prob": 0.0
     },
@@ -33215,8 +33215,8 @@
     {
       "date": "2021-12-29",
       "normal_prob": 0.0,
-      "elevated_prob": 0.2642,
-      "bubble_prob": 0.7358
+      "elevated_prob": 0.2643,
+      "bubble_prob": 0.7357
     },
     {
       "date": "2021-12-30",
@@ -33233,8 +33233,8 @@
     {
       "date": "2022-01-03",
       "normal_prob": 0.0,
-      "elevated_prob": 0.2473,
-      "bubble_prob": 0.7527
+      "elevated_prob": 0.2474,
+      "bubble_prob": 0.7526
     },
     {
       "date": "2022-01-04",
@@ -33274,8 +33274,8 @@
     },
     {
       "date": "2022-01-12",
-      "normal_prob": 0.1469,
-      "elevated_prob": 0.8531,
+      "normal_prob": 0.1468,
+      "elevated_prob": 0.8532,
       "bubble_prob": 0.0
     },
     {
@@ -34108,8 +34108,8 @@
     },
     {
       "date": "2022-08-03",
-      "normal_prob": 0.5868,
-      "elevated_prob": 0.4132,
+      "normal_prob": 0.5869,
+      "elevated_prob": 0.4131,
       "bubble_prob": 0.0
     },
     {
@@ -34768,8 +34768,8 @@
     },
     {
       "date": "2023-01-10",
-      "normal_prob": 0.4933,
-      "elevated_prob": 0.5067,
+      "normal_prob": 0.4934,
+      "elevated_prob": 0.5066,
       "bubble_prob": 0.0
     },
     {
@@ -35681,14 +35681,14 @@
     {
       "date": "2023-08-18",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1384,
-      "bubble_prob": 0.8616
+      "elevated_prob": 0.1383,
+      "bubble_prob": 0.8617
     },
     {
       "date": "2023-08-21",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1503,
-      "bubble_prob": 0.8497
+      "elevated_prob": 0.1502,
+      "bubble_prob": 0.8498
     },
     {
       "date": "2023-08-22",
@@ -35699,8 +35699,8 @@
     {
       "date": "2023-08-23",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1765,
-      "bubble_prob": 0.8235
+      "elevated_prob": 0.1764,
+      "bubble_prob": 0.8236
     },
     {
       "date": "2023-08-24",
@@ -35711,8 +35711,8 @@
     {
       "date": "2023-08-25",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1481,
-      "bubble_prob": 0.8519
+      "elevated_prob": 0.148,
+      "bubble_prob": 0.852
     },
     {
       "date": "2023-08-28",
@@ -35974,8 +35974,8 @@
     },
     {
       "date": "2023-10-27",
-      "normal_prob": 0.054,
-      "elevated_prob": 0.946,
+      "normal_prob": 0.0541,
+      "elevated_prob": 0.9459,
       "bubble_prob": 0.0
     },
     {
@@ -36767,8 +36767,8 @@
     {
       "date": "2024-05-08",
       "normal_prob": 0.0,
-      "elevated_prob": 0.6043,
-      "bubble_prob": 0.3957
+      "elevated_prob": 0.6042,
+      "bubble_prob": 0.3958
     },
     {
       "date": "2024-05-09",
@@ -37120,14 +37120,14 @@
     },
     {
       "date": "2024-08-02",
-      "normal_prob": 0.5952,
-      "elevated_prob": 0.4048,
+      "normal_prob": 0.5953,
+      "elevated_prob": 0.4047,
       "bubble_prob": 0.0
     },
     {
       "date": "2024-08-05",
-      "normal_prob": 0.9248,
-      "elevated_prob": 0.0752,
+      "normal_prob": 0.9249,
+      "elevated_prob": 0.0751,
       "bubble_prob": 0.0
     },
     {
@@ -37199,8 +37199,8 @@
     {
       "date": "2024-08-21",
       "normal_prob": 0.0,
-      "elevated_prob": 0.7196,
-      "bubble_prob": 0.2804
+      "elevated_prob": 0.7195,
+      "bubble_prob": 0.2805
     },
     {
       "date": "2024-08-22",
@@ -37229,8 +37229,8 @@
     {
       "date": "2024-08-28",
       "normal_prob": 0.0,
-      "elevated_prob": 0.8439,
-      "bubble_prob": 0.1561
+      "elevated_prob": 0.8438,
+      "bubble_prob": 0.1562
     },
     {
       "date": "2024-08-29",
@@ -37367,8 +37367,8 @@
     {
       "date": "2024-10-01",
       "normal_prob": 0.0,
-      "elevated_prob": 0.0997,
-      "bubble_prob": 0.9003
+      "elevated_prob": 0.0996,
+      "bubble_prob": 0.9004
     },
     {
       "date": "2024-10-02",
@@ -37379,14 +37379,14 @@
     {
       "date": "2024-10-03",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1424,
-      "bubble_prob": 0.8576
+      "elevated_prob": 0.1423,
+      "bubble_prob": 0.8577
     },
     {
       "date": "2024-10-04",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1547,
-      "bubble_prob": 0.8453
+      "elevated_prob": 0.1546,
+      "bubble_prob": 0.8454
     },
     {
       "date": "2024-10-07",
@@ -37397,8 +37397,8 @@
     {
       "date": "2024-10-08",
       "normal_prob": 0.0,
-      "elevated_prob": 0.1277,
-      "bubble_prob": 0.8723
+      "elevated_prob": 0.1276,
+      "bubble_prob": 0.8724
     },
     {
       "date": "2024-10-09",
@@ -37523,8 +37523,8 @@
     {
       "date": "2024-11-06",
       "normal_prob": 0.0,
-      "elevated_prob": 0.6268,
-      "bubble_prob": 0.3732
+      "elevated_prob": 0.6267,
+      "bubble_prob": 0.3733
     },
     {
       "date": "2024-11-07",
@@ -37535,8 +37535,8 @@
     {
       "date": "2024-11-08",
       "normal_prob": 0.0,
-      "elevated_prob": 0.35,
-      "bubble_prob": 0.65
+      "elevated_prob": 0.3499,
+      "bubble_prob": 0.6501
     },
     {
       "date": "2024-11-11",
@@ -37547,14 +37547,14 @@
     {
       "date": "2024-11-12",
       "normal_prob": 0.0,
-      "elevated_prob": 0.3515,
-      "bubble_prob": 0.6485
+      "elevated_prob": 0.3514,
+      "bubble_prob": 0.6486
     },
     {
       "date": "2024-11-13",
       "normal_prob": 0.0,
-      "elevated_prob": 0.3343,
-      "bubble_prob": 0.6657
+      "elevated_prob": 0.3342,
+      "bubble_prob": 0.6658
     },
     {
       "date": "2024-11-14",
@@ -37571,8 +37571,8 @@
     {
       "date": "2024-11-18",
       "normal_prob": 0.0,
-      "elevated_prob": 0.3577,
-      "bubble_prob": 0.6423
+      "elevated_prob": 0.3576,
+      "bubble_prob": 0.6424
     },
     {
       "date": "2024-11-19",
@@ -37697,8 +37697,8 @@
     {
       "date": "2024-12-18",
       "normal_prob": 0.0,
-      "elevated_prob": 0.2009,
-      "bubble_prob": 0.7991
+      "elevated_prob": 0.2008,
+      "bubble_prob": 0.7992
     },
     {
       "date": "2024-12-19",
@@ -38621,14 +38621,14 @@
     {
       "date": "2025-08-04",
       "normal_prob": 0.0,
-      "elevated_prob": 0.3077,
-      "bubble_prob": 0.6923
+      "elevated_prob": 0.3076,
+      "bubble_prob": 0.6924
     },
     {
       "date": "2025-08-05",
       "normal_prob": 0.0,
-      "elevated_prob": 0.2937,
-      "bubble_prob": 0.7063
+      "elevated_prob": 0.2936,
+      "bubble_prob": 0.7064
     },
     {
       "date": "2025-08-06",
@@ -38981,7 +38981,7 @@
     {
       "date": "2025-10-28",
       "normal_prob": 0.0,
-      "elevated_prob": 0.5914,
+      "elevated_prob": 0.5913,
       "bubble_prob": 0.4086
     },
     {
@@ -39042,7 +39042,7 @@
       "date": "2025-11-11",
       "normal_prob": 0.0,
       "elevated_prob": 0.9871,
-      "bubble_prob": 0.0129
+      "bubble_prob": 0.0128
     },
     {
       "date": "2025-11-12",
@@ -39424,20 +39424,20 @@
     },
     {
       "date": "2026-02-13",
-      "normal_prob": 0.3219,
-      "elevated_prob": 0.6781,
+      "normal_prob": 0.322,
+      "elevated_prob": 0.678,
       "bubble_prob": 0.0
     },
     {
       "date": "2026-02-17",
-      "normal_prob": 0.3767,
-      "elevated_prob": 0.6233,
+      "normal_prob": 0.3768,
+      "elevated_prob": 0.6232,
       "bubble_prob": 0.0
     },
     {
       "date": "2026-02-18",
-      "normal_prob": 0.3891,
-      "elevated_prob": 0.6109,
+      "normal_prob": 0.3892,
+      "elevated_prob": 0.6108,
       "bubble_prob": 0.0
     },
     {
@@ -39448,8 +39448,8 @@
     },
     {
       "date": "2026-02-20",
-      "normal_prob": 0.4112,
-      "elevated_prob": 0.5888,
+      "normal_prob": 0.4113,
+      "elevated_prob": 0.5887,
       "bubble_prob": 0.0
     },
     {
@@ -39466,20 +39466,20 @@
     },
     {
       "date": "2026-02-25",
-      "normal_prob": 0.5133,
-      "elevated_prob": 0.4867,
+      "normal_prob": 0.5134,
+      "elevated_prob": 0.4866,
       "bubble_prob": 0.0
     },
     {
       "date": "2026-02-26",
-      "normal_prob": 0.5957,
-      "elevated_prob": 0.4043,
+      "normal_prob": 0.5958,
+      "elevated_prob": 0.4042,
       "bubble_prob": 0.0
     },
     {
       "date": "2026-02-27",
-      "normal_prob": 0.7642,
-      "elevated_prob": 0.2358,
+      "normal_prob": 0.7643,
+      "elevated_prob": 0.2357,
       "bubble_prob": 0.0
     },
     {
@@ -39737,7 +39737,7 @@
   "regime_means": [
     32.4,
     54.1,
-    71.9
+    71.8
   ],
   "current_regime": "elevated",
   "current_regime_prob": 0.9978
