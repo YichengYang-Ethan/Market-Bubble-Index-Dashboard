@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-04-29T22:31:52.789350+00:00",
+  "generated_at": "2026-04-30T22:28:58.488847+00:00",
   "autocorrelation": {
-    "lag_1": 0.9598,
+    "lag_1": 0.9597,
     "lag_5": 0.8559,
-    "lag_10": 0.7611,
-    "lag_20": 0.5956
+    "lag_10": 0.761,
+    "lag_20": 0.5954
   },
   "buy_signal_threshold": 30,
   "sell_signal_threshold": 70,
