@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-05-14T22:37:11.426894+00:00",
+  "generated_at": "2026-05-15T22:30:36.432432+00:00",
   "autocorrelation": {
     "lag_1": 0.9597,
     "lag_5": 0.8558,
-    "lag_10": 0.7608,
+    "lag_10": 0.7609,
     "lag_20": 0.5946
   },
   "buy_signal_threshold": 30,
@@ -62,7 +62,7 @@
         "median_return": 0.2732,
         "std": 1.3117,
         "hit_rate": 59.8,
-        "t_statistic": 6.128
+        "t_statistic": 6.127
       },
       "20d": {
         "count": 1367,
