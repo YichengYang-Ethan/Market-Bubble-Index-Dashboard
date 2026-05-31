@@ -11,7 +11,10 @@ The Market Bubble Index drawdown probability model was developed through four ve
 | v3.0 | Single 70/30 split | 0.855 | +12.4% | 0.921 | Per-threshold optimization, 180d window |
 | v3.1 | Purged WF-CV | 0.455 | -251% | 0.719 | Honest evaluation exposed overfitting |
 | v3.2 | Purged WF-CV + grid | 0.692 | +11.3% | 0.650 | Automated feature/C selection (28 combos) |
-| **v3.3** | **Purged WF-CV + stability** | **0.802** | **+8.5%** | **0.552** | **Lasso with bootstrap-stable features** |
+| v3.3 | Purged WF-CV + stability | 0.802 | +8.5% | 0.552 | Lasso with bootstrap-stable features |
+| **v4.1** | **Extended to 1999 + WF-CV** | **~0.5** | **≤0** | **~0.5** | **Discrimination abandoned → 100% Bayesian Beta-Binomial** |
+
+> **The shipped model is v4.1, not v3.3.** The v3.3 Lasso AUC of 0.802 was measured in-sample on the shorter 2014-2026 subsample. When the history is extended back to 1999 (Appendix A), out-of-sample AUC for *every* discriminative family collapses toward 0.5 — the longer window contains only ~8 distinct crash events, too few to learn a generalizing decision boundary. v4.1 therefore weights all thresholds 100% to the calibrated Bayesian Beta-Binomial layer (climatology) and reports no AUC headline. The v1.0→v3.3 narrative below is retained as the research log that motivated that decision.
 
 ### v3.3 Key Design Decisions
 
