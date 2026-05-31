@@ -52,14 +52,9 @@ Hybrid 3-layer model predicting the chance of significant QQQ drawdowns over the
 | 2 | Bayesian Beta-Binomial + PAVA monotonicity | 20%, 30% |
 | 3 | EVT/GPD tail extrapolation | 40% |
 
-**Out-of-sample performance** (purged walk-forward CV, 180-day purge):
+**Out-of-sample validation** (purged walk-forward CV, 180-day purge):
 
-| Threshold | AUC | Brier Skill Score | Method |
-|-----------|-----|-------------------|--------|
-| >10% DD | **0.802** | **+8.5%** (beats climatology) | Lasso (Layer 1) |
-| >20% DD | 0.552 | — | Bayesian (Layer 2) |
-
-Selected as winner from exhaustive comparison across **6 ML families** (Logistic, RF, XGBoost, SVM, KNN, MLP — 100+ configs). See [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md) for full methodology, model evolution (v3.0→v3.3), feature selection, and multi-model comparison results.
+Extending the history back to 1999 exposed the discriminative models as fragile. Across **6 ML families** (Logistic, RF, XGBoost, SVM, KNN, MLP — 100+ configs), out-of-sample AUC collapsed toward 0.5 (no edge) on the longer sample, which contains only ~8 distinct crash events. The shipped model (v4.1) therefore weights **every threshold 100% to the Bayesian Beta-Binomial layer** — calibrated drawdown probabilities (climatology) rather than discrimination. An earlier Lasso reached AUC 0.802 on the shorter 2014-2026 subsample but did not generalize. See [`RESEARCH_REPORT.md`](RESEARCH_REPORT.md) for the full model evolution and why discrimination is unreliable on a small crash sample.
 
 ## Strategy Backtesting
 
