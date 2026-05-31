@@ -1,6 +1,6 @@
 {
   "model_version": "4.1",
-  "calibration_date": "2026-05-30",
+  "calibration_date": "2026-05-31",
   "data_points": 6642,
   "train_test_split": "purged_wfcv_5fold",
   "actual_folds_used": {
@@ -57,35 +57,35 @@
       "n_events": 4702,
       "base_rate": 0.7089,
       "weights": {
-        "risk_ema_20d": -0.116037,
-        "ind_qqq_deviation": -0.108641,
-        "ind_credit_spread": 0.039077,
-        "ind_yield_curve": 0.054179,
-        "ind_vix_level": -0.219396,
-        "vix_x_credit": -0.134806,
-        "ind_vix_level_change_5d": 0.056336,
-        "score_velocity": 0.006446
+        "risk_ema_20d": -0.116022,
+        "ind_qqq_deviation": -0.108658,
+        "ind_credit_spread": 0.039094,
+        "ind_yield_curve": 0.054214,
+        "ind_vix_level": -0.219373,
+        "vix_x_credit": -0.134842,
+        "ind_vix_level_change_5d": 0.056355,
+        "score_velocity": 0.006444
       },
-      "intercept": 0.920985,
+      "intercept": 0.92099,
       "scaler_mean": {
-        "risk_ema_20d": 52.947501,
+        "risk_ema_20d": 52.947486,
         "ind_qqq_deviation": 51.375396,
-        "ind_credit_spread": 69.963983,
+        "ind_credit_spread": 69.963893,
         "ind_yield_curve": 47.861435,
         "ind_vix_level": 56.151832,
-        "vix_x_credit": 40.279204,
+        "vix_x_credit": 40.279131,
         "ind_vix_level_change_5d": 0.008684,
         "score_velocity": 0.084036
       },
       "scaler_std": {
         "risk_ema_20d": 8.598756,
-        "ind_qqq_deviation": 27.696429,
-        "ind_credit_spread": 24.875745,
+        "ind_qqq_deviation": 27.696379,
+        "ind_credit_spread": 24.875684,
         "ind_yield_curve": 31.715383,
         "ind_vix_level": 29.419663,
-        "vix_x_credit": 23.699651,
+        "vix_x_credit": 23.699556,
         "ind_vix_level_change_5d": 17.404759,
-        "score_velocity": 9.192799
+        "score_velocity": 9.192795
       },
       "auc_train": 0.6086,
       "auc_test": 0.4634,
@@ -98,7 +98,7 @@
         "auc_mean": 0.4634,
         "auc_std": 0.1876,
         "bss_mean": -0.812,
-        "bss_std": 0.7023,
+        "bss_std": 0.7022,
         "ece_mean": 0.293,
         "ece_std": 0.1543,
         "per_fold": [
@@ -125,7 +125,7 @@
             "base_rate_test": 0.2709,
             "auc": 0.3106,
             "brier": 0.5766,
-            "bss": -1.9194,
+            "bss": -1.9193,
             "ece": 0.5472
           },
           {
@@ -138,7 +138,7 @@
             "base_rate_test": 0.5337,
             "auc": 0.313,
             "brier": 0.3882,
-            "bss": -0.5598,
+            "bss": -0.56,
             "ece": 0.327
           },
           {
@@ -149,9 +149,9 @@
             "n_test": 742,
             "base_rate_train": 0.6481,
             "base_rate_test": 0.8962,
-            "auc": 0.3327,
+            "auc": 0.3326,
             "brier": 0.2109,
-            "bss": -1.2675,
+            "bss": -1.2674,
             "ece": 0.3024
           },
           {
@@ -163,7 +163,7 @@
             "base_rate_train": 0.6929,
             "base_rate_test": 0.8437,
             "auc": 0.5839,
-            "brier": 0.1834,
+            "brier": 0.1835,
             "bss": -0.3909,
             "ece": 0.2109
           }
@@ -183,17 +183,17 @@
       "n_events": 1781,
       "base_rate": 0.2685,
       "weights": {
-        "risk_ema_20d": -0.298573,
-        "score_std_20d": 0.127588
+        "risk_ema_20d": -0.298578,
+        "score_std_20d": 0.127586
       },
       "intercept": -1.023225,
       "scaler_mean": {
-        "risk_ema_20d": 52.947501,
-        "score_std_20d": 6.590103
+        "risk_ema_20d": 52.947486,
+        "score_std_20d": 6.590125
       },
       "scaler_std": {
         "risk_ema_20d": 8.598756,
-        "score_std_20d": 2.803748
+        "score_std_20d": 2.803728
       },
       "auc_train": 0.5957,
       "auc_test": 0.3191,
@@ -231,7 +231,7 @@
             "n_test": 742,
             "base_rate_train": 0.2281,
             "base_rate_test": 0.3154,
-            "auc": 0.5174,
+            "auc": 0.5173,
             "brier": 0.2603,
             "bss": -0.2054,
             "ece": 0.2169
