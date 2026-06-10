@@ -1,7 +1,7 @@
 {
   "model_version": "4.1",
-  "calibration_date": "2026-06-09",
-  "data_points": 6649,
+  "calibration_date": "2026-06-10",
+  "data_points": 6650,
   "train_test_split": "purged_wfcv_5fold",
   "actual_folds_used": {
     "drawdown_10pct": 5,
@@ -25,17 +25,17 @@
     "vix_x_credit"
   ],
   "current_features": {
-    "composite_score": 53.0,
-    "drawdown_risk_score": 62.6,
-    "ind_credit_spread": 98.3,
-    "ind_qqq_deviation": 72.3,
-    "ind_vix_level": 27.1,
-    "ind_vix_level_change_5d": -47.5,
-    "ind_yield_curve": 10.3,
-    "risk_ema_20d": 59.8771,
-    "score_std_20d": 4.8788,
-    "score_velocity": -14.4,
-    "vix_x_credit": 26.6393
+    "composite_score": 46.1,
+    "drawdown_risk_score": 64.2,
+    "ind_credit_spread": 97.1,
+    "ind_qqq_deviation": 54.9,
+    "ind_vix_level": 17.5,
+    "ind_vix_level_change_5d": -53.8,
+    "ind_yield_curve": 11.5,
+    "risk_ema_20d": 60.2888,
+    "score_std_20d": 6.5991,
+    "score_velocity": -17.94,
+    "vix_x_credit": 16.9925
   },
   "logistic_coefficients": {
     "drawdown_10pct": {
@@ -53,54 +53,54 @@
       "forward_window": 180,
       "regularization_C": 5.0,
       "penalty": "l1",
-      "n_total": 6640,
+      "n_total": 6641,
       "n_events": 4702,
-      "base_rate": 0.7081,
+      "base_rate": 0.708,
       "weights": {
-        "risk_ema_20d": -0.119188,
-        "ind_qqq_deviation": -0.117542,
-        "ind_credit_spread": 0.033439,
-        "ind_yield_curve": 0.056811,
-        "ind_vix_level": -0.212438,
-        "vix_x_credit": -0.132774,
-        "ind_vix_level_change_5d": 0.050225,
-        "score_velocity": 0.010262
+        "risk_ema_20d": -0.119253,
+        "ind_qqq_deviation": -0.118556,
+        "ind_credit_spread": 0.033804,
+        "ind_yield_curve": 0.057598,
+        "ind_vix_level": -0.211128,
+        "vix_x_credit": -0.134132,
+        "ind_vix_level_change_5d": 0.048703,
+        "score_velocity": 0.011358
       },
-      "intercept": 0.917652,
+      "intercept": 0.917231,
       "scaler_mean": {
-        "risk_ema_20d": 52.956029,
-        "ind_qqq_deviation": 51.422605,
-        "ind_credit_spread": 70.009443,
-        "ind_yield_curve": 47.838313,
-        "ind_vix_level": 56.149383,
-        "vix_x_credit": 40.297283,
-        "ind_vix_level_change_5d": 0.020226,
-        "score_velocity": 0.085458
+        "risk_ema_20d": 52.957115,
+        "ind_qqq_deviation": 51.429589,
+        "ind_credit_spread": 70.029363,
+        "ind_yield_curve": 47.832932,
+        "ind_vix_level": 56.152296,
+        "vix_x_credit": 40.297652,
+        "ind_vix_level_change_5d": 0.024289,
+        "score_velocity": 0.085906
       },
       "scaler_std": {
-        "risk_ema_20d": 8.598256,
-        "ind_qqq_deviation": 27.714532,
-        "ind_credit_spread": 24.88448,
-        "ind_yield_curve": 31.70942,
-        "ind_vix_level": 29.405758,
-        "vix_x_credit": 23.692039,
-        "ind_vix_level_change_5d": 17.402141,
-        "score_velocity": 9.188138
+        "risk_ema_20d": 8.598079,
+        "ind_qqq_deviation": 27.718181,
+        "ind_credit_spread": 24.889186,
+        "ind_yield_curve": 31.710065,
+        "ind_vix_level": 29.404502,
+        "vix_x_credit": 23.694186,
+        "ind_vix_level_change_5d": 17.403979,
+        "score_velocity": 9.18753
       },
-      "auc_train": 0.6093,
-      "auc_test": 0.4612,
-      "brier_train": 0.2007,
-      "bss_test": -0.8208,
+      "auc_train": 0.6095,
+      "auc_test": 0.4616,
+      "brier_train": 0.2008,
+      "bss_test": -0.8217,
       "cv_metrics": {
         "method": "purged_walk_forward_5fold",
         "purge_days": 120,
         "embargo_days": 20,
-        "auc_mean": 0.4612,
-        "auc_std": 0.1845,
-        "bss_mean": -0.8208,
-        "bss_std": 0.6923,
-        "ece_mean": 0.2968,
-        "ece_std": 0.1514,
+        "auc_mean": 0.4616,
+        "auc_std": 0.1841,
+        "bss_mean": -0.8217,
+        "bss_std": 0.6924,
+        "ece_mean": 0.2973,
+        "ece_std": 0.151,
         "per_fold": [
           {
             "fold": 1,
@@ -110,10 +110,10 @@
             "n_test": 743,
             "base_rate_train": 0.7917,
             "base_rate_test": 0.8237,
-            "auc": 0.7677,
-            "brier": 0.1366,
-            "bss": 0.0597,
-            "ece": 0.0878
+            "auc": 0.7673,
+            "brier": 0.1367,
+            "bss": 0.0587,
+            "ece": 0.0897
           },
           {
             "fold": 2,
@@ -123,10 +123,10 @@
             "n_test": 743,
             "base_rate_train": 0.7675,
             "base_rate_test": 0.2719,
-            "auc": 0.3061,
-            "brier": 0.5763,
-            "bss": -1.911,
-            "ece": 0.5459
+            "auc": 0.3086,
+            "brier": 0.5764,
+            "bss": -1.9117,
+            "ece": 0.5462
           },
           {
             "fold": 3,
@@ -136,10 +136,10 @@
             "n_test": 743,
             "base_rate_train": 0.6709,
             "base_rate_test": 0.5343,
-            "auc": 0.3,
-            "brier": 0.3961,
-            "bss": -0.5918,
-            "ece": 0.3361
+            "auc": 0.2999,
+            "brier": 0.3967,
+            "bss": -0.5943,
+            "ece": 0.3362
           },
           {
             "fold": 4,
@@ -149,10 +149,10 @@
             "n_test": 743,
             "base_rate_train": 0.6486,
             "base_rate_test": 0.8964,
-            "auc": 0.3518,
-            "brier": 0.2105,
-            "bss": -1.2663,
-            "ece": 0.3028
+            "auc": 0.3514,
+            "brier": 0.2107,
+            "bss": -1.2676,
+            "ece": 0.303
           },
           {
             "fold": 5,
@@ -162,10 +162,10 @@
             "n_test": 743,
             "base_rate_train": 0.6934,
             "base_rate_test": 0.8439,
-            "auc": 0.5804,
-            "brier": 0.1838,
-            "bss": -0.3947,
-            "ece": 0.2116
+            "auc": 0.581,
+            "brier": 0.1836,
+            "bss": -0.3938,
+            "ece": 0.2115
           }
         ]
       }
@@ -179,25 +179,25 @@
       "forward_window": 180,
       "regularization_C": 1.0,
       "penalty": "l2",
-      "n_total": 6640,
+      "n_total": 6641,
       "n_events": 1781,
       "base_rate": 0.2682,
       "weights": {
-        "risk_ema_20d": -0.299896,
-        "score_std_20d": 0.128515
+        "risk_ema_20d": -0.300066,
+        "score_std_20d": 0.128751
       },
-      "intercept": -1.024901,
+      "intercept": -1.025143,
       "scaler_mean": {
-        "risk_ema_20d": 52.956029,
-        "score_std_20d": 6.588234
+        "risk_ema_20d": 52.957115,
+        "score_std_20d": 6.587669
       },
       "scaler_std": {
-        "risk_ema_20d": 8.598256,
-        "score_std_20d": 2.803007
+        "risk_ema_20d": 8.598079,
+        "score_std_20d": 2.803163
       },
-      "auc_train": 0.5961,
+      "auc_train": 0.5962,
       "auc_test": 0.3207,
-      "brier_train": 0.1914,
+      "brier_train": 0.1913,
       "bss_test": -0.274,
       "cv_metrics": {
         "method": "purged_walk_forward_3fold",
@@ -231,9 +231,9 @@
             "n_test": 743,
             "base_rate_train": 0.2278,
             "base_rate_test": 0.3163,
-            "auc": 0.5182,
+            "auc": 0.5181,
             "brier": 0.261,
-            "bss": -0.2067,
+            "bss": -0.2068,
             "ece": 0.2172
           },
           {
@@ -348,7 +348,7 @@
       "n_30pct": 287,
       "p_40pct": 0.1629,
       "n_40pct": 207,
-      "mean_dd": 21.54,
+      "mean_dd": 21.56,
       "median_dd": 16.11,
       "p95_dd": 47.93
     },
@@ -362,15 +362,15 @@
       "n_30pct": 433,
       "p_40pct": 0.1348,
       "n_40pct": 309,
-      "mean_dd": 19.3,
+      "mean_dd": 19.31,
       "median_dd": 13.47,
       "p95_dd": 54.22
     },
     "60-80": {
-      "count": 2616,
-      "p_10pct": 0.6747,
+      "count": 2617,
+      "p_10pct": 0.6744,
       "n_10pct": 1765,
-      "p_20pct": 0.1858,
+      "p_20pct": 0.1857,
       "n_20pct": 486,
       "p_30pct": 0.0516,
       "n_30pct": 135,
@@ -396,7 +396,7 @@
     }
   },
   "unconditional_base_rates": {
-    "10pct": 0.7081,
+    "10pct": 0.708,
     "20pct": 0.2682,
     "30pct": 0.1307,
     "40pct": 0.0919
@@ -408,13 +408,13 @@
       "ci_level": 0.9
     },
     "20pct": {
-      "lower": 0.3477,
-      "upper": 0.4998,
+      "lower": 0.3542,
+      "upper": 0.5083,
       "ci_level": 0.9
     },
     "30pct": {
       "lower": 0.0976,
-      "upper": 0.1716,
+      "upper": 0.1721,
       "ci_level": 0.9
     }
   },
