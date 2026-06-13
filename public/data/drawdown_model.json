@@ -1,6 +1,6 @@
 {
   "model_version": "4.1",
-  "calibration_date": "2026-06-12",
+  "calibration_date": "2026-06-13",
   "data_points": 6652,
   "train_test_split": "purged_wfcv_5fold",
   "actual_folds_used": {
@@ -57,49 +57,49 @@
       "n_events": 4702,
       "base_rate": 0.7078,
       "weights": {
-        "risk_ema_20d": -0.119351,
-        "ind_qqq_deviation": -0.120494,
-        "ind_credit_spread": 0.034026,
-        "ind_yield_curve": 0.059099,
-        "ind_vix_level": -0.208993,
-        "vix_x_credit": -0.136184,
-        "ind_vix_level_change_5d": 0.046718,
-        "score_velocity": 0.012915
+        "risk_ema_20d": -0.119355,
+        "ind_qqq_deviation": -0.120493,
+        "ind_credit_spread": 0.034034,
+        "ind_yield_curve": 0.059098,
+        "ind_vix_level": -0.208991,
+        "vix_x_credit": -0.136191,
+        "ind_vix_level_change_5d": 0.046717,
+        "score_velocity": 0.012912
       },
-      "intercept": 0.916383,
+      "intercept": 0.916378,
       "scaler_mean": {
-        "risk_ema_20d": 52.959043,
-        "ind_qqq_deviation": 51.443519,
-        "ind_credit_spread": 70.053003,
+        "risk_ema_20d": 52.959028,
+        "ind_qqq_deviation": 51.443504,
+        "ind_credit_spread": 70.052883,
         "ind_yield_curve": 47.821406,
         "ind_vix_level": 56.158362,
-        "vix_x_credit": 40.307774,
+        "vix_x_credit": 40.307686,
         "ind_vix_level_change_5d": 0.029294,
-        "score_velocity": 0.086322
+        "score_velocity": 0.086324
       },
       "scaler_std": {
-        "risk_ema_20d": 8.597532,
-        "ind_qqq_deviation": 27.725631,
-        "ind_credit_spread": 24.894225,
+        "risk_ema_20d": 8.59752,
+        "ind_qqq_deviation": 27.725647,
+        "ind_credit_spread": 24.89417,
         "ind_yield_curve": 31.711397,
         "ind_vix_level": 29.402257,
-        "vix_x_credit": 23.698102,
+        "vix_x_credit": 23.697992,
         "ind_vix_level_change_5d": 17.403988,
-        "score_velocity": 9.186255
+        "score_velocity": 9.186257
       },
       "auc_train": 0.6099,
-      "auc_test": 0.4632,
+      "auc_test": 0.4616,
       "brier_train": 0.2008,
-      "bss_test": -0.8255,
+      "bss_test": -0.8253,
       "cv_metrics": {
         "method": "purged_walk_forward_5fold",
         "purge_days": 120,
         "embargo_days": 20,
-        "auc_mean": 0.4632,
-        "auc_std": 0.1822,
-        "bss_mean": -0.8255,
+        "auc_mean": 0.4616,
+        "auc_std": 0.1831,
+        "bss_mean": -0.8253,
         "bss_std": 0.6889,
-        "ece_mean": 0.2997,
+        "ece_mean": 0.2996,
         "ece_std": 0.1495,
         "per_fold": [
           {
@@ -149,10 +149,10 @@
             "n_test": 743,
             "base_rate_train": 0.6487,
             "base_rate_test": 0.8964,
-            "auc": 0.366,
-            "brier": 0.2107,
-            "bss": -1.2677,
-            "ece": 0.3032
+            "auc": 0.3576,
+            "brier": 0.2106,
+            "bss": -1.2674,
+            "ece": 0.3031
           },
           {
             "fold": 5,
@@ -162,10 +162,10 @@
             "n_test": 743,
             "base_rate_train": 0.6934,
             "base_rate_test": 0.8439,
-            "auc": 0.581,
-            "brier": 0.1839,
-            "bss": -0.3957,
-            "ece": 0.2118
+            "auc": 0.5813,
+            "brier": 0.1838,
+            "bss": -0.3951,
+            "ece": 0.2116
           }
         ]
       }
@@ -183,19 +183,19 @@
       "n_events": 1781,
       "base_rate": 0.2681,
       "weights": {
-        "risk_ema_20d": -0.300391,
-        "score_std_20d": 0.12919
+        "risk_ema_20d": -0.300398,
+        "score_std_20d": 0.129196
       },
-      "intercept": -1.025624,
+      "intercept": -1.025625,
       "scaler_mean": {
-        "risk_ema_20d": 52.959043,
-        "score_std_20d": 6.586702
+        "risk_ema_20d": 52.959028,
+        "score_std_20d": 6.586705
       },
       "scaler_std": {
-        "risk_ema_20d": 8.597532,
-        "score_std_20d": 2.803359
+        "risk_ema_20d": 8.59752,
+        "score_std_20d": 2.803352
       },
-      "auc_train": 0.5962,
+      "auc_train": 0.5963,
       "auc_test": 0.3209,
       "brier_train": 0.1913,
       "bss_test": -0.2721,
