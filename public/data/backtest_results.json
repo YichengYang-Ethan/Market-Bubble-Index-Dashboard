@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-17T22:58:38.186476+00:00",
+  "generated_at": "2026-06-18T23:18:46.059438+00:00",
   "autocorrelation": {
     "lag_1": 0.9596,
     "lag_5": 0.8556,
@@ -31,7 +31,7 @@
         "count": 672,
         "mean_return": 2.0901,
         "median_return": 3.0548,
-        "std": 7.7577,
+        "std": 7.7576,
         "hit_rate": 66.1,
         "t_statistic": 6.984
       },
@@ -39,7 +39,7 @@
         "count": 668,
         "mean_return": 3.5907,
         "median_return": 5.1537,
-        "std": 11.0228,
+        "std": 11.0229,
         "hit_rate": 69.5,
         "t_statistic": 8.419
       }
