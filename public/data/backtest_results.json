@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-06-18T23:18:46.059438+00:00",
+  "generated_at": "2026-06-19T22:31:10.150865+00:00",
   "autocorrelation": {
-    "lag_1": 0.9596,
+    "lag_1": 0.9595,
     "lag_5": 0.8556,
     "lag_10": 0.7608,
     "lag_20": 0.5944
@@ -15,33 +15,33 @@
         "count": 672,
         "mean_return": 0.1255,
         "median_return": 0.1517,
-        "std": 2.4858,
-        "hit_rate": 53.6,
-        "t_statistic": 1.309
+        "std": 2.4862,
+        "hit_rate": 53.7,
+        "t_statistic": 1.308
       },
       "5d": {
         "count": 672,
         "mean_return": 0.4675,
-        "median_return": 0.7106,
-        "std": 4.5871,
+        "median_return": 0.7124,
+        "std": 4.587,
         "hit_rate": 56.2,
         "t_statistic": 2.642
       },
       "20d": {
         "count": 672,
-        "mean_return": 2.0901,
-        "median_return": 3.0548,
-        "std": 7.7576,
+        "mean_return": 2.0903,
+        "median_return": 3.0572,
+        "std": 7.7575,
         "hit_rate": 66.1,
-        "t_statistic": 6.984
+        "t_statistic": 6.985
       },
       "60d": {
         "count": 668,
-        "mean_return": 3.5907,
-        "median_return": 5.1537,
-        "std": 11.0229,
+        "mean_return": 3.5909,
+        "median_return": 5.1509,
+        "std": 11.0222,
         "hit_rate": 69.5,
-        "t_statistic": 8.419
+        "t_statistic": 8.42
       }
     }
   },
@@ -51,34 +51,34 @@
       "1d": {
         "count": 1371,
         "mean_return": 0.0432,
-        "median_return": 0.063,
-        "std": 0.6251,
-        "hit_rate": 55.2,
-        "t_statistic": 2.559
+        "median_return": 0.0632,
+        "std": 0.625,
+        "hit_rate": 55.3,
+        "t_statistic": 2.56
       },
       "5d": {
         "count": 1370,
         "mean_return": 0.2135,
-        "median_return": 0.2731,
-        "std": 1.3144,
-        "hit_rate": 59.7,
-        "t_statistic": 6.011
+        "median_return": 0.2795,
+        "std": 1.3143,
+        "hit_rate": 59.6,
+        "t_statistic": 6.012
       },
       "20d": {
         "count": 1367,
-        "mean_return": 0.906,
-        "median_return": 1.2832,
+        "mean_return": 0.9059,
+        "median_return": 1.2829,
         "std": 2.9317,
         "hit_rate": 70.4,
-        "t_statistic": 11.426
+        "t_statistic": 11.424
       },
       "60d": {
         "count": 1367,
-        "mean_return": 2.543,
-        "median_return": 3.6854,
-        "std": 5.7846,
+        "mean_return": 2.5429,
+        "median_return": 3.6803,
+        "std": 5.7848,
         "hit_rate": 76.8,
-        "t_statistic": 16.254
+        "t_statistic": 16.253
       }
     }
   }
