@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-26T22:52:13.331183+00:00",
+  "generated_at": "2026-06-27T22:43:52.031866+00:00",
   "method": "GSADF (Phillips-Shi-Yu 2015)",
   "min_window": 63,
   "results": [
@@ -755,103 +755,103 @@
     },
     {
       "date": "2001-07-11",
-      "test_statistic": -1.136,
+      "test_statistic": -1.1359,
       "critical_value": -0.0612,
       "is_bubble": false
     },
     {
       "date": "2001-07-18",
-      "test_statistic": -1.2912,
+      "test_statistic": -1.2911,
       "critical_value": -0.0613,
       "is_bubble": false
     },
     {
       "date": "2001-07-25",
-      "test_statistic": -1.2198,
+      "test_statistic": -1.2197,
       "critical_value": -0.0614,
       "is_bubble": false
     },
     {
       "date": "2001-08-01",
-      "test_statistic": -1.368,
+      "test_statistic": -1.3679,
       "critical_value": -0.0614,
       "is_bubble": false
     },
     {
       "date": "2001-08-08",
-      "test_statistic": -1.2263,
+      "test_statistic": -1.2262,
       "critical_value": -0.0615,
       "is_bubble": false
     },
     {
       "date": "2001-08-15",
-      "test_statistic": -1.2178,
+      "test_statistic": -1.2177,
       "critical_value": -0.0616,
       "is_bubble": false
     },
     {
       "date": "2001-08-22",
-      "test_statistic": -1.097,
+      "test_statistic": -1.0963,
       "critical_value": -0.0616,
       "is_bubble": false
     },
     {
       "date": "2001-08-29",
-      "test_statistic": -0.9555,
+      "test_statistic": -0.9548,
       "critical_value": -0.0617,
       "is_bubble": false
     },
     {
       "date": "2001-09-06",
-      "test_statistic": -0.0603,
+      "test_statistic": -0.0596,
       "critical_value": -0.0618,
       "is_bubble": true
     },
     {
       "date": "2001-09-19",
-      "test_statistic": 2.2136,
+      "test_statistic": 2.2154,
       "critical_value": -0.0619,
       "is_bubble": true
     },
     {
       "date": "2001-09-26",
-      "test_statistic": 0.6365,
+      "test_statistic": 0.637,
       "critical_value": -0.0619,
       "is_bubble": true
     },
     {
       "date": "2001-10-03",
-      "test_statistic": -0.578,
+      "test_statistic": -0.5778,
       "critical_value": -0.062,
       "is_bubble": false
     },
     {
       "date": "2001-10-10",
-      "test_statistic": -0.7429,
+      "test_statistic": -0.7427,
       "critical_value": -0.0621,
       "is_bubble": false
     },
     {
       "date": "2001-10-17",
-      "test_statistic": -0.7484,
+      "test_statistic": -0.7482,
       "critical_value": -0.0621,
       "is_bubble": false
     },
     {
       "date": "2001-10-24",
-      "test_statistic": -0.8633,
+      "test_statistic": -0.8632,
       "critical_value": -0.0622,
       "is_bubble": false
     },
     {
       "date": "2001-10-31",
-      "test_statistic": -0.7168,
+      "test_statistic": -0.7167,
       "critical_value": -0.0622,
       "is_bubble": false
     },
     {
       "date": "2001-11-07",
-      "test_statistic": -1.1099,
+      "test_statistic": -1.1098,
       "critical_value": -0.0623,
       "is_bubble": false
     },
@@ -863,31 +863,31 @@
     },
     {
       "date": "2001-11-21",
-      "test_statistic": -1.2035,
+      "test_statistic": -1.2034,
       "critical_value": -0.0624,
       "is_bubble": false
     },
     {
       "date": "2001-11-29",
-      "test_statistic": -1.2448,
+      "test_statistic": -1.2447,
       "critical_value": -0.0625,
       "is_bubble": false
     },
     {
       "date": "2001-12-06",
-      "test_statistic": -1.3349,
+      "test_statistic": -1.3348,
       "critical_value": -0.0626,
       "is_bubble": false
     },
     {
       "date": "2001-12-13",
-      "test_statistic": -1.179,
+      "test_statistic": -1.1789,
       "critical_value": -0.0626,
       "is_bubble": false
     },
     {
       "date": "2001-12-20",
-      "test_statistic": -1.2853,
+      "test_statistic": -1.2852,
       "critical_value": -0.0627,
       "is_bubble": false
     },
@@ -899,7 +899,7 @@
     },
     {
       "date": "2002-01-07",
-      "test_statistic": -1.3784,
+      "test_statistic": -1.3783,
       "critical_value": -0.0628,
       "is_bubble": false
     },
@@ -911,13 +911,13 @@
     },
     {
       "date": "2002-01-22",
-      "test_statistic": -1.252,
+      "test_statistic": -1.2519,
       "critical_value": -0.0629,
       "is_bubble": false
     },
     {
       "date": "2002-01-29",
-      "test_statistic": -1.1817,
+      "test_statistic": -1.1816,
       "critical_value": -0.063,
       "is_bubble": false
     },
@@ -935,7 +935,7 @@
     },
     {
       "date": "2002-02-20",
-      "test_statistic": -1.2241,
+      "test_statistic": -1.224,
       "critical_value": -0.0631,
       "is_bubble": false
     },
@@ -947,7 +947,7 @@
     },
     {
       "date": "2002-03-06",
-      "test_statistic": -1.4221,
+      "test_statistic": -1.422,
       "critical_value": -0.0632,
       "is_bubble": false
     },
@@ -959,7 +959,7 @@
     },
     {
       "date": "2002-03-20",
-      "test_statistic": -1.4085,
+      "test_statistic": -1.4084,
       "critical_value": -0.0633,
       "is_bubble": false
     },
@@ -977,37 +977,37 @@
     },
     {
       "date": "2002-04-11",
-      "test_statistic": -1.288,
+      "test_statistic": -1.2879,
       "critical_value": -0.0635,
       "is_bubble": false
     },
     {
       "date": "2002-04-18",
-      "test_statistic": -1.3511,
+      "test_statistic": -1.351,
       "critical_value": -0.0635,
       "is_bubble": false
     },
     {
       "date": "2002-04-25",
-      "test_statistic": -1.2569,
+      "test_statistic": -1.2568,
       "critical_value": -0.0636,
       "is_bubble": false
     },
     {
       "date": "2002-05-02",
-      "test_statistic": -1.2389,
+      "test_statistic": -1.2388,
       "critical_value": -0.0636,
       "is_bubble": false
     },
     {
       "date": "2002-05-09",
-      "test_statistic": -1.2133,
+      "test_statistic": -1.2132,
       "critical_value": -0.0637,
       "is_bubble": false
     },
     {
       "date": "2002-05-16",
-      "test_statistic": -1.325,
+      "test_statistic": -1.3249,
       "critical_value": -0.0637,
       "is_bubble": false
     },
@@ -1025,7 +1025,7 @@
     },
     {
       "date": "2002-06-07",
-      "test_statistic": -0.4523,
+      "test_statistic": -0.4522,
       "critical_value": -0.0639,
       "is_bubble": false
     },
@@ -1067,19 +1067,19 @@
     },
     {
       "date": "2002-07-29",
-      "test_statistic": -0.0917,
+      "test_statistic": -0.0916,
       "critical_value": -0.0642,
       "is_bubble": false
     },
     {
       "date": "2002-08-05",
-      "test_statistic": 0.5702,
+      "test_statistic": 0.5703,
       "critical_value": -0.0643,
       "is_bubble": true
     },
     {
       "date": "2002-08-12",
-      "test_statistic": -0.5317,
+      "test_statistic": -0.5301,
       "critical_value": -0.0643,
       "is_bubble": false
     },
@@ -1097,13 +1097,13 @@
     },
     {
       "date": "2002-09-03",
-      "test_statistic": -0.4667,
+      "test_statistic": -0.4668,
       "critical_value": -0.0644,
       "is_bubble": false
     },
     {
       "date": "2002-09-10",
-      "test_statistic": -0.7063,
+      "test_statistic": -0.7064,
       "critical_value": -0.0645,
       "is_bubble": false
     },
@@ -1115,19 +1115,19 @@
     },
     {
       "date": "2002-09-24",
-      "test_statistic": 0.0065,
+      "test_statistic": 0.0063,
       "critical_value": -0.0646,
       "is_bubble": true
     },
     {
       "date": "2002-10-01",
-      "test_statistic": -0.3997,
+      "test_statistic": -0.3998,
       "critical_value": -0.0646,
       "is_bubble": false
     },
     {
       "date": "2002-10-08",
-      "test_statistic": 0.0661,
+      "test_statistic": 0.0659,
       "critical_value": -0.0646,
       "is_bubble": true
     },
@@ -1163,13 +1163,13 @@
     },
     {
       "date": "2002-11-19",
-      "test_statistic": -0.7471,
+      "test_statistic": -0.7472,
       "critical_value": -0.0649,
       "is_bubble": false
     },
     {
       "date": "2002-11-26",
-      "test_statistic": -0.8217,
+      "test_statistic": -0.8218,
       "critical_value": -0.0649,
       "is_bubble": false
     },
@@ -1211,7 +1211,7 @@
     },
     {
       "date": "2003-01-17",
-      "test_statistic": -0.8272,
+      "test_statistic": -0.8273,
       "critical_value": -0.0652,
       "is_bubble": false
     },
@@ -1265,7 +1265,7 @@
     },
     {
       "date": "2003-03-25",
-      "test_statistic": -0.7666,
+      "test_statistic": -0.7667,
       "critical_value": -0.0655,
       "is_bubble": false
     },
@@ -1277,7 +1277,7 @@
     },
     {
       "date": "2003-04-08",
-      "test_statistic": -0.8059,
+      "test_statistic": -0.806,
       "critical_value": -0.0656,
       "is_bubble": false
     },
@@ -1889,7 +1889,7 @@
     },
     {
       "date": "2005-04-18",
-      "test_statistic": -0.9512,
+      "test_statistic": -0.9513,
       "critical_value": -0.0681,
       "is_bubble": false
     },
@@ -1901,13 +1901,13 @@
     },
     {
       "date": "2005-05-02",
-      "test_statistic": -0.8987,
+      "test_statistic": -0.8988,
       "critical_value": -0.0682,
       "is_bubble": false
     },
     {
       "date": "2005-05-09",
-      "test_statistic": -0.8562,
+      "test_statistic": -0.8563,
       "critical_value": -0.0682,
       "is_bubble": false
     },
@@ -1919,13 +1919,13 @@
     },
     {
       "date": "2005-05-23",
-      "test_statistic": -0.7989,
+      "test_statistic": -0.799,
       "critical_value": -0.0682,
       "is_bubble": false
     },
     {
       "date": "2005-05-31",
-      "test_statistic": -0.8117,
+      "test_statistic": -0.8118,
       "critical_value": -0.0683,
       "is_bubble": false
     },
@@ -1937,7 +1937,7 @@
     },
     {
       "date": "2005-06-14",
-      "test_statistic": -0.7695,
+      "test_statistic": -0.7696,
       "critical_value": -0.0683,
       "is_bubble": false
     },
@@ -1949,19 +1949,19 @@
     },
     {
       "date": "2005-06-28",
-      "test_statistic": -0.7897,
+      "test_statistic": -0.7898,
       "critical_value": -0.0683,
       "is_bubble": false
     },
     {
       "date": "2005-07-06",
-      "test_statistic": -0.8149,
+      "test_statistic": -0.815,
       "critical_value": -0.0683,
       "is_bubble": false
     },
     {
       "date": "2005-07-13",
-      "test_statistic": -0.7136,
+      "test_statistic": -0.7137,
       "critical_value": -0.0684,
       "is_bubble": false
     },
@@ -2003,37 +2003,37 @@
     },
     {
       "date": "2005-08-31",
-      "test_statistic": -0.7385,
+      "test_statistic": -0.7386,
       "critical_value": -0.0685,
       "is_bubble": false
     },
     {
       "date": "2005-09-08",
-      "test_statistic": -0.7065,
+      "test_statistic": -0.7066,
       "critical_value": -0.0685,
       "is_bubble": false
     },
     {
       "date": "2005-09-15",
-      "test_statistic": -0.7246,
+      "test_statistic": -0.7247,
       "critical_value": -0.0685,
       "is_bubble": false
     },
     {
       "date": "2005-09-22",
-      "test_statistic": -0.7771,
+      "test_statistic": -0.7772,
       "critical_value": -0.0685,
       "is_bubble": false
     },
     {
       "date": "2005-09-29",
-      "test_statistic": -0.7359,
+      "test_statistic": -0.736,
       "critical_value": -0.0686,
       "is_bubble": false
     },
     {
       "date": "2005-10-06",
-      "test_statistic": -0.8589,
+      "test_statistic": -0.859,
       "critical_value": -0.0686,
       "is_bubble": false
     },
@@ -2057,19 +2057,19 @@
     },
     {
       "date": "2005-11-03",
-      "test_statistic": -0.7799,
+      "test_statistic": -0.78,
       "critical_value": -0.0686,
       "is_bubble": false
     },
     {
       "date": "2005-11-10",
-      "test_statistic": -0.7472,
+      "test_statistic": -0.7473,
       "critical_value": -0.0687,
       "is_bubble": false
     },
     {
       "date": "2005-11-17",
-      "test_statistic": -0.7053,
+      "test_statistic": -0.7054,
       "critical_value": -0.0687,
       "is_bubble": false
     },
@@ -2087,7 +2087,7 @@
     },
     {
       "date": "2005-12-09",
-      "test_statistic": -0.6548,
+      "test_statistic": -0.6549,
       "critical_value": -0.0687,
       "is_bubble": false
     },
@@ -2123,13 +2123,13 @@
     },
     {
       "date": "2006-01-25",
-      "test_statistic": -0.6459,
+      "test_statistic": -0.646,
       "critical_value": -0.0688,
       "is_bubble": false
     },
     {
       "date": "2006-02-01",
-      "test_statistic": -0.5879,
+      "test_statistic": -0.588,
       "critical_value": -0.0688,
       "is_bubble": false
     },
@@ -2147,19 +2147,19 @@
     },
     {
       "date": "2006-02-23",
-      "test_statistic": -0.5741,
+      "test_statistic": -0.5742,
       "critical_value": -0.0689,
       "is_bubble": false
     },
     {
       "date": "2006-03-02",
-      "test_statistic": -0.5681,
+      "test_statistic": -0.5682,
       "critical_value": -0.0689,
       "is_bubble": false
     },
     {
       "date": "2006-03-09",
-      "test_statistic": -0.644,
+      "test_statistic": -0.6441,
       "critical_value": -0.0689,
       "is_bubble": false
     },
@@ -2177,7 +2177,7 @@
     },
     {
       "date": "2006-03-30",
-      "test_statistic": -0.5521,
+      "test_statistic": -0.5522,
       "critical_value": -0.069,
       "is_bubble": false
     },
@@ -2189,13 +2189,13 @@
     },
     {
       "date": "2006-04-13",
-      "test_statistic": -0.6017,
+      "test_statistic": -0.6018,
       "critical_value": -0.069,
       "is_bubble": false
     },
     {
       "date": "2006-04-21",
-      "test_statistic": -0.5189,
+      "test_statistic": -0.519,
       "critical_value": -0.069,
       "is_bubble": false
     },
@@ -2213,7 +2213,7 @@
     },
     {
       "date": "2006-05-12",
-      "test_statistic": -0.6038,
+      "test_statistic": -0.6039,
       "critical_value": -0.069,
       "is_bubble": false
     },
@@ -2225,19 +2225,19 @@
     },
     {
       "date": "2006-05-26",
-      "test_statistic": -0.6522,
+      "test_statistic": -0.6523,
       "critical_value": -0.0691,
       "is_bubble": false
     },
     {
       "date": "2006-06-05",
-      "test_statistic": -0.6962,
+      "test_statistic": -0.6963,
       "critical_value": -0.0691,
       "is_bubble": false
     },
     {
       "date": "2006-06-12",
-      "test_statistic": -0.7966,
+      "test_statistic": -0.7967,
       "critical_value": -0.0691,
       "is_bubble": false
     },
@@ -2255,7 +2255,7 @@
     },
     {
       "date": "2006-07-03",
-      "test_statistic": -0.6878,
+      "test_statistic": -0.6879,
       "critical_value": -0.0691,
       "is_bubble": false
     },
@@ -2273,55 +2273,55 @@
     },
     {
       "date": "2006-07-25",
-      "test_statistic": -0.742,
+      "test_statistic": -0.7421,
       "critical_value": -0.0692,
       "is_bubble": false
     },
     {
       "date": "2006-08-01",
-      "test_statistic": -0.7279,
+      "test_statistic": -0.728,
       "critical_value": -0.0692,
       "is_bubble": false
     },
     {
       "date": "2006-08-08",
-      "test_statistic": -0.7259,
+      "test_statistic": -0.726,
       "critical_value": -0.0692,
       "is_bubble": false
     },
     {
       "date": "2006-08-15",
-      "test_statistic": -0.6945,
+      "test_statistic": -0.6946,
       "critical_value": -0.0692,
       "is_bubble": false
     },
     {
       "date": "2006-08-22",
-      "test_statistic": -0.6505,
+      "test_statistic": -0.6506,
       "critical_value": -0.0692,
       "is_bubble": false
     },
     {
       "date": "2006-08-29",
-      "test_statistic": -0.6395,
+      "test_statistic": -0.6396,
       "critical_value": -0.0693,
       "is_bubble": false
     },
     {
       "date": "2006-09-06",
-      "test_statistic": -0.6447,
+      "test_statistic": -0.6448,
       "critical_value": -0.0693,
       "is_bubble": false
     },
     {
       "date": "2006-09-13",
-      "test_statistic": -0.5953,
+      "test_statistic": -0.5954,
       "critical_value": -0.0693,
       "is_bubble": false
     },
     {
       "date": "2006-09-20",
-      "test_statistic": -0.57,
+      "test_statistic": -0.5701,
       "critical_value": -0.0693,
       "is_bubble": false
     },
@@ -2357,7 +2357,7 @@
     },
     {
       "date": "2006-11-01",
-      "test_statistic": -0.4463,
+      "test_statistic": -0.4464,
       "critical_value": -0.0694,
       "is_bubble": false
     },
@@ -2459,7 +2459,7 @@
     },
     {
       "date": "2007-03-08",
-      "test_statistic": -0.3934,
+      "test_statistic": -0.3935,
       "critical_value": -0.0696,
       "is_bubble": false
     },
@@ -2477,7 +2477,7 @@
     },
     {
       "date": "2007-03-29",
-      "test_statistic": -0.3492,
+      "test_statistic": -0.3493,
       "critical_value": -0.0696,
       "is_bubble": false
     },
@@ -2591,7 +2591,7 @@
     },
     {
       "date": "2007-08-14",
-      "test_statistic": -0.4085,
+      "test_statistic": -0.4086,
       "critical_value": -0.0699,
       "is_bubble": false
     },
@@ -2603,7 +2603,7 @@
     },
     {
       "date": "2007-08-28",
-      "test_statistic": -0.4066,
+      "test_statistic": -0.4067,
       "critical_value": -0.0699,
       "is_bubble": false
     },
@@ -2615,19 +2615,19 @@
     },
     {
       "date": "2007-09-12",
-      "test_statistic": -0.2956,
+      "test_statistic": -0.2957,
       "critical_value": -0.0699,
       "is_bubble": false
     },
     {
       "date": "2007-09-19",
-      "test_statistic": -0.1326,
+      "test_statistic": -0.1327,
       "critical_value": -0.0699,
       "is_bubble": false
     },
     {
       "date": "2007-09-26",
-      "test_statistic": -0.1526,
+      "test_statistic": -0.1527,
       "critical_value": -0.0699,
       "is_bubble": false
     },
@@ -2645,7 +2645,7 @@
     },
     {
       "date": "2007-10-17",
-      "test_statistic": -0.1052,
+      "test_statistic": -0.1053,
       "critical_value": -0.07,
       "is_bubble": false
     },
@@ -2657,13 +2657,13 @@
     },
     {
       "date": "2007-10-31",
-      "test_statistic": -0.1131,
+      "test_statistic": -0.1132,
       "critical_value": -0.07,
       "is_bubble": false
     },
     {
       "date": "2007-11-07",
-      "test_statistic": -0.3186,
+      "test_statistic": -0.3187,
       "critical_value": -0.07,
       "is_bubble": false
     },
@@ -2681,19 +2681,19 @@
     },
     {
       "date": "2007-11-29",
-      "test_statistic": -0.3729,
+      "test_statistic": -0.373,
       "critical_value": -0.07,
       "is_bubble": false
     },
     {
       "date": "2007-12-06",
-      "test_statistic": -0.2768,
+      "test_statistic": -0.2769,
       "critical_value": -0.0701,
       "is_bubble": false
     },
     {
       "date": "2007-12-13",
-      "test_statistic": -0.3322,
+      "test_statistic": -0.3323,
       "critical_value": -0.0701,
       "is_bubble": false
     },
@@ -2777,13 +2777,13 @@
     },
     {
       "date": "2008-03-27",
-      "test_statistic": -0.7827,
+      "test_statistic": -0.7828,
       "critical_value": -0.0702,
       "is_bubble": false
     },
     {
       "date": "2008-04-03",
-      "test_statistic": -0.7079,
+      "test_statistic": -0.708,
       "critical_value": -0.0702,
       "is_bubble": false
     },
@@ -2795,7 +2795,7 @@
     },
     {
       "date": "2008-04-17",
-      "test_statistic": -0.7181,
+      "test_statistic": -0.7182,
       "critical_value": -0.0703,
       "is_bubble": false
     },
@@ -2807,43 +2807,43 @@
     },
     {
       "date": "2008-05-01",
-      "test_statistic": -0.6402,
+      "test_statistic": -0.6403,
       "critical_value": -0.0703,
       "is_bubble": false
     },
     {
       "date": "2008-05-08",
-      "test_statistic": -0.6834,
+      "test_statistic": -0.6835,
       "critical_value": -0.0703,
       "is_bubble": false
     },
     {
       "date": "2008-05-15",
-      "test_statistic": -0.6142,
+      "test_statistic": -0.6143,
       "critical_value": -0.0703,
       "is_bubble": false
     },
     {
       "date": "2008-05-22",
-      "test_statistic": -0.685,
+      "test_statistic": -0.6851,
       "critical_value": -0.0703,
       "is_bubble": false
     },
     {
       "date": "2008-05-30",
-      "test_statistic": -0.6706,
+      "test_statistic": -0.6707,
       "critical_value": -0.0703,
       "is_bubble": false
     },
     {
       "date": "2008-06-06",
-      "test_statistic": -0.7533,
+      "test_statistic": -0.7534,
       "critical_value": -0.0703,
       "is_bubble": false
     },
     {
       "date": "2008-06-13",
-      "test_statistic": -0.7669,
+      "test_statistic": -0.767,
       "critical_value": -0.0703,
       "is_bubble": false
     },
@@ -2891,7 +2891,7 @@
     },
     {
       "date": "2008-08-11",
-      "test_statistic": -0.8875,
+      "test_statistic": -0.8876,
       "critical_value": -0.0704,
       "is_bubble": false
     },
@@ -4127,13 +4127,13 @@
     },
     {
       "date": "2012-09-11",
-      "test_statistic": -0.7883,
+      "test_statistic": -0.7882,
       "critical_value": -0.072,
       "is_bubble": false
     },
     {
       "date": "2012-09-18",
-      "test_statistic": -0.4539,
+      "test_statistic": -0.4538,
       "critical_value": -0.072,
       "is_bubble": false
     },
@@ -4145,19 +4145,19 @@
     },
     {
       "date": "2012-10-02",
-      "test_statistic": -0.7448,
+      "test_statistic": -0.7447,
       "critical_value": -0.072,
       "is_bubble": false
     },
     {
       "date": "2012-10-09",
-      "test_statistic": -0.837,
+      "test_statistic": -0.8369,
       "critical_value": -0.072,
       "is_bubble": false
     },
     {
       "date": "2012-10-16",
-      "test_statistic": -0.765,
+      "test_statistic": -0.7649,
       "critical_value": -0.072,
       "is_bubble": false
     },
@@ -4181,7 +4181,7 @@
     },
     {
       "date": "2012-11-15",
-      "test_statistic": -0.7352,
+      "test_statistic": -0.7353,
       "critical_value": -0.072,
       "is_bubble": false
     },
@@ -4229,7 +4229,7 @@
     },
     {
       "date": "2013-01-15",
-      "test_statistic": -0.8998,
+      "test_statistic": -0.9001,
       "critical_value": -0.0721,
       "is_bubble": false
     },
@@ -4241,19 +4241,19 @@
     },
     {
       "date": "2013-01-30",
-      "test_statistic": -0.5565,
+      "test_statistic": -0.5564,
       "critical_value": -0.0721,
       "is_bubble": false
     },
     {
       "date": "2013-02-06",
-      "test_statistic": -0.4044,
+      "test_statistic": -0.4043,
       "critical_value": -0.0721,
       "is_bubble": false
     },
     {
       "date": "2013-02-13",
-      "test_statistic": -0.3467,
+      "test_statistic": -0.3465,
       "critical_value": -0.0721,
       "is_bubble": false
     },
@@ -4283,13 +4283,13 @@
     },
     {
       "date": "2013-03-21",
-      "test_statistic": -0.4363,
+      "test_statistic": -0.4364,
       "critical_value": -0.0721,
       "is_bubble": false
     },
     {
       "date": "2013-03-28",
-      "test_statistic": -0.1307,
+      "test_statistic": -0.1308,
       "critical_value": -0.0721,
       "is_bubble": false
     },
@@ -4307,7 +4307,7 @@
     },
     {
       "date": "2013-04-19",
-      "test_statistic": -0.495,
+      "test_statistic": -0.4949,
       "critical_value": -0.0722,
       "is_bubble": false
     },
@@ -4361,7 +4361,7 @@
     },
     {
       "date": "2013-06-24",
-      "test_statistic": -0.6269,
+      "test_statistic": -0.6268,
       "critical_value": -0.0722,
       "is_bubble": false
     },
@@ -4373,7 +4373,7 @@
     },
     {
       "date": "2013-07-09",
-      "test_statistic": -0.1464,
+      "test_statistic": -0.1463,
       "critical_value": -0.0722,
       "is_bubble": false
     },
@@ -4397,13 +4397,13 @@
     },
     {
       "date": "2013-08-06",
-      "test_statistic": 0.0402,
+      "test_statistic": 0.0403,
       "critical_value": -0.0722,
       "is_bubble": true
     },
     {
       "date": "2013-08-13",
-      "test_statistic": -0.0125,
+      "test_statistic": -0.0124,
       "critical_value": -0.0722,
       "is_bubble": true
     },
@@ -4457,7 +4457,7 @@
     },
     {
       "date": "2013-10-16",
-      "test_statistic": -0.1595,
+      "test_statistic": -0.1594,
       "critical_value": -0.0723,
       "is_bubble": false
     },
@@ -4475,7 +4475,7 @@
     },
     {
       "date": "2013-11-06",
-      "test_statistic": 0.0593,
+      "test_statistic": 0.0594,
       "critical_value": -0.0723,
       "is_bubble": true
     },
@@ -4487,13 +4487,13 @@
     },
     {
       "date": "2013-11-20",
-      "test_statistic": 0.0661,
+      "test_statistic": 0.0662,
       "critical_value": -0.0723,
       "is_bubble": true
     },
     {
       "date": "2013-11-27",
-      "test_statistic": 0.1996,
+      "test_statistic": 0.1997,
       "critical_value": -0.0723,
       "is_bubble": true
     },
@@ -4511,7 +4511,7 @@
     },
     {
       "date": "2013-12-19",
-      "test_statistic": 0.0866,
+      "test_statistic": 0.0867,
       "critical_value": -0.0723,
       "is_bubble": true
     },
@@ -4541,7 +4541,7 @@
     },
     {
       "date": "2014-01-28",
-      "test_statistic": -0.208,
+      "test_statistic": -0.2079,
       "critical_value": -0.0724,
       "is_bubble": false
     },
@@ -4571,7 +4571,7 @@
     },
     {
       "date": "2014-03-05",
-      "test_statistic": 0.0907,
+      "test_statistic": 0.0908,
       "critical_value": -0.0724,
       "is_bubble": true
     },
@@ -4583,7 +4583,7 @@
     },
     {
       "date": "2014-03-19",
-      "test_statistic": -0.046,
+      "test_statistic": -0.0459,
       "critical_value": -0.0724,
       "is_bubble": true
     },
@@ -4613,13 +4613,13 @@
     },
     {
       "date": "2014-04-24",
-      "test_statistic": -0.1017,
+      "test_statistic": -0.1016,
       "critical_value": -0.0724,
       "is_bubble": false
     },
     {
       "date": "2014-05-01",
-      "test_statistic": -0.1006,
+      "test_statistic": -0.1002,
       "critical_value": -0.0724,
       "is_bubble": false
     },
@@ -4691,7 +4691,7 @@
     },
     {
       "date": "2014-07-28",
-      "test_statistic": 0.0376,
+      "test_statistic": 0.0377,
       "critical_value": -0.0725,
       "is_bubble": true
     },
@@ -4835,7 +4835,7 @@
     },
     {
       "date": "2015-01-16",
-      "test_statistic": -0.1894,
+      "test_statistic": -0.1893,
       "critical_value": -0.0726,
       "is_bubble": false
     },
@@ -4889,7 +4889,7 @@
     },
     {
       "date": "2015-03-24",
-      "test_statistic": -0.1028,
+      "test_statistic": -0.1027,
       "critical_value": -0.0726,
       "is_bubble": false
     },
@@ -5231,7 +5231,7 @@
     },
     {
       "date": "2016-05-10",
-      "test_statistic": -0.3158,
+      "test_statistic": -0.3159,
       "critical_value": -0.0729,
       "is_bubble": false
     },
@@ -5321,13 +5321,13 @@
     },
     {
       "date": "2016-08-25",
-      "test_statistic": -0.2207,
+      "test_statistic": -0.2208,
       "critical_value": -0.0729,
       "is_bubble": false
     },
     {
       "date": "2016-09-01",
-      "test_statistic": -0.2271,
+      "test_statistic": -0.2272,
       "critical_value": -0.0729,
       "is_bubble": false
     },
@@ -5381,7 +5381,7 @@
     },
     {
       "date": "2016-11-04",
-      "test_statistic": -0.3451,
+      "test_statistic": -0.3452,
       "critical_value": -0.073,
       "is_bubble": false
     },
@@ -5609,7 +5609,7 @@
     },
     {
       "date": "2017-08-09",
-      "test_statistic": 0.0659,
+      "test_statistic": 0.0658,
       "critical_value": -0.0731,
       "is_bubble": true
     },
@@ -5645,13 +5645,13 @@
     },
     {
       "date": "2017-09-21",
-      "test_statistic": 0.0867,
+      "test_statistic": 0.0866,
       "critical_value": -0.0731,
       "is_bubble": true
     },
     {
       "date": "2017-09-28",
-      "test_statistic": 0.0942,
+      "test_statistic": 0.0941,
       "critical_value": -0.0731,
       "is_bubble": true
     },
@@ -5807,7 +5807,7 @@
     },
     {
       "date": "2018-04-06",
-      "test_statistic": 0.1255,
+      "test_statistic": 0.1254,
       "critical_value": -0.0732,
       "is_bubble": true
     },
@@ -5909,7 +5909,7 @@
     },
     {
       "date": "2018-08-07",
-      "test_statistic": 0.3434,
+      "test_statistic": 0.3433,
       "critical_value": -0.0733,
       "is_bubble": true
     },
@@ -6005,7 +6005,7 @@
     },
     {
       "date": "2018-11-29",
-      "test_statistic": 0.1683,
+      "test_statistic": 0.1682,
       "critical_value": -0.0734,
       "is_bubble": true
     },
@@ -6071,7 +6071,7 @@
     },
     {
       "date": "2019-02-21",
-      "test_statistic": 0.1692,
+      "test_statistic": 0.1691,
       "critical_value": -0.0734,
       "is_bubble": true
     },
@@ -6251,7 +6251,7 @@
     },
     {
       "date": "2019-09-25",
-      "test_statistic": 0.2804,
+      "test_statistic": 0.2803,
       "critical_value": -0.0735,
       "is_bubble": true
     },
@@ -6299,7 +6299,7 @@
     },
     {
       "date": "2019-11-20",
-      "test_statistic": 0.3677,
+      "test_statistic": 0.3676,
       "critical_value": -0.0735,
       "is_bubble": true
     },
@@ -6809,7 +6809,7 @@
     },
     {
       "date": "2021-07-30",
-      "test_statistic": 0.9351,
+      "test_statistic": 0.935,
       "critical_value": -0.0738,
       "is_bubble": true
     },
@@ -7103,7 +7103,7 @@
     },
     {
       "date": "2022-07-21",
-      "test_statistic": 0.4214,
+      "test_statistic": 0.4213,
       "critical_value": -0.0739,
       "is_bubble": true
     },
@@ -7217,7 +7217,7 @@
     },
     {
       "date": "2022-12-05",
-      "test_statistic": 0.3517,
+      "test_statistic": 0.3516,
       "critical_value": -0.0739,
       "is_bubble": true
     },
@@ -7355,7 +7355,7 @@
     },
     {
       "date": "2023-05-22",
-      "test_statistic": 0.3865,
+      "test_statistic": 0.3864,
       "critical_value": -0.074,
       "is_bubble": true
     },
@@ -7487,7 +7487,7 @@
     },
     {
       "date": "2023-10-27",
-      "test_statistic": 0.2841,
+      "test_statistic": 0.284,
       "critical_value": -0.074,
       "is_bubble": true
     },
@@ -7601,7 +7601,7 @@
     },
     {
       "date": "2024-03-15",
-      "test_statistic": 0.7085,
+      "test_statistic": 0.7084,
       "critical_value": -0.0741,
       "is_bubble": true
     },
@@ -7625,7 +7625,7 @@
     },
     {
       "date": "2024-04-15",
-      "test_statistic": 0.6662,
+      "test_statistic": 0.6661,
       "critical_value": -0.0741,
       "is_bubble": true
     },
@@ -7919,7 +7919,7 @@
     },
     {
       "date": "2025-04-07",
-      "test_statistic": 0.6358,
+      "test_statistic": 0.6356,
       "critical_value": -0.0742,
       "is_bubble": true
     },
@@ -7949,7 +7949,7 @@
     },
     {
       "date": "2025-05-13",
-      "test_statistic": 0.7652,
+      "test_statistic": 0.7651,
       "critical_value": -0.0742,
       "is_bubble": true
     },
@@ -8069,7 +8069,7 @@
     },
     {
       "date": "2025-10-06",
-      "test_statistic": 1.002,
+      "test_statistic": 1.0019,
       "critical_value": -0.0743,
       "is_bubble": true
     },
