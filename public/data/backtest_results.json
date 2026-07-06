@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-05T22:31:03.462895+00:00",
+  "generated_at": "2026-07-06T22:45:56.072371+00:00",
   "autocorrelation": {
     "lag_1": 0.9595,
-    "lag_5": 0.8554,
+    "lag_5": 0.8553,
     "lag_10": 0.7608,
     "lag_20": 0.5944
   },
@@ -29,7 +29,7 @@
       },
       "20d": {
         "count": 672,
-        "mean_return": 2.0903,
+        "mean_return": 2.0904,
         "median_return": 3.0572,
         "std": 7.7575,
         "hit_rate": 66.1,
@@ -54,7 +54,7 @@
         "median_return": 0.0632,
         "std": 0.625,
         "hit_rate": 55.3,
-        "t_statistic": 2.559
+        "t_statistic": 2.56
       },
       "5d": {
         "count": 1371,
@@ -65,18 +65,18 @@
         "t_statistic": 5.949
       },
       "20d": {
-        "count": 1369,
-        "mean_return": 0.9009,
-        "median_return": 1.2743,
-        "std": 2.9325,
-        "hit_rate": 70.3,
-        "t_statistic": 11.367
+        "count": 1370,
+        "mean_return": 0.8999,
+        "median_return": 1.2731,
+        "std": 2.9317,
+        "hit_rate": 70.2,
+        "t_statistic": 11.362
       },
       "60d": {
         "count": 1367,
         "mean_return": 2.5429,
         "median_return": 3.6803,
-        "std": 5.7847,
+        "std": 5.7848,
         "hit_rate": 76.8,
         "t_statistic": 16.253
       }
