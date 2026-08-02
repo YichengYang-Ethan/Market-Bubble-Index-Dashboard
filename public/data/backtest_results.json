@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-01T22:27:42.181039+00:00",
+  "generated_at": "2026-08-02T22:28:08.305133+00:00",
   "autocorrelation": {
     "lag_1": 0.9593,
     "lag_5": 0.855,
@@ -54,7 +54,7 @@
         "median_return": 0.0623,
         "std": 0.625,
         "hit_rate": 55.2,
-        "t_statistic": 2.538
+        "t_statistic": 2.539
       },
       "5d": {
         "count": 1372,
@@ -66,9 +66,9 @@
       },
       "20d": {
         "count": 1371,
-        "mean_return": 0.8994,
+        "mean_return": 0.8995,
         "median_return": 1.2719,
-        "std": 2.9307,
+        "std": 2.9306,
         "hit_rate": 70.2,
         "t_statistic": 11.364
       },
