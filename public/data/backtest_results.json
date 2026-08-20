@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-19T21:51:41.569192+00:00",
+  "generated_at": "2026-08-20T21:54:06.850247+00:00",
   "autocorrelation": {
     "lag_1": 0.9594,
     "lag_5": 0.8548,
     "lag_10": 0.7595,
-    "lag_20": 0.5937
+    "lag_20": 0.5936
   },
   "buy_signal_threshold": 30,
   "sell_signal_threshold": 70,
@@ -23,7 +23,7 @@
         "count": 672,
         "mean_return": 0.4675,
         "median_return": 0.7124,
-        "std": 4.587,
+        "std": 4.5871,
         "hit_rate": 56.2,
         "t_statistic": 2.642
       },
