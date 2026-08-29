@@ -57,35 +57,35 @@
       "n_events": 4805,
       "base_rate": 0.7176,
       "weights": {
-        "risk_ema_20d": -0.079749,
-        "ind_qqq_deviation": -0.108095,
-        "ind_credit_spread": 0.141211,
-        "ind_yield_curve": 0.071967,
-        "ind_vix_level": -0.243919,
-        "vix_x_credit": -0.250069,
-        "ind_vix_level_change_5d": 0.069093,
-        "score_velocity": 0.013388
+        "risk_ema_20d": -0.079774,
+        "ind_qqq_deviation": -0.108096,
+        "ind_credit_spread": 0.141207,
+        "ind_yield_curve": 0.071965,
+        "ind_vix_level": -0.243935,
+        "vix_x_credit": -0.250051,
+        "ind_vix_level_change_5d": 0.06909,
+        "score_velocity": 0.013389
       },
-      "intercept": 0.974989,
+      "intercept": 0.974996,
       "scaler_mean": {
-        "risk_ema_20d": 53.033361,
-        "ind_qqq_deviation": 51.535394,
-        "ind_credit_spread": 70.386574,
+        "risk_ema_20d": 53.033316,
+        "ind_qqq_deviation": 51.535439,
+        "ind_credit_spread": 70.386455,
         "ind_yield_curve": 47.561955,
         "ind_vix_level": 56.162709,
-        "vix_x_credit": 40.523751,
+        "vix_x_credit": 40.52364,
         "ind_vix_level_change_5d": 0.04098,
-        "score_velocity": 0.083665
+        "score_velocity": 0.08366
       },
       "scaler_std": {
-        "risk_ema_20d": 8.606388,
-        "ind_qqq_deviation": 27.692232,
-        "ind_credit_spread": 24.946031,
+        "risk_ema_20d": 8.606387,
+        "ind_qqq_deviation": 27.69227,
+        "ind_credit_spread": 24.945951,
         "ind_yield_curve": 31.721055,
         "ind_vix_level": 29.343267,
-        "vix_x_credit": 23.709488,
+        "vix_x_credit": 23.709347,
         "ind_vix_level_change_5d": 17.51169,
-        "score_velocity": 9.193765
+        "score_velocity": 9.193788
       },
       "auc_train": 0.6247,
       "auc_test": 0.4335,
@@ -136,10 +136,10 @@
             "n_test": 750,
             "base_rate_train": 0.674,
             "base_rate_test": 0.5387,
-            "auc": 0.2128,
-            "brier": 0.4506,
-            "bss": -0.8131,
-            "ece": 0.3913
+            "auc": 0.2134,
+            "brier": 0.4505,
+            "bss": -0.813,
+            "ece": 0.3914
           },
           {
             "fold": 4,
@@ -149,9 +149,9 @@
             "n_test": 750,
             "base_rate_train": 0.6519,
             "base_rate_test": 0.8973,
-            "auc": 0.3679,
+            "auc": 0.3674,
             "brier": 0.2069,
-            "bss": -1.2455,
+            "bss": -1.2454,
             "ece": 0.297
           },
           {
@@ -162,7 +162,7 @@
             "n_test": 750,
             "base_rate_train": 0.6912,
             "base_rate_test": 0.8453,
-            "auc": 0.5934,
+            "auc": 0.5935,
             "brier": 0.1815,
             "bss": -0.3879,
             "ece": 0.2098
@@ -183,17 +183,17 @@
       "n_events": 1781,
       "base_rate": 0.266,
       "weights": {
-        "risk_ema_20d": -0.311233,
-        "score_std_20d": 0.130702
+        "risk_ema_20d": -0.31124,
+        "score_std_20d": 0.130695
       },
-      "intercept": -1.038097,
+      "intercept": -1.038098,
       "scaler_mean": {
-        "risk_ema_20d": 53.033361,
-        "score_std_20d": 6.586957
+        "risk_ema_20d": 53.033316,
+        "score_std_20d": 6.586983
       },
       "scaler_std": {
-        "risk_ema_20d": 8.606388,
-        "score_std_20d": 2.795471
+        "risk_ema_20d": 8.606387,
+        "score_std_20d": 2.795462
       },
       "auc_train": 0.5985,
       "auc_test": 0.3193,
@@ -206,7 +206,7 @@
         "auc_mean": 0.3193,
         "auc_std": 0.1572,
         "bss_mean": -0.2731,
-        "bss_std": 0.0393,
+        "bss_std": 0.0394,
         "ece_mean": 0.2304,
         "ece_std": 0.0334,
         "per_fold": [
@@ -220,7 +220,7 @@
             "base_rate_test": 0.1587,
             "auc": 0.1228,
             "brier": 0.1704,
-            "bss": -0.2761,
+            "bss": -0.2762,
             "ece": 0.1925
           },
           {
@@ -233,8 +233,8 @@
             "base_rate_test": 0.3227,
             "auc": 0.5076,
             "brier": 0.2674,
-            "bss": -0.2236,
-            "ece": 0.225
+            "bss": -0.2234,
+            "ece": 0.2249
           },
           {
             "fold": 5,
