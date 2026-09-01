@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-08-30T23:43:31.524123+00:00",
+  "generated_at": "2026-09-01T00:43:53.843995+00:00",
   "autocorrelation": {
     "lag_1": 0.9593,
     "lag_5": 0.8547,
     "lag_10": 0.7597,
-    "lag_20": 0.5937
+    "lag_20": 0.5936
   },
   "buy_signal_threshold": 30,
   "sell_signal_threshold": 70,
@@ -29,7 +29,7 @@
       },
       "20d": {
         "count": 672,
-        "mean_return": 2.0904,
+        "mean_return": 2.0903,
         "median_return": 3.0572,
         "std": 7.7575,
         "hit_rate": 66.1,
@@ -73,12 +73,12 @@
         "t_statistic": 11.372
       },
       "60d": {
-        "count": 1369,
-        "mean_return": 2.5414,
-        "median_return": 3.6786,
-        "std": 5.7806,
-        "hit_rate": 76.8,
-        "t_statistic": 16.266
+        "count": 1370,
+        "mean_return": 2.5407,
+        "median_return": 3.675,
+        "std": 5.7786,
+        "hit_rate": 76.9,
+        "t_statistic": 16.274
       }
     }
   }
