@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-18T23:29:52.374504+00:00",
+  "generated_at": "2026-09-19T23:21:56.846521+00:00",
   "autocorrelation": {
     "lag_1": 0.9592,
     "lag_5": 0.8546,
@@ -13,33 +13,33 @@
     "stats": {
       "1d": {
         "count": 672,
-        "mean_return": 0.1255,
-        "median_return": 0.1517,
-        "std": 2.4862,
+        "mean_return": 0.1254,
+        "median_return": 0.1521,
+        "std": 2.4856,
         "hit_rate": 53.7,
         "t_statistic": 1.308
       },
       "5d": {
         "count": 672,
-        "mean_return": 0.4675,
-        "median_return": 0.7124,
-        "std": 4.5871,
+        "mean_return": 0.4673,
+        "median_return": 0.714,
+        "std": 4.5869,
         "hit_rate": 56.2,
-        "t_statistic": 2.642
+        "t_statistic": 2.641
       },
       "20d": {
         "count": 672,
-        "mean_return": 2.0903,
-        "median_return": 3.0572,
-        "std": 7.7575,
+        "mean_return": 2.0901,
+        "median_return": 3.0621,
+        "std": 7.7574,
         "hit_rate": 66.1,
-        "t_statistic": 6.985
+        "t_statistic": 6.984
       },
       "60d": {
         "count": 672,
         "mean_return": 3.6588,
-        "median_return": 5.2418,
-        "std": 11.0249,
+        "median_return": 5.2444,
+        "std": 11.025,
         "hit_rate": 69.6,
         "t_statistic": 8.603
       }
@@ -50,32 +50,32 @@
     "stats": {
       "1d": {
         "count": 1374,
-        "mean_return": 0.0419,
-        "median_return": 0.0612,
-        "std": 0.625,
-        "hit_rate": 55.2,
-        "t_statistic": 2.487
+        "mean_return": 0.0418,
+        "median_return": 0.0611,
+        "std": 0.6252,
+        "hit_rate": 55.1,
+        "t_statistic": 2.479
       },
       "5d": {
         "count": 1374,
         "mean_return": 0.2089,
-        "median_return": 0.2761,
-        "std": 1.3158,
+        "median_return": 0.2738,
+        "std": 1.316,
         "hit_rate": 59.5,
-        "t_statistic": 5.885
+        "t_statistic": 5.883
       },
       "20d": {
         "count": 1374,
         "mean_return": 0.8952,
-        "median_return": 1.2672,
-        "std": 2.9295,
+        "median_return": 1.2613,
+        "std": 2.9296,
         "hit_rate": 70.2,
         "t_statistic": 11.327
       },
       "60d": {
         "count": 1371,
         "mean_return": 2.5393,
-        "median_return": 3.6714,
+        "median_return": 3.6721,
         "std": 5.7767,
         "hit_rate": 76.9,
         "t_statistic": 16.276
