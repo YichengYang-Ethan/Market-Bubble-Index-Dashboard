@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-03T00:38:24.413986+00:00",
+  "generated_at": "2026-10-03T23:59:21.871978+00:00",
   "autocorrelation": {
-    "lag_1": 0.9592,
+    "lag_1": 0.9591,
     "lag_5": 0.8544,
     "lag_10": 0.7595,
-    "lag_20": 0.5933
+    "lag_20": 0.5934
   },
   "buy_signal_threshold": 30,
   "sell_signal_threshold": 70,
@@ -54,7 +54,7 @@
         "median_return": 0.0611,
         "std": 0.6252,
         "hit_rate": 55.1,
-        "t_statistic": 2.479
+        "t_statistic": 2.478
       },
       "5d": {
         "count": 1374,
@@ -74,7 +74,7 @@
       },
       "60d": {
         "count": 1372,
-        "mean_return": 2.5389,
+        "mean_return": 2.5388,
         "median_return": 3.6711,
         "std": 5.7746,
         "hit_rate": 76.9,
