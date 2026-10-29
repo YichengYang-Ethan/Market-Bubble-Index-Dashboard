@@ -1,9 +1,9 @@
 {
-  "generated_at": "2026-10-28T00:39:38.813827+00:00",
+  "generated_at": "2026-10-29T01:09:00.136897+00:00",
   "autocorrelation": {
     "lag_1": 0.9591,
     "lag_5": 0.8541,
-    "lag_10": 0.759,
+    "lag_10": 0.7591,
     "lag_20": 0.5931
   },
   "buy_signal_threshold": 30,
@@ -54,7 +54,7 @@
         "median_return": 0.0607,
         "std": 0.6248,
         "hit_rate": 55.0,
-        "t_statistic": 2.476
+        "t_statistic": 2.475
       },
       "5d": {
         "count": 1376,
