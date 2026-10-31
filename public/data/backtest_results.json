@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-10-30T01:16:23.875259+00:00",
+  "generated_at": "2026-10-31T00:57:46.271182+00:00",
   "autocorrelation": {
     "lag_1": 0.959,
     "lag_5": 0.8541,
     "lag_10": 0.7591,
-    "lag_20": 0.5931
+    "lag_20": 0.593
   },
   "buy_signal_threshold": 30,
   "sell_signal_threshold": 70,
@@ -54,7 +54,7 @@
         "median_return": 0.0607,
         "std": 0.6248,
         "hit_rate": 55.0,
-        "t_statistic": 2.475
+        "t_statistic": 2.476
       },
       "5d": {
         "count": 1376,
