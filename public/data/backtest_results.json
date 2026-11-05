@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-04T01:34:11.942088+00:00",
+  "generated_at": "2026-11-05T01:41:53.379440+00:00",
   "autocorrelation": {
     "lag_1": 0.959,
     "lag_5": 0.854,
@@ -13,11 +13,11 @@
     "stats": {
       "1d": {
         "count": 673,
-        "mean_return": 0.126,
+        "mean_return": 0.1261,
         "median_return": 0.1554,
         "std": 2.4839,
         "hit_rate": 53.8,
-        "t_statistic": 1.316
+        "t_statistic": 1.317
       },
       "5d": {
         "count": 673,
@@ -52,7 +52,7 @@
         "count": 1376,
         "mean_return": 0.0417,
         "median_return": 0.0607,
-        "std": 0.6248,
+        "std": 0.6247,
         "hit_rate": 55.0,
         "t_statistic": 2.476
       },
@@ -62,7 +62,7 @@
         "median_return": 0.2712,
         "std": 1.3171,
         "hit_rate": 59.4,
-        "t_statistic": 5.803
+        "t_statistic": 5.802
       },
       "20d": {
         "count": 1374,
