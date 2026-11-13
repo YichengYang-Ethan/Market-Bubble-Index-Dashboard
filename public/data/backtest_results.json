@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-11-12T02:23:51.392783+00:00",
+  "generated_at": "2026-11-13T02:01:48.119376+00:00",
   "autocorrelation": {
-    "lag_1": 0.959,
+    "lag_1": 0.9589,
     "lag_5": 0.854,
     "lag_10": 0.7589,
     "lag_20": 0.5921
@@ -62,7 +62,7 @@
         "median_return": 0.2712,
         "std": 1.3171,
         "hit_rate": 59.4,
-        "t_statistic": 5.803
+        "t_statistic": 5.802
       },
       "20d": {
         "count": 1376,
