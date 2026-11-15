@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-11-14T01:37:09.992418+00:00",
+  "generated_at": "2026-11-15T01:11:56.641691+00:00",
   "autocorrelation": {
     "lag_1": 0.9589,
     "lag_5": 0.854,
@@ -52,9 +52,9 @@
         "count": 1376,
         "mean_return": 0.0417,
         "median_return": 0.0607,
-        "std": 0.6247,
+        "std": 0.6248,
         "hit_rate": 55.0,
-        "t_statistic": 2.475
+        "t_statistic": 2.476
       },
       "5d": {
         "count": 1376,
@@ -62,7 +62,7 @@
         "median_return": 0.2712,
         "std": 1.3171,
         "hit_rate": 59.4,
-        "t_statistic": 5.803
+        "t_statistic": 5.802
       },
       "20d": {
         "count": 1376,
